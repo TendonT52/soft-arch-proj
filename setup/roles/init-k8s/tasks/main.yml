@@ -1,0 +1,52 @@
+- name: Include variables
+  include_vars:
+    file: ../../../variable.yml
+
+- name: Check admin.conf file exists.
+  stat:
+    path: /etc/kubernetes/admin.conf
+  register: k8s_conf
+
+- name: Initialize Kubernetes cluster
+  command: "kubeadm init --pod-network-cidr {{ pod_cidr }}"
+  args:
+    creates: /etc/kubernetes/admin.conf
+  register: kube_init
+  when: k8s_conf.stat.exists == False
+
+- name: show kube init info
+  debug:
+    var: kube_init
+
+- name: Create .kube directory in user home
+  file:
+    path: "{{ home_dir }}/.kube"
+    state: directory
+    owner: root
+    group: root
+
+- name: Configure .kube/config files in user home
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ home_dir }}/.kube/config"
+    remote_src: yes
+    owner: root
+    group: root
+
+- name: Restart kubelet for config changes
+  service:
+    name: kubelet
+    state: restarted
+
+- name: Extract the join command
+  become: true
+  command: "kubeadm token create --print-join-command"
+  register: join_command
+
+- name: show join command
+  debug:
+    var: join_command
+
+- name: Save kubeadm join command for cluster
+  become: true
+  local_action: copy content={{ join_command.stdout_lines | last | trim }} dest={{ join_command_location }}

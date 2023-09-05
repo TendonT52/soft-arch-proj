@@ -1,0 +1,34 @@
+- hosts: "all"
+  become: true
+  remote_user: ubuntu
+  roles:
+    - setup-ubuntu
+
+- hosts: "all"
+  become: true
+  remote_user: ubuntu
+  roles:
+    - install-containerd
+
+- hosts: "all"
+  become: true
+  remote_user: ubuntu
+  roles:
+    - install-k8s-dependencies
+
+- hosts: "kube_controller"
+  become: true
+  remote_user: ubuntu
+  roles:
+    - init-k8s
+
+- hosts: "kube_controller"
+  remote_user: ubuntu
+  roles:
+    - install-flannel
+
+- hosts: "kube_worker"
+  become: true
+  remote_user: ubuntu
+  roles:
+    - join-worker

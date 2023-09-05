@@ -1,0 +1,35 @@
+- name: Include variables
+  include_vars:
+    file: ../../../variable.yml
+
+- name: get dashboard
+  become: true
+  get_url:
+    url: https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
+    dest: "{{ home_dir }}/dashboard.yml"
+    force: true
+
+- name: apply dashboard
+  command: kubectl apply -f "{{ home_dir }}/dashboard.yml"
+
+- name: copy sa
+  become: true
+  copy:
+    src: sa.yml
+    dest: "{{ home_dir }}/sa.yml"
+
+- name: apply ServiceAccount
+  command: kubectl apply -f "sa.yml"
+
+- name: copy ClusterRoleBinding
+  become: true
+  copy:
+    src: clusterrole.yml
+    dest: "{{ home_dir }}/clusterrole.yml"
+
+- name: apply ClusterRoleBinding
+  command: kubectl apply -f "clusterrole.yml"
+
+- name: get token
+  command: |
+    kubectl -n kubernetes-dashboard get secret $(kubectl -n kubernetes-dashboard get sa/admin-user -o jsonpath="{.secrets[0].name}")

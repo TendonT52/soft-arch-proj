@@ -1,0 +1,14 @@
+- name: Include variables
+  include_vars:
+    file: ../../../variable.yml
+
+- name: read join command
+  debug: msg={{ lookup('file', join_command_location) }}
+  register: join_command_local
+
+- name: show join command
+  debug:
+    var: join_command_local.msg
+
+- name: join agents to cluster
+  command: "{{ join_command_local.msg }}"

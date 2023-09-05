@@ -1,0 +1,9 @@
+- name: Include variables
+  include_vars:
+    file: ../../../variable.yml
+- name: Copy kube-flannel.yml
+  copy:
+    src: kube-flannel.yml
+    dest: "{{ home_dir }}/kube-flannel.yml"
+- name: apply flannel networking
+  command: kubectl apply -f "kube-flannel.yml"

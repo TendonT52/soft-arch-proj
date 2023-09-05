@@ -1,0 +1,7 @@
+provision/.terraform/
+provision/.terraform.lock.hcl
+provision/terraform.tfstate
+provision/terraform.tfstate.backup
+provision/secret.tfvars
+
+setup/join_command.out

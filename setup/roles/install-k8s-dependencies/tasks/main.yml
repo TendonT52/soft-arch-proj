@@ -1,0 +1,48 @@
+- name: Install kubernetes dependencies
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+    force_apt_get: yes
+  loop:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg-agent
+    - software-properties-common
+
+- name: Download the public signing key for the Kubernetes package repositories
+  ansible.builtin.shell: |
+    curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key |
+    gpg --batch --yes --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  changed_when: false
+
+- name: Add Kubernetes repository to sources.list
+  ansible.builtin.shell: |
+    echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' |
+    tee /etc/apt/sources.list.d/kubernetes.list
+  changed_when: false
+
+- name: Install Kubernetes binaries
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - kubelet
+      - kubeadm
+      - kubectl
+
+- name: Hold kubernetes binary versions from being updated)
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
+
+- name: Reboot
+  reboot:
+    reboot_timeout: 180

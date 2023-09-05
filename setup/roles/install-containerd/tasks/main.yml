@@ -1,0 +1,18 @@
+- name: Install containerd
+  apt:
+    name: containerd
+
+- name: Create containerd config directory
+  file:
+    path: /etc/containerd
+    state: directory
+
+- name: Copy containerd config
+  copy:
+    src: containerd-config.toml
+    dest: /etc/containerd/config.toml
+
+- name: Restart containerd
+  service:
+    name: containerd
+    state: restarted

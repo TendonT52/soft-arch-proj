@@ -1,0 +1,3 @@
+pod_cidr: "10.10.0.0/16"
+join_command_location: "join_command.out"
+home_dir: "/home/ubuntu"
