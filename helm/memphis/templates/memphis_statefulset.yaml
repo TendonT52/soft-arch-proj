@@ -1,0 +1,679 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "memphis.fullname" . }}
+  namespace: {{ include "memphis.namespace" . }}
+  labels:
+    {{- include "memphis.labels" . | nindent 4 }}
+    {{- if .Values.statefulSetAnnotations}}
+  annotations:
+  {{- range $key, $value := .Values.statefulSetAnnotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "memphis.selectorLabels" . | nindent 6 }}
+  {{- if eq (include "memphis.clusterEnabled" .) "true" }}
+  replicas: {{ .Values.cluster.replicas }}
+  {{- else }}
+  replicas: 1
+  {{- end }}
+  updateStrategy:
+    {{- toYaml .Values.updateStrategy | nindent 4 }}  
+  serviceName: {{ include "memphis.svcName" . }}
+
+  podManagementPolicy: {{ .Values.podManagementPolicy }}
+
+  template:
+    metadata:
+      {{- if or .Values.podAnnotations .Values.exporter.enabled }}
+      annotations:
+      {{- if .Values.exporter.enabled }}
+        prometheus.io/path: /metrics
+        prometheus.io/port: "7777"
+        prometheus.io/scrape: "true"
+      {{- end }}
+      {{- range $key, $value := .Values.podAnnotations }}
+        {{ $key }}: {{ $value | quote }}
+      {{- end }}
+      {{- end }}
+      labels:
+        {{- include "memphis.selectorLabels" . | nindent 8 }}
+        {{- if .Values.statefulSetPodLabels }}
+        {{- tpl (toYaml .Values.statefulSetPodLabels) . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccount: {{ include "memphis.namespace" . }}-cp-account
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- with .Values.securityContext }}
+      securityContext:
+{{- toYaml . | nindent 8 }}
+{{- end }}
+
+{{- if or .Values.affinity.nodeAffinity .Values.affinity.podAffinity .Values.affinity.podAntiAffinity }}
+      affinity:
+      {{- with .Values.affinity.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+      {{- end }}
+      {{- with .Values.affinity.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+      {{- end }}
+      {{- if .Values.affinity.podAntiAffinity }}
+        podAntiAffinity:
+        {{- if eq .Values.affinity.podAntiAffinity.type "hard" }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: {{ .Values.affinity.podAntiAffinity.topologyKey }}
+              labelSelector:
+                matchLabels: {{- include "memphis.selectorLabels" . | nindent 18 }}
+        {{- else if eq .Values.affinity.podAntiAffinity.type "soft" }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: {{ .Values.affinity.podAntiAffinity.weight | int64 }}
+              podAffinityTerm:
+                topologyKey: {{ .Values.affinity.podAntiAffinity.topologyKey }}
+                labelSelector:
+                  matchLabels: {{- include "memphis.selectorLabels" . | nindent 20 }}
+        {{- else if eq .Values.affinity.podAntiAffinity.type "custom" }}
+          {{- toYaml .Values.affinity.podAntiAffinity.custom | nindent 12 }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+
+{{- with .Values.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+{{- end }}
+{{- with .Values.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+{{- end }}
+{{- if .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+      {{- range .Values.topologySpreadConstraints }}
+      {{- if and .maxSkew .topologyKey }}
+      - maxSkew: {{ .maxSkew }}
+        topologyKey: {{ .topologyKey }}
+        {{- if .whenUnsatisfiable }}
+        whenUnsatisfiable: {{ .whenUnsatisfiable }}
+        {{- end }}
+        labelSelector:
+          matchLabels:
+            {{- include "memphis.selectorLabels" $ | nindent 12 }}
+      {{- end }}
+      {{- end }}
+{{- end }}
+{{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName | quote }}
+{{- end }}
+      # Common volumes for the containers.
+      volumes:
+      - name: config-volume
+        {{ if .Values.memphis.customConfigSecret }}
+        secret:
+          secretName: {{ .Values.memphis.customConfigSecret.name }}
+        {{ else }}
+        configMap:
+          name: {{ include "memphis.fullname" . }}-config
+        {{ end }}
+
+      {{/* User extended config volumes*/}}
+      {{- if .Values.memphis.config }}
+      # User extended config volumes
+      {{- with .Values.memphis.config }}
+        {{- . | toYaml | nindent 6 }}
+      {{- end }}
+      {{- end }}
+
+      # Local volume shared with the reloader.
+      - name: pid
+        emptyDir: {}
+
+      {{- if and .Values.auth.enabled .Values.auth.resolver }}
+      {{- if .Values.auth.resolver.configMap }}
+      - name: resolver-volume
+        configMap:
+          name: {{ .Values.auth.resolver.configMap.name }}
+      {{- end }}
+
+      {{- if eq .Values.auth.resolver.type "URL" }}
+      - name: operator-jwt-volume
+        configMap:
+          name: {{ .Values.auth.operatorjwt.configMap.name }}
+      {{- end }}
+      {{- end }}
+
+      {{- if and .Values.memphis.storageEngine.fileStorage.enabled .Values.memphis.storageEngine.fileStorage.existingClaim }}
+      # Persistent volume for storageEngine running with file storage option
+      - name: {{ include "memphis.fullname" . }}-js-pvc
+        persistentVolumeClaim:
+          claimName: {{ .Values.memphis.storageEngine.fileStorage.existingClaim | quote }}
+      {{- end }}
+      
+      {{- if .Values.metadata.pgpool.tls.enabled }}
+      {{- if .Values.metadata.pgpool.tls.autoGenerated }}
+      - name: memphis-metadata-coordinator-crt
+        secret:
+          secretName: memphis-metadata-coordinator-crt
+      {{- else }}
+      {{- with .Values.metadata.pgpool.tls }}
+      {{ $secretName := tpl .certificatesSecret $ }}
+      - name: {{ $secretName }}-metadata-crt
+        secret:
+          secretName: {{ $secretName }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
+
+
+      #################
+      #               #
+      #  TLS Volumes  #
+      #               #
+      #################
+      {{- with .Values.memphis.tls }}
+      {{ $secretName := tpl .secret.name $ }}
+      - name: {{ $secretName }}-clients-volume
+        secret:
+          secretName: {{ $secretName }}
+      {{- end }}
+      {{- with .Values.cluster.tls }}
+      {{ $secretName := tpl .secret.name $ }}
+      - name: {{ $secretName }}-cluster-volume
+        secret:
+          secretName: {{ $secretName }}
+      {{- end }}
+      {{- with .Values.websocket.tls }}
+      {{ $secretName := tpl .secret.name $ }}
+      - name: {{ $secretName }}-ws-volume
+        secret:
+          secretName: {{ $secretName }}
+      {{- end }}
+
+      {{- if .Values.additionalVolumes }}
+      {{- toYaml .Values.additionalVolumes | nindent 6 }}
+      {{- end }}
+
+      # Required to be able to HUP signal and apply config
+      # reload to the server without restarting the pod.
+      shareProcessNamespace: true
+
+      #####################
+      #                   #
+      #  InitContainerts  #
+      #                   #
+      #####################
+      initContainers:
+      {{- if .Values.metadata.enabled }}
+      {{- if .Values.global.cluster.enabled }}
+        - name: memphis-metadata-readiness
+          image: {{ .Values.busybox.image }}
+          imagePullPolicy: {{ .Values.busybox.pullPolicy }}
+          env:
+          - name: NAMESPACE
+            value: {{ include "memphis.namespace" . }}
+          command: ['sh', '-c', "until nslookup {{ .Values.metadata.fullnameOverride }}-1.{{ .Values.metadata.fullnameOverride }}-headless.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for memphis-metadata; sleep 2; done"]
+      {{- else }}
+        - name: memphis-metadata-readiness
+          image: {{ .Values.busybox.image }}
+          imagePullPolicy: {{ .Values.busybox.pullPolicy }}
+          env:
+          - name: NAMESPACE
+            value: {{ include "memphis.namespace" . }}
+          command: ['sh', '-c', "until nslookup {{ .Values.metadata.fullnameOverride }}-0.{{ .Values.metadata.fullnameOverride }}-headless.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for memphis-metadata; sleep 2; done"]
+      {{- end }}   
+      {{- end }}
+
+      ####################
+      #                  #
+      #  Memphis Server  #
+      #                  #
+      ####################
+      terminationGracePeriodSeconds: {{ .Values.memphis.terminationGracePeriodSeconds }}
+      containers:
+      - name: memphis
+        image: {{ .Values.memphis.image }}
+        imagePullPolicy: {{ .Values.memphis.pullPolicy }}
+        {{- if .Values.memphis.securityContext }}
+        securityContext:
+        {{- .Values.memphis.securityContext | toYaml | nindent 10 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.memphis.resources | nindent 10 }}
+        ports:
+        - containerPort: {{ .Values.memphis.ui.port }}
+          name: http
+        - containerPort: {{ .Values.websocket.port }}
+          name: ws
+        - containerPort: {{ .Values.memphis.client.port }}
+          name: clients
+        {{- if .Values.memphis.externalAccess }}
+          hostPort: {{ .Values.memphis.client.port }}
+        {{- end }}
+        - containerPort: 8222
+          name: monitor
+        - containerPort: 6222
+          name: cluster
+        {{- if .Values.memphis.profiling.enabled }}
+        - containerPort: {{ .Values.memphis.profiling.port }}
+          name: profiler
+        {{- end }}
+        command:
+         - "nats-server"
+         - "--config"
+         - "/etc/nats-config/memphis.conf"
+        {{- if .Values.memphis.profiling.enabled }}
+         - "--profile={{ .Values.memphis.profiling.port }}"
+        {{- end }}
+
+        # Required to be able to define an environment variable
+        # that refers to other environment variables.  This env var
+        # is later used as part of the configuration file.
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: SERVER_NAME
+          value: {{ .Values.memphis.serverNamePrefix }}$(POD_NAME)
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: CLUSTER_ADVERTISE
+          value: {{ include "memphis.clusterAdvertise" . }}
+
+
+        {{- with .Values.memphis.storageEngine.encryption }}
+        {{- with .secret }}
+        - name: JS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .name }}
+              key: {{ .key }}
+        {{- end }}
+        {{- end }}
+        - name: USER_PASS_BASED_AUTH
+          value: {{ .Values.memphis.configFile.userPassBasedAuth | quote }}
+        - name: LOGS_RETENTION_IN_DAYS
+          value: {{ .Values.memphis.configFile.logsRetentionInDays | quote }}
+        - name: K8S_NAMESPACE
+          value: {{ include "memphis.namespace" . }}
+        - name: ROOT_PASSWORD
+          valueFrom:
+              secretKeyRef:
+        {{- if and .Values.memphis.creds.customConfigSecret.enabled .Values.memphis.creds.customConfigSecret.rootPwd_key }}
+                name: {{ .Values.memphis.creds.customConfigSecret.secret.name | quote }}
+                key: {{ .Values.memphis.creds.customConfigSecret.rootPwd_key }} 
+        {{- else }}
+                name: "memphis-creds"
+                key: ROOT_PASSWORD
+        {{- end }}
+        - name: JWT_SECRET
+          valueFrom:
+              secretKeyRef:
+        {{- if and .Values.memphis.creds.customConfigSecret.enabled .Values.memphis.creds.customConfigSecret.jwtSecret_key }}
+                name: {{ .Values.memphis.creds.customConfigSecret.secret.name | quote }}
+                key: {{ .Values.memphis.creds.customConfigSecret.jwtSecret_key }}
+        {{- else }}
+                name: "memphis-creds"
+                key: JWT_SECRET
+        {{- end }}
+        - name: REFRESH_JWT_SECRET
+          valueFrom:
+              secretKeyRef:
+         {{- if and .Values.memphis.creds.customConfigSecret.enabled .Values.memphis.creds.customConfigSecret.refreshJwtSecret_key }}
+                name: {{ .Values.memphis.creds.customConfigSecret.secret.name | quote }}
+                key: {{ .Values.memphis.creds.customConfigSecret.refreshJwtSecret_key }}
+        {{- else }}
+                name: "memphis-creds"
+                key: REFRESH_JWT_SECRET
+        {{- end }}
+        - name: CONNECTION_TOKEN
+          valueFrom:
+              secretKeyRef:
+        {{- if and .Values.memphis.creds.customConfigSecret.enabled .Values.memphis.creds.customConfigSecret.connectionToken_key }}
+                name: {{ .Values.memphis.creds.customConfigSecret.secret.name | quote }}
+                key: {{ .Values.memphis.creds.customConfigSecret.connectionToken_key }}
+        {{- else }}
+                name: "memphis-creds"
+                key: CONNECTION_TOKEN
+        {{- end }}
+        - name: ENCRYPTION_SECRET_KEY
+          valueFrom:
+              secretKeyRef:
+        {{- if and .Values.memphis.creds.customConfigSecret.enabled .Values.memphis.creds.customConfigSecret.encryptionSecretKey_key }}
+                name: {{ .Values.memphis.creds.customConfigSecret.secret.name | quote }}
+                key: {{ .Values.memphis.creds.customConfigSecret.encryptionSecretKey_key }}
+        {{- else }}
+                name: "memphis-creds"
+                key: ENCRYPTION_SECRET_KEY
+        {{- end }}
+        - name: EXPORTER
+          value: {{ .Values.exporter.enabled | quote }}
+        - name: INSTALLATION_SOURCE
+          value: {{ .Values.memphis.source | quote }}
+        {{- if .Values.memphis.extraEnvironmentVars.enabled }}
+        {{- .Values.memphis.extraEnvironmentVars.vars | toYaml | nindent 8  }}
+        {{- end }}
+        {{- if .Values.metadata.external.enabled }}
+        - name: METADATA_DB_USER
+          value: {{ .Values.metadata.external.dbUser | quote }}
+        - name: METADATA_DB_PASS
+        {{- if .Values.metadata.external.secret.enabled }}
+          valueFrom:
+              secretKeyRef:
+                name: {{ .Values.metadata.external.secret.name | quote }}
+                key: {{ .Values.metadata.external.secret.dbPass_key }}
+        {{- else }}
+          value: {{ .Values.metadata.external.dbPass | quote }}
+        {{- end }}
+          value: {{ .Values.metadata.external.dbPass | quote }}
+        - name: METADATA_DB_DBNAME
+          value: {{ .Values.metadata.external.dbName | quote }}
+        - name: METADATA_DB_HOST
+          value: {{ .Values.metadata.external.dbHost | quote }}
+        - name: METADATA_DB_PORT
+          value: {{ .Values.metadata.external.dbPort | quote }}
+        - name: METADATA_DB_TLS_MUTUAL
+          value: {{ .Values.metadata.external.dbTlsMutual | quote }}
+        {{- else }}
+        - name: METADATA_DB_USER
+          value: {{ .Values.metadata.postgresql.username | quote }}
+        - name: METADATA_DB_PASS
+          valueFrom:
+              secretKeyRef:
+                name: "memphis-metadata"
+                key: password
+        - name: METADATA_DB_DBNAME
+          value: "memphis"
+        - name: METADATA_DB_HOST
+          value: {{ .Values.metadata.fullnameOverride }}-coordinator.{{ include "memphis.namespace" . }}.svc
+        - name: METADATA_DB_PORT
+          value: {{ .Values.metadata.service.ports.postgresql | quote }}
+        {{- end }}
+        {{- if .Values.metadata.pgpool.tls.enabled }}
+        - name: METADATA_DB_TLS_ENABLED
+          value: "true"
+        {{- if .Values.metadata.pgpool.tls.autoGenerated }}
+        - name: METADATA_DB_TLS_CRT
+          value: "/etc/memphis-certs/metadata/memphis-metadata-coordinator-crt/tls.crt"
+        - name: METADATA_DB_TLS_KEY
+          value: "/etc/memphis-certs/metadata/memphis-metadata-coordinator-crt/tls.key"
+        - name: METADATA_DB_TLS_CA
+          value: "/etc/memphis-certs/metadata/memphis-metadata-coordinator-crt/ca.crt"
+        {{- end}}
+        {{- if not .Values.metadata.pgpool.tls.autoGenerated }}
+        - name: METADATA_DB_TLS_CRT
+          value: "/etc/memphis-certs/metadata/memphis-metadata-coordinator-crt/{{ .Values.metadata.pgpool.tls.certFilename }}"
+        - name: METADATA_DB_TLS_KEY
+          value: "/etc/memphis-certs/metadata/memphis-metadata-coordinator-crt/{{ .Values.metadata.pgpool.tls.certKeyFilename }}"
+        - name: METADATA_DB_TLS_CA
+          value: "/etc/memphis-certs/metadata/memphis-metadata-coordinator-crt/{{ .Values.metadata.pgpool.tls.certCAFilename }}"
+        {{- end }}
+        {{- end }}
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/nats-config
+          - name: pid
+            mountPath: /var/run/memphis
+          {{/* User extended config volumes*/}}
+          {{- range .Values.memphis.config }}
+          # User extended config volumes
+          - name: {{ .name }}
+            mountPath: /etc/nats-config/{{ .name }}
+          {{- end }}
+
+
+          {{- if and .Values.auth.enabled .Values.auth.resolver }}
+          {{- if eq .Values.auth.resolver.type "memory" }}
+          - name: resolver-volume
+            mountPath: /etc/nats-config/accounts
+          {{- end }}
+
+          {{- if eq .Values.auth.resolver.type "full" }}
+          {{- if .Values.auth.resolver.configMap }}
+          - name: resolver-volume
+            mountPath: /etc/nats-config/accounts
+          {{- end }}
+          {{- if and .Values.auth.resolver .Values.auth.resolver.store }}
+          - name: memphis-jwt-pvc
+            mountPath: {{ .Values.auth.resolver.store.dir }}
+          {{- end }}
+          {{- end }}
+
+          {{- if eq .Values.auth.resolver.type "URL" }}
+          - name: operator-jwt-volume
+            mountPath: /etc/nats-config/operator
+          {{- end }}
+          {{- end }}
+
+          {{- if .Values.memphis.storageEngine.fileStorage.enabled }}
+          - name: {{ include "memphis.fullname" . }}-js-pvc
+            mountPath: {{ .Values.memphis.storageEngine.fileStorage.storageDirectory }}
+          {{- end }}
+        
+          {{- if .Values.metadata.pgpool.tls.enabled }}
+          {{- if .Values.metadata.pgpool.tls.autoGenerated }}
+          - name: memphis-metadata-coordinator-crt
+            mountPath: /etc/memphis-certs/metadata/memphis-metadata-coordinator-crt
+          {{- else }}
+          {{- with .Values.metadata.pgpool.tls }}
+          {{ $secretName := tpl .certificatesSecret $ }}
+          - name: {{ $secretName }}-metadata-crt
+            mountPath: /etc/memphis-certs/metadata/memphis-metadata-coordinator-crt
+          {{- end }}
+          {{- end }}
+          {{- end }}
+
+
+          {{- with .Values.memphis.tls }}
+          #######################
+          #                     #
+          #  TLS Volumes Mounts #
+          #                     #
+          #######################
+
+
+          {{ $secretName := tpl .secret.name $ }}
+          - name: {{ $secretName }}-clients-volume
+            mountPath: /etc/memphis-certs/clients/{{ $secretName }}
+          {{- end }}
+          {{- with .Values.cluster.tls }}
+          {{- if not .custom }}
+          {{ $secretName := tpl .secret.name $ }}
+          - name: {{ $secretName }}-cluster-volume
+            mountPath: /etc/memphis-certs/cluster/{{ $secretName }}
+          {{- end }}
+          {{- end }}
+          {{- with .Values.websocket.tls }}
+          {{ $secretName := tpl .secret.name $ }}
+          - name: {{ $secretName }}-ws-volume
+            mountPath: /etc/memphis-certs/ws/{{ $secretName }}
+          {{- end }}
+          {{- if .Values.additionalVolumeMounts }}
+          {{- toYaml .Values.additionalVolumeMounts | nindent 10 }}
+          {{- end }}
+
+        #######################
+        #                     #
+        # Healthcheck Probes  #
+        #                     #
+        #######################
+        {{- if .Values.memphis.healthcheck }}
+
+        {{- with .Values.memphis.healthcheck.liveness }}
+        {{- if .enabled }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8222
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          failureThreshold: {{ .failureThreshold }}
+          {{- if .terminationGracePeriodSeconds }}
+          terminationGracePeriodSeconds: {{ .terminationGracePeriodSeconds }}
+          {{- end }}
+        {{- end }}
+        {{- end }}
+
+        {{- with .Values.memphis.healthcheck.readiness }}
+        {{- if .enabled }}
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8222
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          failureThreshold: {{ .failureThreshold }}
+        {{- end }}
+        {{- end }}
+
+        {{- if .Values.memphis.healthcheck.startup.enabled }}
+        startupProbe:
+          httpGet:
+            # During upgrades, healthz will be enabled instead to allow for a grace period
+            # in case of storageEngine enabled deployments to form quorum and streams to catch up.
+            path: /
+            port: 8222
+        {{- with .Values.memphis.healthcheck.startup }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          failureThreshold: {{ .failureThreshold }}
+        {{- end }}
+        {{- end }}
+
+        {{- end }}
+
+        # Gracefully stop NATS Server on pod deletion or image upgrade.
+        #
+        lifecycle:
+          preStop:
+            exec:
+              # Using the alpine based NATS image, we add an extra sleep that is
+              # the same amount as the terminationGracePeriodSeconds to allow
+              # the NATS Server to gracefully terminate the client connections.
+              #
+              command:
+              - "/bin/sh"
+              - "-c"
+              - "nats-server -sl=ldm=/var/run/nats/nats.pid"
+
+      #################################
+      #                               #
+      #  NATS Configuration Reloader  #
+      #                               #
+      #################################
+      {{ if .Values.reloader.enabled }}
+      - name: reloader
+        image: {{ .Values.reloader.image }}
+        imagePullPolicy: {{ .Values.reloader.pullPolicy }}
+        {{- if .Values.reloader.securityContext }}
+        securityContext:
+        {{- .Values.reloader.securityContext | toYaml | nindent 10 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.reloader.resources | nindent 10 }}
+        command:
+         - "memphis-config-reloader"
+         - "-pid"
+         - "/var/run/memphis/memphis.pid"
+         - "-config"
+         - "/etc/nats-config/memphis.conf"
+        {{- range .Values.reloader.extraConfigs }}
+         - "-config"
+         - {{ . | quote }}
+        {{- end }}
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/nats-config
+          - name: pid
+            mountPath: /var/run/memphis
+          {{- if .Values.additionalVolumeMounts }}
+          {{- toYaml .Values.additionalVolumeMounts | nindent 10 }}
+          {{- end }}
+      {{ end }}
+
+      ##############################
+      #                            #
+      #  NATS Prometheus Exporter  #
+      #                            #
+      ##############################
+      {{ if .Values.exporter.enabled }}
+      - name: metrics
+        image: {{ .Values.exporter.image }}
+        imagePullPolicy: {{ .Values.exporter.pullPolicy }}
+        {{- if .Values.exporter.securityContext }}
+        securityContext:
+        {{- .Values.exporter.securityContext | toYaml | nindent 10 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.exporter.resources | nindent 10 }}
+        args:
+        - -connz
+        - -routez
+        - -subz
+        - -varz
+        - -prefix=nats
+        - -use_internal_server_id
+        - -jsz=all
+        - http://localhost:8222/
+        ports:
+        - containerPort: 7777
+          name: metrics
+      {{ end }}
+
+
+  volumeClaimTemplates:
+  {{- if eq .Values.auth.resolver.type "full" }}
+  {{- if and .Values.auth.resolver .Values.auth.resolver.store }}
+  #####################################
+  #                                   #
+  #  Account Server Embedded JWT      #
+  #                                   #
+  #####################################
+    - metadata:
+        name: nats-jwt-pvc
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.auth.resolver.store.size }}
+  {{- end }}
+  {{- end }}
+
+  {{- if and .Values.memphis.storageEngine.fileStorage.enabled (not .Values.memphis.storageEngine.fileStorage.existingClaim) }}
+  #########################################
+  #                                       #
+  #  storageEngine New Persistent Volume  #
+  #                                       #
+  #########################################
+    - metadata:
+        name: {{ include "memphis.fullname" . }}-js-pvc
+        {{- if .Values.memphis.storageEngine.fileStorage.annotations }}
+        annotations:
+        {{- range $key, $value := .Values.memphis.storageEngine.fileStorage.annotations }}
+          {{ $key }}: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
+      spec:
+        accessModes:
+        {{- range .Values.memphis.storageEngine.fileStorage.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.memphis.storageEngine.fileStorage.size }}
+        {{- if .Values.memphis.storageEngine.fileStorage.storageClassName }}
+        storageClassName: {{ .Values.memphis.storageEngine.fileStorage.storageClassName | quote }}
+        {{- end }}
+  {{- end }}

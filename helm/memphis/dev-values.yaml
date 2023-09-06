@@ -1,0 +1,5 @@
+memphis:
+  creds:
+    rootPwd: password
+cluster:
+  replicas: 1

@@ -1,0 +1,129 @@
+apiVersion: /v1
+kind: Service
+metadata:
+  name: memphis-rest-gateway
+  namespace: {{ include "memphis.namespace" . }}
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: {{ .Values.restGateway.port }}
+      targetPort: 4444
+  selector:
+    app: memphis-rest-gateway
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memphis-rest-gateway
+  namespace: {{ include "memphis.namespace" . }}
+  labels:
+    app: memphis-rest-gateway
+spec:
+{{- if .Values.restGateway.enabled }}
+  {{- if eq (include "memphis.clusterEnabled" .) "true" }}
+  replicas: 2
+  {{- else }}
+  replicas: 1
+  {{- end }}
+{{- else }}
+  replicas: 0
+{{- end }}
+  selector:
+    matchLabels:
+      app: memphis-rest-gateway
+  template:
+    metadata:
+      name: memphis-rest-gateway
+      labels:
+        app: memphis-rest-gateway
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: k8s-busybox-waits4broker
+          image: {{ .Values.busybox.image }}
+          imagePullPolicy: {{ .Values.busybox.pullPolicy }}
+          command: ['sh', '-c', "until nslookup {{ include "memphis.svcName" . }}.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for broker; sleep 2; done"]
+      containers:
+        - name: memphis-rest-gateway
+          image: {{ .Values.restGateway.image }}
+          resources:
+            {{- toYaml .Values.restGateway.resources | nindent 12 }}
+          imagePullPolicy: {{ .Values.restGateway.pullPolicy }}
+          ports:
+            - containerPort: 4444
+          env:
+          - name: ROOT_USER
+            value: {{ .Values.restGateway.user | quote }}
+          - name: HTTP_PORT
+            value: {{ .Values.restGateway.port | quote }}
+          - name: MEMPHIS_HOST
+            value: {{ include "memphis.svcName" . }}.{{ include "memphis.namespace" . }}.svc.cluster.local
+          - name: USER_PASS_BASED_AUTH
+            value: {{ .Values.memphis.configFile.userPassBasedAuth | quote }}
+          - name: ROOT_PASSWORD
+            valueFrom:
+                secretKeyRef:
+          {{- if and .Values.memphis.creds.customConfigSecret.enabled .Values.memphis.creds.customConfigSecret.rootPwd_key }}
+                  name: {{ .Values.memphis.creds.customConfigSecret.secret.name | quote }}
+                  key: {{ .Values.memphis.creds.customConfigSecret.rootPwd_key }}
+          {{- else }}
+                  name: "memphis-creds"
+                  key: ROOT_PASSWORD
+          {{- end }}
+          - name: CONNECTION_TOKEN
+            valueFrom:
+              secretKeyRef:
+          {{- if and .Values.memphis.creds.customConfigSecret.enabled .Values.memphis.creds.customConfigSecret.connectionToken_key }}
+                  name: {{ .Values.memphis.creds.customConfigSecret.secret.name | quote }}
+                  key: {{ .Values.memphis.creds.customConfigSecret.connectionToken_key }}
+          {{- else }}
+                  name: "memphis-creds"
+                  key: CONNECTION_TOKEN
+          {{- end }}
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: "memphis-creds"
+                key: JWT_SECRET_REST_GW
+          - name: REFRESH_JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: "memphis-creds"
+                key: REFRESH_JWT_SECRET_REST_GW
+          {{- if .Values.restGateway.extraEnvironmentVars.enabled }}
+          {{- .Values.restGateway.extraEnvironmentVars.vars | toYaml | nindent 10 }}
+          {{- end }}
+          {{- with .Values.memphis.tls }}
+          {{ $secretName := tpl .secret.name $ }}
+          {{- with .cert }}
+          - name: CLIENT_CERT_PATH
+            value: "/etc/memphis-certs/clients/{{ $secretName }}/{{ . }}"
+          {{- end }}
+          {{- with .key }}
+          - name: CLIENT_KEY_PATH
+            value: "/etc/memphis-certs/clients/{{ $secretName }}/{{ . }}"
+          {{- end }}
+          {{- with .ca }}
+          - name: ROOT_CA_PATH
+            value: /etc/memphis-certs/clients/{{ $secretName }}/{{ . }}
+          {{- end }}
+          volumeMounts:
+            - name: {{ $secretName }}-clients-volume
+              mountPath: /etc/memphis-certs/clients/{{ $secretName }}
+          {{- end }}
+          
+      {{- with .Values.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      
+      {{- with .Values.memphis.tls }}
+      {{ $secretName := tpl .secret.name $ }}      
+      volumes:
+      - name: {{ $secretName }}-clients-volume
+        secret:
+          secretName: {{ $secretName }}
+      {{- end }}

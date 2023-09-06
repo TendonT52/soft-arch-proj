@@ -1,0 +1,30 @@
+annotations:
+  category: Streaming and messaging
+  licenses: Memphis Business Source License 1.0
+apiVersion: v2
+appVersion: 1.2.0
+dependencies:
+- condition: metadata.enabled
+  name: metadata
+  repository: ""
+  version: 11.5.2
+description: Memphis.dev Official Helm chart
+home: https://github.com/memphisdev/memphis
+icon: https://memphis-public-files.s3.eu-central-1.amazonaws.com/icon.png
+keywords:
+- data streaming
+- message broker
+- memphis
+- producer
+- consumer
+- cluster
+- high availability
+maintainers:
+- name: Memphis.dev
+  url: https://k8s.memphis.dev/charts
+name: memphis
+sources:
+- https://github.com/memphisdev/memphis
+- https://www.memphis.dev
+type: application
+version: 1.2.1

@@ -1,0 +1,2 @@
+telepresence helm install
+telepresence connect

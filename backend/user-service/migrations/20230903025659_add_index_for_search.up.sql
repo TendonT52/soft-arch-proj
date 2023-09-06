@@ -1,0 +1,1 @@
+CREATE INDEX companies_search_idx ON companies USING GIN (to_tsvector('english', companies.category || ' ' || companies.name));

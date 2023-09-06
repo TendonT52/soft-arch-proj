@@ -1,0 +1,378 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "memphis.fullname" . }}-config
+  namespace: {{ include "memphis.namespace" . }}
+  labels:
+    {{- include "memphis.labels" . | nindent 4 }}
+data:
+  memphis.conf: |
+    # Memphis Clients Port
+    port: {{ .Values.memphis.client.port }}
+
+    # PID file shared with configuration reloader.
+    pid_file: "/var/run/memphis/memphis.pid"
+    
+    # Memphis K8s namespace
+    k8s_namespace: {{ include "memphis.namespace" . }}
+
+    # Memphis HTTP/UI Port
+    ui_port: {{ .Values.memphis.ui.port }}
+
+    # Memphis Rest Gateway API Port
+    rest_gw_port: {{ .Values.restGateway.port }}
+
+    {{- if .Values.memphis.hosts.uiHostName }}
+    # Memphis UI URL that displayed in dashboard
+    ui_host: {{ .Values.memphis.hosts.uiHostName }}
+    {{- end }}
+
+    {{- if .Values.memphis.hosts.brokerHostName }}
+    # Memphis Broker URL that displayed in dashboard
+    broker_host: {{ .Values.memphis.hosts.brokerHostName }}
+    {{- end }}
+
+    {{- if .Values.memphis.hosts.restgwHostName }}
+    # Memphis Rest Gateway URL that displayed in dashboard
+    rest_gw_host: {{ .Values.memphis.hosts.restgwHostName }}
+    {{- end }}    
+
+    # Logs retention parameter in days
+    logs_retention_days: {{ .Values.memphis.configFile.logsRetentionInDays }}
+
+    # Disconnected producer/consumer retention in hours
+    # gc_producer_consumer_retention_hours: {{ .Values.memphis.configFile.gcProducerConsumerRetentionInHours }}
+    
+    # Tiered storage upload interval in seconds
+    tiered_storage_upload_interval_seconds: {{ .Values.memphis.configFile.tieredStorageUploadIntervalSeconds }}
+
+    # Dead letter station retention
+    dls_retention_hours: {{ .Values.memphis.configFile.dlsRetentionHours }}
+
+
+    {{- if .Values.memphis.config }}
+    ###########
+    #         #
+    # Imports #
+    #         #
+    ###########
+    {{- range .Values.memphis.config }}
+    include ./{{ .name }}/{{ .name }}.conf
+    {{- end}}
+    {{- end }}
+
+    ###############
+    #             #
+    # Monitoring  #
+    #             #
+    ###############
+    http: 8222
+    server_name: {{- if .Values.memphis.serverNamePrefix  }}$SERVER_NAME{{- else }}$POD_NAME{{- end }}
+
+    {{- if .Values.memphis.tls }}
+    #####################
+    #                   #
+    # TLS Configuration #
+    #                   #
+    #####################
+    {{- with .Values.memphis.tls }}
+    {{- $memphis_tls := merge (dict) . }}
+    {{- $_ := set $memphis_tls "secretPath" "/etc/memphis-certs/clients" }}
+    {{- tpl (include "memphis.tlsConfig" $memphis_tls) $ | nindent 4}}
+    {{- end }}
+    {{- end }}
+
+    #######################################
+    #                                     #
+    #            storageEngine            #
+    #                                     #
+    #######################################
+    jetstream {
+      {{- if .Values.memphis.storageEngine.encryption }}
+      {{- if .Values.memphis.storageEngine.encryption.key }}
+      key: {{ .Values.memphis.storageEngine.encryption.key | quote }}
+      {{- else if .Values.memphis.storageEngine.encryption.secret }}
+      key: $JS_KEY
+      {{- end}}
+      {{- end}}
+
+      {{- if .Values.memphis.storageEngine.memStorage.enabled }}
+      {{- if .Values.memphis.storageEngine.memStorage.size }}
+      max_mem: {{ .Values.memphis.storageEngine.memStorage.size }}
+      {{- end }}
+      {{- end }}
+
+      {{- if .Values.memphis.storageEngine.fileStorage.enabled }}
+      store_dir: {{ .Values.memphis.storageEngine.fileStorage.storageDirectory }}
+      {{- end }}
+    }
+
+    {{- if eq (include "memphis.clusterEnabled" .) "true" }}
+    ###################################
+    #                                 #
+    #     Memphis Clustering Setup    #
+    #                                 #
+    ###################################
+    cluster {
+      port: 6222
+
+
+      {{- if .Values.cluster.name }}
+      name: {{ .Values.cluster.name }}
+      {{- else }}
+      name: {{ template "memphis.name" . }}
+      {{- end }}
+
+      {{- with .Values.cluster.tls }}
+      {{-  $cluster_tls := merge (dict) . }}
+      {{- $_ := set $cluster_tls "secretPath" "/etc/memphis-certs/cluster" }}
+      {{- tpl (include "memphis.tlsConfig" $cluster_tls) $ | nindent 6}}
+      {{- end }}
+
+      {{- if .Values.cluster.authorization }}
+      authorization {
+        {{- with .Values.cluster.authorization.user }}
+        user: {{ . }}
+        {{- end }}
+        {{- with .Values.cluster.authorization.password }}
+        password: {{ . }}
+        {{- end }}
+        {{- with .Values.cluster.authorization.timeout }}
+        timeout: {{ . }}
+        {{- end }}
+      }
+      {{- end }}
+
+      routes = [
+        {{ include "memphis.clusterRoutes" . }}
+        {{ include "memphis.extraRoutes" . }}
+      ]
+      cluster_advertise: $CLUSTER_ADVERTISE
+
+      {{- with .Values.cluster.noAdvertise }}
+      no_advertise: {{ . }}
+      {{- end }}
+
+      connect_retries: {{ .Values.memphis.connectRetries }}
+    }
+    {{- end }}  
+
+    {{- if and .Values.memphis.advertise .Values.memphis.externalAccess }}
+    include "advertise/client_advertise.conf"
+    {{- end }}
+
+    {{- with .Values.memphis.logging.debug }}
+    debug: {{ . }}
+    {{- end }}
+
+    {{- with .Values.memphis.logging.trace }}
+    trace:  {{ . }}
+    {{- end }}
+
+    {{- with .Values.memphis.logging.logtime }}
+    logtime: {{ . }}
+    {{- end }}
+
+    {{- with .Values.memphis.logging.connectErrorReports }}
+    connect_error_reports: {{ . }}
+    {{- end }}
+
+    {{- with .Values.memphis.logging.reconnectErrorReports }}
+    reconnect_error_reports: {{ . }}
+    {{- end }}
+
+    {{- with .Values.memphis.limits.maxConnections }}
+    max_connections: {{ . }}
+    {{- end }}
+
+    {{- with .Values.memphis.limits.maxSubscriptions }}
+    max_subscriptions: {{ . }}
+    {{- end }}
+
+    {{- with .Values.memphis.limits.maxPending }}
+    max_pending: {{ . }}
+    {{- end }}
+
+    {{- with .Values.memphis.limits.maxControlLine }}
+    max_control_line: {{ . }}
+    {{- end }}
+
+    {{- with .Values.memphis.limits.maxPayload }}
+    max_payload: {{ . }}
+    {{- end }}
+
+    {{- with .Values.memphis.limits.pingInterval }}
+    ping_interval: {{ . }}
+    {{- end }}
+
+    {{- with .Values.memphis.limits.maxPings }}
+    ping_max: {{ . }}
+    {{- end }}
+
+    {{- with .Values.memphis.limits.writeDeadline }}
+    write_deadline: {{ . }}
+    {{- end }}
+
+    {{- with .Values.memphis.limits.lameDuckDuration }}
+    lame_duck_duration: {{ . }}
+    {{- end }}
+
+    {{- if .Values.websocket.enabled }}
+    ##################
+    #                #
+    # Websocket      #
+    #                #
+    ##################
+    websocket {
+      port: {{ .Values.websocket.port }}
+      {{- with .Values.websocket.tls }}
+        {{ $secretName := tpl .secret.name $ }}
+      tls {
+        {{- with .cert }}
+        cert_file: /etc/memphis-certs/ws/{{ $secretName }}/{{ . }}
+        {{- end }}
+
+        {{- with .key }}
+        key_file: /etc/memphis-certs/ws/{{ $secretName }}/{{ . }}
+        {{- end }}
+
+        {{- with .ca }}
+        ca_file: /etc/memphis-certs/ws/{{ $secretName }}/{{ . }}
+        {{- end }}
+      }
+      {{- else }}
+      no_tls: {{ .Values.websocket.noTLS }}
+      {{- end }}
+      same_origin: {{ .Values.websocket.sameOrigin }}
+      {{- with .Values.websocket.allowedOrigins }}
+      allowed_origins: {{ toRawJson . }}
+      {{- end }}
+      
+      {{- with .Values.websocket.auth }}
+      authorization {
+        {{- if .token }}
+        token: {{ .token | quote }}
+        {{- else }}
+        user: {{ .user | quote }}
+        pass: {{ .pass | quote }}
+        {{- end }}
+      {{- if .timeout }}
+        timeout: {{ .timeout }}
+      {{- end }}
+      }
+    {{- end }}
+    }
+    {{- end }}
+
+    {{- if .Values.auth.enabled }}
+    ##################
+    #                #
+    # Authorization  #
+    #                #
+    ##################
+    {{- if .Values.auth.resolver }}
+      {{- if eq .Values.auth.resolver.type "memory" }}
+        resolver: MEMORY
+        include "accounts/{{ .Values.auth.resolver.configMap.key }}"
+      {{- end }}
+
+      {{- if eq .Values.auth.resolver.type "full" }}
+        {{- if .Values.auth.resolver.configMap }}
+        include "accounts/{{ .Values.auth.resolver.configMap.key }}"
+        {{- else }}
+          {{- with .Values.auth.resolver }}
+            {{- if $.Values.auth.timeout }}
+            authorization {
+              timeout: {{ $.Values.auth.timeout }}
+             }
+            {{- end }}
+
+            {{- if .operator }}
+            operator: {{ .operator }}
+            {{- end }}
+
+            {{- if .systemAccount }}
+            system_account: {{ .systemAccount | quote }}
+            {{- end }}
+          {{- end }}
+
+          resolver: {
+            type: full
+            {{- with .Values.auth.resolver }}
+            dir: {{ .store.dir | quote }}
+
+            allow_delete: {{ .allowDelete }}
+
+            interval: {{ .interval | quote }}
+            {{- end }}
+          }
+        {{- end }}
+      {{- end }}
+
+      {{- if .Values.auth.resolver.resolverPreload }}
+      resolver_preload: {{ toRawJson .Values.auth.resolver.resolverPreload }}
+      {{- end }}
+
+      {{- if eq .Values.auth.resolver.type "URL" }}
+        {{- with .Values.auth.resolver.url }}
+        resolver: URL({{ . }})
+        {{- end }}
+        operator: /etc/memphis-config/operator/{{ .Values.auth.operatorjwt.configMap.key }}
+      {{- end }}
+    {{- end }}
+
+    {{- with .Values.auth.systemAccount }}
+    system_account: {{ . | quote }}
+    {{- end }}
+
+
+    {{- with .Values.auth.nkeys }}
+    {{- with .users }}
+    authorization {
+      {{- if $.Values.auth.timeout }}
+      timeout: {{ $.Values.auth.timeout }}
+      {{- end }}
+
+      users: [
+      {{- range . }}
+      {{- toRawJson . | nindent 4 }},
+      {{- end }}
+      ]
+    }
+    {{- end }}
+    {{- end }}
+
+    {{- with .Values.auth.basic }}
+
+    {{- with .noAuthUser }}
+    no_auth_user: {{ . }}
+    {{- end }}
+
+    {{- with .users }}
+    authorization {
+      {{- if $.Values.auth.timeout }}
+      timeout: {{ $.Values.auth.timeout }}
+      {{- end }}
+
+      users: [
+      {{- range . }}
+      {{- toRawJson . | nindent 4 }},
+      {{- end }}
+      ]
+    }
+    {{- end }}
+
+    {{- with .accounts }}
+    authorization {
+      {{- if $.Values.auth.timeout }}
+      timeout: {{ $.Values.auth.timeout }}
+      {{- end }}
+    }
+
+    accounts: {{- toRawJson . }}
+    {{- end }}
+
+    {{- end }}
+
+    {{- end }}

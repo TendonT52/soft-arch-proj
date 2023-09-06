@@ -1,0 +1,110 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "github.com/TikhampornSky/go-auth-verifiedMail/gen";
+
+
+service AuthService {
+  rpc CreateStudent(CreateStudentRequest) returns (CreateStudentResponse) {}
+  rpc CreateCompany(CreateCompanyRequest) returns (CreateCompanyResponse) {}
+  rpc CreateAdmin(CreateAdminRequest) returns (CreateAdminResponse) {}
+
+  rpc SignIn(LoginRequest) returns (LoginResponse) {}
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {}
+  rpc LogOut(LogOutRequest) returns (LogOutResponse) {}
+
+  rpc VerifyEmailCode(VerifyEmailCodeRequest) returns (VerifyEmailCodeResponse) {}
+}
+
+// Create Student
+message CreateStudentRequest {
+  string name = 1;
+  string email = 2;
+  string password = 3;
+  string password_confirm = 4;
+  string description = 5;
+  string faculty = 6;
+  string major = 7;
+  int32 year = 8;
+}
+
+message CreateStudentResponse {
+  int64 status = 1;
+  string message = 2;
+}
+
+// Create Company
+message CreateCompanyRequest {
+  string name = 1;
+  string email = 2;
+  string password = 3;
+  string password_confirm = 4;
+  string description = 5;
+  string location = 6;
+  string phone = 7;
+  string category = 8;
+}
+
+message CreateCompanyResponse {
+  int64 status = 1;
+  string message = 2;
+}
+
+// Create admin (Internal Use)
+message CreateAdminRequest {
+  string email = 1;
+  string password = 2;
+  string password_confirm = 3;
+}
+
+message CreateAdminResponse {
+  int64 status = 1;
+  string message = 2;
+}
+
+// SignIn
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  int64 status = 1;
+  string message = 2;
+  string access_token = 3;
+  string refresh_token = 4;
+  string logged_in = 5;
+}
+
+// RefreshToken
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message RefreshTokenResponse {
+  int64 status = 1;
+  string message = 2;
+  string access_token = 3;
+  string logged_in = 4;
+}
+
+// LogOut
+message LogOutRequest {
+  string refresh_token = 1;
+}
+
+message LogOutResponse {
+  int64 status = 1;
+  string message = 2;
+}
+
+// Verify Email Code
+message VerifyEmailCodeRequest {
+  string code = 1;
+}
+
+message VerifyEmailCodeResponse {
+  int64 status = 1;
+  string message = 2;
+}

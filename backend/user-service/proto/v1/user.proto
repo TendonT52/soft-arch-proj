@@ -1,0 +1,133 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "github.com/TikhampornSky/go-auth-verifiedMail/gen";
+
+service UserService {
+    rpc GetStudentMe(GetStudentMeRequest) returns (GetStudentResponse);
+    rpc GetStudent(GetStudentRequest) returns (GetStudentResponse);
+    rpc UpdateStudent(UpdateStudentRequest) returns (UpdateStudentResponse);
+
+    rpc GetCompanyMe(GetCompanyMeRequest) returns (GetCompanyResponse);
+    rpc GetCompany(GetCompanyRequest) returns (GetCompanyResponse);
+    rpc UpdateCompany(UpdateCompanyRequest) returns (UpdateCompanyResponse);
+    rpc ListApprovedCompanies(ListApprovedCompaniesRequest) returns (ListApprovedCompaniesResponse);
+
+    rpc ListCompanies(ListCompaniesRequest) returns (ListCompaniesResponse);
+    rpc UpdateCompanyStatus(UpdateCompanyStatusRequest) returns (UpdateCompanyStatusResponse);
+}
+
+message Student {
+    int64 id = 1;
+    string name = 2;
+    string email = 3;
+    string description = 4;
+    string faculty = 5;
+    string major = 6;
+    int32 year = 7;
+}
+
+message Company {
+    int64 id = 1;
+    string name = 2;
+    string email = 3;
+    string description = 4;
+    string location = 5;
+    string phone = 6;
+    string category = 7;
+    string status = 8;
+}
+
+// Get Student Me
+message GetStudentMeRequest {
+    string access_token = 1;
+}
+
+// Get Student
+message GetStudentRequest {
+    int64 id = 1;
+    string access_token = 2;
+}
+
+message GetStudentResponse {
+    int64 status = 1;
+    string message = 2;
+    Student student = 3;
+}
+
+// Update Student
+message UpdateStudentRequest {
+    string access_token = 1;
+    Student student = 2;
+}
+
+message UpdateStudentResponse {
+    int64 status = 1;
+    string message = 2;
+}
+
+// Get Company Me
+message GetCompanyMeRequest {
+    string access_token = 1;
+}
+
+// Get Company
+message GetCompanyRequest {
+    int64 id = 1;
+    string access_token = 2;
+}
+
+message GetCompanyResponse {
+    int64 status = 1;
+    string message = 2;
+    Company company = 3;
+}
+
+// Update Company
+message UpdateCompanyRequest {
+    string access_token = 1;
+    Company company = 2;
+}
+
+message UpdateCompanyResponse {
+    int64 status = 1;
+    string message = 2;
+}
+
+// List Companies
+message ListCompaniesRequest {
+    string access_token = 1;
+}
+
+message ListCompaniesResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated Company companies = 3;
+    int64 total = 4;
+}
+
+// List Approved Companies
+message ListApprovedCompaniesRequest {
+    string access_token = 1;
+    string search = 2;
+}
+
+message ListApprovedCompaniesResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated Company companies = 3;
+    int64 total = 4;
+}
+
+// Approve or Reject Company
+message UpdateCompanyStatusRequest {
+    string access_token = 1;
+    int64 id = 2;
+    string status = 3;
+}
+
+message UpdateCompanyStatusResponse {
+    int64 status = 1;
+    string message = 2;
+}
