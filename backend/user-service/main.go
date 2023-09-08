@@ -25,9 +25,11 @@ func main() {
 	memphisConn := email.InitMemphisConnection()
 	defer memphisConn.Close()
 
+	memphis := email.NewMemphis(memphisConn, config.MemphisStationName)
+
 	userRepo := repo.NewUserRepository(db.GetPostgresqlDB(), db.GetRedisDB())
-	authService := service.NewAuthService(userRepo, memphisConn)
-	userService := service.NewUserService(userRepo, memphisConn)
+	authService := service.NewAuthService(userRepo, memphis)
+	userService := service.NewUserService(userRepo, memphis)
 
 	// gRPC Zone
 	server.NewServer(config.ServerPort, authService, userService)

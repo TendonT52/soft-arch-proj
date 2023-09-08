@@ -40,6 +40,7 @@ type Config struct {
 	MemphisPassword        string `mapstructure:"MEMPHIS_PASSWORD"`
 	MemphisAccountID       int    `mapstructure:"MEMPHIS_ACCOUNT_ID"`
 	MemphisStationName     string `mapstructure:"MEMPHIS_STATION_NAME"`
+	MemphisStationNameTest string `mapstructure:"MEMPHIS_STATION_NAME_TEST"`
 	MemphisProducer        string `mapstructure:"MEMPHIS_PRODUCER"`
 }
 
