@@ -28,7 +28,18 @@ init-k8s:
 	--set master.persistence.path="${PWD}/data/redis" \
 	--set master.persistence.existingClaim=todo-redis-persistent-claim \
 	--set volumePermissions.enabled=true
-	
+
+	helm install todo-memphis ../../helm/memphis \
+	--set memphis.creds.rootPwd=password \
+	--set cluster.replicas=1 \
+	--set master.persistence.size=10Gi \
+	--set master.persistence.path="${PWD}/data/memphis" \
+	--set memphis.storageEngine.fileStorage.existingClaim=memphis-persistent-claim \
+	--set master.metadata.persistence.size=10Gi \
+	--set master.metadata.persistence.path="${PWD}/data/memphis-meta" \
+	--set metadata.persistence.existingClaim=memphis-metadata-persistent-claim \
+	--wait
+
 	telepresence helm install
 	telepresence connect
 
