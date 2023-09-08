@@ -20,12 +20,15 @@ func NewDatabase(config *initializers.Config) (*Database, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("Successfully connected to the postgresql database")
 
 	redis := redis.NewClient(&redis.Options{
 		Addr:     config.REDISHost + ":" + config.REDISPort,
 		Password: config.REDISPassword,
 		DB:       config.REDISDB,
 	})
+	fmt.Println("Successfully connected to the redis database")
+	
 	return &Database{db: db, redis: redis}, nil
 }
 
