@@ -1,1 +1,1 @@
-migrate -database "postgres://root:mypassword@10.111.188.43:5432/user-db?sslmode=disable" -path migrations up
+migrate -database "postgres://postgres:password@todo-postgresql.default:5432/?sslmode=disable" -path migrations up
