@@ -301,14 +301,37 @@ func TestSignIn(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	id_student, err := utils.GenerateRandomNumber(10)
+	require.NoError(t, err)
+	s := &pbv1.CreateStudentRequest{
+		Name:            "Mock SignIn",
+		Email:           id_student + "@student.chula.ac.th",
+		Password:        "password-test",
+		PasswordConfirm: "password-test",
+		Description:     "I am a student",
+		Faculty:         "Engineering",
+		Major:           "Computer Engineering",
+		Year:            4,
+	}
+	_, err = c.CreateStudent(ctx, s)
+	require.NoError(t, err)
+
+	a := &pbv1.CreateAdminRequest{
+		Email:           utils.GenerateRandomString(10) + "@gmail.com",
+		Password:        "password-test",
+		PasswordConfirm: "password-test",
+	}
+	_, err = c.CreateAdmin(ctx, a)
+	require.NoError(t, err)
+
 	tests := map[string]struct {
 		req    *pbv1.LoginRequest
 		expect *pbv1.LoginResponse
 	}{
 		"success": {
 			req: &pbv1.LoginRequest{
-				Email:    "admin@gmail.com",
-				Password: "12345678",
+				Email:    a.Email,
+				Password: a.Password,
 			},
 			expect: &pbv1.LoginResponse{
 				Status:  200,
@@ -317,7 +340,7 @@ func TestSignIn(t *testing.T) {
 		},
 		"password not match": {
 			req: &pbv1.LoginRequest{
-				Email:    "password_not_match@gmail.com",
+				Email:    a.Email,
 				Password: "password-test-not-match",
 			},
 			expect: &pbv1.LoginResponse{
@@ -327,8 +350,8 @@ func TestSignIn(t *testing.T) {
 		},
 		"account not verified": {
 			req: &pbv1.LoginRequest{
-				Email:    "not_verified@gmail.com",
-				Password: "password-test",
+				Email:    s.Email,
+				Password: s.Password,
 			},
 			expect: &pbv1.LoginResponse{
 				Status:  400,
@@ -358,14 +381,44 @@ func TestRefreshToken(t *testing.T) {
 	defer conn.Close()
 
 	c := pbv1.NewAuthServiceClient(conn)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	config, _ := initializers.LoadConfig("..")
-	refresh_token, err := utils.CreateToken(config.RefreshTokenExpiresIn, 100, config.RefreshTokenPrivateKey)
+	// Person 1 OK
+	mock_email := utils.GenerateRandomString(10) + "@gmail.com"
+	_, err = c.CreateAdmin(ctx, &pbv1.CreateAdminRequest{
+		Email:           mock_email,
+		Password:        "password-test",
+		PasswordConfirm: "password-test",
+	})
 	require.NoError(t, err)
 
-	refresh_token_not_userId, err := utils.CreateToken(config.RefreshTokenExpiresIn, 0, config.RefreshTokenPrivateKey)
+	res, err := c.SignIn(ctx, &pbv1.LoginRequest{
+		Email:    mock_email,
+		Password: "password-test",
+	})
+
+	// Wrong token (Unknown person)
+	config, _ := initializers.LoadConfig("..")
+	refresh_token_wrong, err := utils.CreateToken(config.RefreshTokenExpiresIn, 0, config.RefreshTokenPrivateKey)
+	require.NoError(t, err)
+
+	// Person 2 Already logged out
+	mock_email2 := utils.GenerateRandomString(10) + "@gmail.com"
+	_, err = c.CreateAdmin(ctx, &pbv1.CreateAdminRequest{
+		Email:           mock_email2,
+		Password:        "password-test",
+		PasswordConfirm: "password-test",
+	})
+	u, err := c.SignIn(ctx, &pbv1.LoginRequest{
+		Email:     mock_email2,
+		Password: "password-test",
+	})
+	require.NoError(t, err)
+	_, err = c.LogOut(ctx, &pbv1.LogOutRequest{
+		RefreshToken: u.RefreshToken,
+	})
 	require.NoError(t, err)
 
 	tests := map[string]struct {
@@ -374,7 +427,7 @@ func TestRefreshToken(t *testing.T) {
 	}{
 		"success": {
 			req: &pbv1.RefreshTokenRequest{
-				RefreshToken: refresh_token,
+				RefreshToken: res.RefreshToken,
 			},
 			expect: &pbv1.RefreshTokenResponse{
 				Status:  200,
@@ -383,11 +436,20 @@ func TestRefreshToken(t *testing.T) {
 		},
 		"user not found": {
 			req: &pbv1.RefreshTokenRequest{
-				RefreshToken: refresh_token_not_userId,
+				RefreshToken: refresh_token_wrong,
 			},
 			expect: &pbv1.RefreshTokenResponse{
 				Status:  403,
 				Message: "the user belonging to this token no logger exists",
+			},
+		},
+		"already logged out": {
+			req: &pbv1.RefreshTokenRequest{
+				RefreshToken: u.RefreshToken,
+			},
+			expect: &pbv1.RefreshTokenResponse{
+				Status:  403,
+				Message: "your token has been logged out!",
 			},
 		},
 	}
@@ -416,9 +478,18 @@ func TestLogOut(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	config, _ := initializers.LoadConfig("..")
-	refresh_token, err := utils.CreateToken(config.RefreshTokenExpiresIn, 100, config.RefreshTokenPrivateKey)
+	mock_email := utils.GenerateRandomString(10) + "@gmail.com"
+	_, err = c.CreateAdmin(ctx, &pbv1.CreateAdminRequest{
+		Email:           mock_email,
+		Password:        "password-test",
+		PasswordConfirm: "password-test",
+	})
 	require.NoError(t, err)
+
+	res, err := c.SignIn(ctx, &pbv1.LoginRequest{
+		Email:    mock_email,
+		Password: "password-test",
+	})
 
 	tests := map[string]struct {
 		req    *pbv1.LogOutRequest
@@ -426,7 +497,7 @@ func TestLogOut(t *testing.T) {
 	}{
 		"success": {
 			req: &pbv1.LogOutRequest{
-				RefreshToken: refresh_token,
+				RefreshToken: res.RefreshToken,
 			},
 			expect: &pbv1.LogOutResponse{
 				Status:  200,
