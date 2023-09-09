@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	"github.com/TikhampornSky/go-auth-verifiedMail/email"
@@ -31,22 +32,21 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 	if req.Password != req.PasswordConfirm {
 		return domain.ErrPasswordNotMatch
 	}
+	current_time := time.Now().Unix()
 
-	hashedPassword, err := utils.HashPassword(req.Password)
-	if err != nil {
-		return err
-	}
+	hashedPassword := utils.HashPassword(req.Password, current_time)
 	req.Password = hashedPassword
 
 	if !email.IsChulaStudentEmail(req.Email) {
 		return domain.ErrNotChulaStudentEmail.With("email must be @student.chula.ac.th")
 	}
 
-	err = s.repo.CheckEmailExist(ctx, req.Email)
+	err := s.repo.CheckEmailExist(ctx, req.Email)
 	if err != nil {
 		return domain.ErrDuplicateEmail
 	}
 
+	createAt := time.Now().Unix()
 	// Generate Verification Code
 	code := randstr.String(20)
 	verification_code := utils.Encode(code)
@@ -72,7 +72,7 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 		return domain.ErrMailNotSent.With("cannot send email")
 	}
 
-	err = s.repo.CreateStudent(ctx, req, verification_code)
+	err = s.repo.CreateStudent(ctx, req, verification_code, createAt)
 	if err != nil {
 		return err
 	}
@@ -94,18 +94,18 @@ func (s *authService) SignUpCompany(ctx context.Context, req *pbv1.CreateCompany
 		return domain.ErrPasswordNotMatch
 	}
 
-	hashedPassword, err := utils.HashPassword(req.Password)
-	if err != nil {
-		return err
-	}
+	current_time := time.Now().Unix()
+	hashedPassword := utils.HashPassword(req.Password, current_time)
+
 	req.Password = hashedPassword
 
-	err = s.repo.CheckEmailExist(ctx, req.Email)
+	err := s.repo.CheckEmailExist(ctx, req.Email)
 	if err != nil {
 		return domain.ErrDuplicateEmail
 	}
 
-	err = s.repo.CreateCompany(ctx, req)
+	createAt := time.Now().Unix()
+	err = s.repo.CreateCompany(ctx, req, createAt)
 	if err != nil {
 		return err
 	}
@@ -118,18 +118,17 @@ func (s *authService) SignUpAdmin(ctx context.Context, req *pbv1.CreateAdminRequ
 		return domain.ErrPasswordNotMatch
 	}
 
-	hashedPassword, err := utils.HashPassword(req.Password)
-	if err != nil {
-		return err
-	}
+	current_time := time.Now().Unix()
+	hashedPassword := utils.HashPassword(req.Password, current_time)
 	req.Password = hashedPassword
 
-	err = s.repo.CheckEmailExist(ctx, req.Email)
+	err := s.repo.CheckEmailExist(ctx, req.Email)
 	if err != nil {
 		return domain.ErrDuplicateEmail
 	}
 
-	err = s.repo.CreateAdmin(ctx, req)
+	createAt := time.Now().Unix()
+	err = s.repo.CreateAdmin(ctx, req, createAt)
 	if err != nil {
 		return err
 	}
@@ -138,11 +137,11 @@ func (s *authService) SignUpAdmin(ctx context.Context, req *pbv1.CreateAdminRequ
 }
 
 func (s *authService) SignIn(ctx context.Context, req *pbv1.LoginRequest) (string, string, error) {
-	id, password, err := s.repo.GetPassword(ctx, req)
+	id, password, db_time, err := s.repo.GetPassword(ctx, req)
 	if err != nil {
 		return "", "", err
 	}
-	if err := utils.VerifyPassword(password, req.Password); err != nil {
+	if err := utils.VerifyPassword(password, req.Password, db_time); err != nil {
 		return "", "", domain.ErrPasswordNotMatch
 	}
 

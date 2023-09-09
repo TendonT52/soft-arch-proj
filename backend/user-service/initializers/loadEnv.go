@@ -31,10 +31,6 @@ type Config struct {
 	AccessTokenMaxAge      int           `mapstructure:"ACCESS_TOKEN_MAXAGE"`
 	RefreshTokenMaxAge     int           `mapstructure:"REFRESH_TOKEN_MAXAGE"`
 
-	// EmailFrom string `mapstructure:"EMAIL_FROM"`
-	// SMTPHost  string `mapstructure:"SMTP_HOST"`
-	// SMTPPass  string `mapstructure:"SMTP_PASS"`
-	// SMTPPort  int    `mapstructure:"SMTP_PORT"`
 	MemphisHostName        string `mapstructure:"MEMPHIS_HOSTNAME"`
 	MemphisApplicationUser string `mapstructure:"MEMPHIS_APPLICATION_USER"`
 	MemphisPassword        string `mapstructure:"MEMPHIS_PASSWORD"`
@@ -42,6 +38,8 @@ type Config struct {
 	MemphisStationName     string `mapstructure:"MEMPHIS_STATION_NAME"`
 	MemphisStationNameTest string `mapstructure:"MEMPHIS_STATION_NAME_TEST"`
 	MemphisProducer        string `mapstructure:"MEMPHIS_PRODUCER"`
+
+	Pepper string `mapstructure:"PEPPER"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

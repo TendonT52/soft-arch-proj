@@ -2,12 +2,13 @@ package repo
 
 import (
 	"context"
+	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 )
 
-func (r *userRepository) CreateCompany(ctx context.Context, company *pbv1.CreateCompanyRequest) error {
+func (r *userRepository) CreateCompany(ctx context.Context, company *pbv1.CreateCompanyRequest, createTime int64) error {
 	// Start a transaction
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -15,17 +16,17 @@ func (r *userRepository) CreateCompany(ctx context.Context, company *pbv1.Create
 	}
 
 	// Insert into Table users
-	query := "INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING id"
+	query := "INSERT INTO users (email, password, role, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
 	var id int64
-	err = tx.QueryRowContext(ctx, query, company.Email, company.Password, "company").Scan(&id)
+	err = tx.QueryRowContext(ctx, query, company.Email, company.Password, "company", createTime, createTime).Scan(&id)
 	if err != nil {
 		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Insert into Table companies
-	query = "INSERT INTO companies (cid, name, description, location, phone, category) VALUES ($1, $2, $3, $4, $5, $6)"
-	_, err = tx.ExecContext(ctx, query, id, company.Name, company.Description, company.Location, company.Phone, company.Category)
+	query = "INSERT INTO companies (cid, name, description, location, phone, category, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
+	_, err = tx.ExecContext(ctx, query, id, company.Name, company.Description, company.Location, company.Phone, company.Category, createTime, createTime)
 	if err != nil {
 		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
@@ -110,8 +111,9 @@ func (r *userRepository) GetApprovedCompany(ctx context.Context, search string) 
 }
 
 func (r *userRepository) UpdateCompanyByID(ctx context.Context, id int64, req *pbv1.Company) error {
-	query := "UPDATE companies SET name = $1, description = $2, location = $3, phone = $4, category = $5 WHERE cid = $6"
-	_, err := r.db.ExecContext(ctx, query, req.Name, req.Description, req.Location, req.Phone, req.Category, id)
+	current_timestamp := time.Now().Unix()
+	query := "UPDATE companies SET name = $1, description = $2, location = $3, phone = $4, category = $5, updated_at = $6 WHERE cid = $7"
+	_, err := r.db.ExecContext(ctx, query, req.Name, req.Description, req.Location, req.Phone, req.Category, current_timestamp, id)
 	if err != nil {
 		return domain.ErrInternal.From(err.Error(), err)
 	}
@@ -133,16 +135,17 @@ func (r *userRepository) UpdateCompanyStatus(ctx context.Context, id int64, stat
 	} else {
 		verified = false
 	}
-	query := "UPDATE users SET verified = $2, updated_at = current_timestamp WHERE id = $1"
-	_, err = tx.ExecContext(ctx, query, id, verified)
+	current_timestamp := time.Now().Unix()
+	query := "UPDATE users SET verified = $2, updated_at = $3 WHERE id = $1"
+	_, err = tx.ExecContext(ctx, query, id, verified, current_timestamp)
 	if err != nil {
 		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Update Table companies
-	query = "UPDATE companies SET status = $2, updated_at = current_timestamp WHERE cid = $1"
-	_, err = tx.ExecContext(ctx, query, id, status)
+	query = "UPDATE companies SET status = $2, updated_at = $3 WHERE cid = $1"
+	_, err = tx.ExecContext(ctx, query, id, status, current_timestamp)
 	if err != nil {
 		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)

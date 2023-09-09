@@ -7,12 +7,12 @@ import (
 )
 
 type UserRepoPort interface {
-	CreateStudent(ctx context.Context, user *pbv1.CreateStudentRequest, code string) error
-	CreateCompany(ctx context.Context, user *pbv1.CreateCompanyRequest) error
-	CreateAdmin(ctx context.Context, user *pbv1.CreateAdminRequest) error
+	CreateStudent(ctx context.Context, user *pbv1.CreateStudentRequest, code string, createTime int64) error
+	CreateCompany(ctx context.Context, user *pbv1.CreateCompanyRequest, createTime int64) error
+	CreateAdmin(ctx context.Context, user *pbv1.CreateAdminRequest, createTime int64) error
 
 	UpdateVerificationCode(ctx context.Context, verification_code string) error
-	GetPassword(ctx context.Context, req *pbv1.LoginRequest) (int64, string, error)
+	GetPassword(ctx context.Context, req *pbv1.LoginRequest) (int64, string, int64, error)
 	CheckUserIDExist(ctx context.Context, id int64) (string, error)
 	CheckEmailExist(ctx context.Context, email string) error
 	CheckIfAdmin(ctx context.Context, id int64) error
