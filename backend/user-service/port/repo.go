@@ -7,9 +7,9 @@ import (
 )
 
 type UserRepoPort interface {
-	CreateStudent(ctx context.Context, user *pbv1.CreateStudentRequest, createTime int64) error
-	CreateCompany(ctx context.Context, user *pbv1.CreateCompanyRequest, createTime int64) error
-	CreateAdmin(ctx context.Context, user *pbv1.CreateAdminRequest, createTime int64) error
+	CreateStudent(ctx context.Context, user *pbv1.CreateStudentRequest, createTime int64) (int64, error)
+	CreateCompany(ctx context.Context, user *pbv1.CreateCompanyRequest, createTime int64) (int64, error)
+	CreateAdmin(ctx context.Context, user *pbv1.CreateAdminRequest, createTime int64) (int64, error)
 
 	GetSalt(ctx context.Context, email string) (string, error)
 	GetPassword(ctx context.Context, req *pbv1.LoginRequest) (int64, string, int64, error)

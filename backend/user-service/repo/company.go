@@ -8,11 +8,11 @@ import (
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 )
 
-func (r *userRepository) CreateCompany(ctx context.Context, company *pbv1.CreateCompanyRequest, createTime int64) error {
+func (r *userRepository) CreateCompany(ctx context.Context, company *pbv1.CreateCompanyRequest, createTime int64) (int64, error) {
 	// Start a transaction
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return domain.ErrInternal.From(err.Error(), err)
+		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Insert into Table users
@@ -21,7 +21,7 @@ func (r *userRepository) CreateCompany(ctx context.Context, company *pbv1.Create
 	err = tx.QueryRowContext(ctx, query, company.Email, company.Password, "company", createTime, createTime).Scan(&id)
 	if err != nil {
 		tx.Rollback()
-		return domain.ErrInternal.From(err.Error(), err)
+		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Insert into Table companies
@@ -29,16 +29,16 @@ func (r *userRepository) CreateCompany(ctx context.Context, company *pbv1.Create
 	_, err = tx.ExecContext(ctx, query, id, company.Name, company.Description, company.Location, company.Phone, company.Category, createTime, createTime)
 	if err != nil {
 		tx.Rollback()
-		return domain.ErrInternal.From(err.Error(), err)
+		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Commit the transaction if all insertions were successful
 	err = tx.Commit()
 	if err != nil {
-		return domain.ErrInternal.From(err.Error(), err)
+		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
-	return nil
+	return id, nil
 }
 
 func (r *userRepository) GetCompanyByID(ctx context.Context, id int64) (*pbv1.Company, error) {

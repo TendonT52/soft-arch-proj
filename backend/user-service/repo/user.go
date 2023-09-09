@@ -39,15 +39,15 @@ func NewUserRepository(db DBTX, redis Redis) port.UserRepoPort {
 	return &userRepository{db: db, redis: redis}
 }
 
-func (r *userRepository) CreateAdmin(ctx context.Context, admin *pbv1.CreateAdminRequest, createTime int64) error {
+func (r *userRepository) CreateAdmin(ctx context.Context, admin *pbv1.CreateAdminRequest, createTime int64) (int64, error) {
 	query := "INSERT INTO users (email, password, role, verified, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
 	var id int64
 	err := r.db.QueryRowContext(ctx, query, admin.Email, admin.Password, "admin", true, createTime, createTime).Scan(&id)
 	if err != nil {
-		return domain.ErrInternal.From(err.Error(), err)
+		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
-	return nil
+	return id, nil
 }
 
 func (r *userRepository) CheckEmailExist(ctx context.Context, email string) error {

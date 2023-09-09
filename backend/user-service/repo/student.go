@@ -2,17 +2,19 @@ package repo
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 )
 
-func (r *userRepository) CreateStudent(ctx context.Context, student *pbv1.CreateStudentRequest, createTime int64) error {
+func (r *userRepository) CreateStudent(ctx context.Context, student *pbv1.CreateStudentRequest, createTime int64) (int64, error) {
 	// Start a transaction
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return domain.ErrInternal.From(err.Error(), err)
+		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Insert into Table users
@@ -21,7 +23,7 @@ func (r *userRepository) CreateStudent(ctx context.Context, student *pbv1.Create
 	err = tx.QueryRowContext(ctx, query, student.Email, student.Password, "student", createTime, createTime).Scan(&id)
 	if err != nil {
 		tx.Rollback()
-		return domain.ErrInternal.From(err.Error(), err)
+		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Insert into Table students
@@ -29,16 +31,16 @@ func (r *userRepository) CreateStudent(ctx context.Context, student *pbv1.Create
 	_, err = tx.ExecContext(ctx, query, id, student.Name, student.Description, student.Faculty, student.Major, student.Year, createTime, createTime)
 	if err != nil {
 		tx.Rollback()
-		return domain.ErrInternal.From(err.Error(), err)
+		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Commit the transaction if all insertions were successful
 	err = tx.Commit()
 	if err != nil {
-		return domain.ErrInternal.From(err.Error(), err)
+		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
-	return nil
+	return id, nil
 }
 
 func (r *userRepository) GetSalt(ctx context.Context, email string) (string, error) {
@@ -55,6 +57,9 @@ func (r *userRepository) GetStudentByID(ctx context.Context, id int64) (*pbv1.St
 	query := "SELECT users.id, students.name, users.email, students.description, students.faculty, students.major, students.year FROM users INNER JOIN students ON users.id = students.sid WHERE users.id = $1"
 	var student pbv1.Student
 	err := r.db.QueryRowContext(ctx, query, id).Scan(&student.Id, &student.Name, &student.Email, &student.Description, &student.Faculty, &student.Major, &student.Year)
+	if errors.Is(err, sql.ErrNoRows){
+		return &pbv1.Student{}, domain.ErrUserIDNotFound.From(err.Error(), err)
+	}
 	if err != nil {
 		return &pbv1.Student{}, domain.ErrInternal.From(err.Error(), err)
 	}

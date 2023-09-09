@@ -81,11 +81,12 @@ func (mr *MockAuthServicePortMockRecorder) SignIn(ctx, req interface{}) *gomock.
 }
 
 // SignUpAdmin mocks base method.
-func (m *MockAuthServicePort) SignUpAdmin(ctx context.Context, req *gen.CreateAdminRequest) error {
+func (m *MockAuthServicePort) SignUpAdmin(ctx context.Context, req *gen.CreateAdminRequest) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignUpAdmin", ctx, req)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // SignUpAdmin indicates an expected call of SignUpAdmin.
@@ -95,11 +96,12 @@ func (mr *MockAuthServicePortMockRecorder) SignUpAdmin(ctx, req interface{}) *go
 }
 
 // SignUpCompany mocks base method.
-func (m *MockAuthServicePort) SignUpCompany(ctx context.Context, req *gen.CreateCompanyRequest) error {
+func (m *MockAuthServicePort) SignUpCompany(ctx context.Context, req *gen.CreateCompanyRequest) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignUpCompany", ctx, req)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // SignUpCompany indicates an expected call of SignUpCompany.
@@ -109,11 +111,12 @@ func (mr *MockAuthServicePortMockRecorder) SignUpCompany(ctx, req interface{}) *
 }
 
 // SignUpStudent mocks base method.
-func (m *MockAuthServicePort) SignUpStudent(ctx context.Context, req *gen.CreateStudentRequest) error {
+func (m *MockAuthServicePort) SignUpStudent(ctx context.Context, req *gen.CreateStudentRequest) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignUpStudent", ctx, req)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // SignUpStudent indicates an expected call of SignUpStudent.

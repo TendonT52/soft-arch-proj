@@ -32,6 +32,7 @@ message CreateStudentRequest {
 message CreateStudentResponse {
   int64 status = 1;
   string message = 2;
+  int64 id = 3;
 }
 
 // Create Company
@@ -49,6 +50,7 @@ message CreateCompanyRequest {
 message CreateCompanyResponse {
   int64 status = 1;
   string message = 2;
+  int64 id = 3;
 }
 
 // Create admin (Internal Use)
@@ -61,6 +63,7 @@ message CreateAdminRequest {
 message CreateAdminResponse {
   int64 status = 1;
   string message = 2;
+  int64 id = 3;
 }
 
 // SignIn

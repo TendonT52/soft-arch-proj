@@ -30,9 +30,9 @@ func NewAuthService(repo port.UserRepoPort, m port.MemphisPort, t port.TimeProvi
 	}
 }
 
-func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudentRequest) error {
+func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudentRequest) (int64, error) {
 	if req.Password != req.PasswordConfirm {
-		return domain.ErrPasswordNotMatch
+		return 0, domain.ErrPasswordNotMatch
 	}
 	current_time := s.time.Now().Unix()
 
@@ -40,12 +40,12 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 	req.Password = hashedPassword
 
 	if !email.IsChulaStudentEmail(req.Email) {
-		return domain.ErrNotChulaStudentEmail.With("email must be @student.chula.ac.th")
+		return 0, domain.ErrNotChulaStudentEmail.With("email must be @student.chula.ac.th")
 	}
 
 	err := s.repo.CheckEmailExist(ctx, req.Email)
 	if err != nil {
-		return domain.ErrDuplicateEmail
+		return 0, domain.ErrDuplicateEmail
 	}
 
 	config, _ := initializers.LoadConfig("..")
@@ -64,21 +64,21 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 	jsonData, err := json.Marshal(emailData)
 	if err != nil {
 		fmt.Println("Error:", err)
-		return err
+		return 0, err
 	}
 
 	err = email.SendEmail(s.memphis, domain.StudentConfirmEmail, jsonData)
 	if err != nil {
 		fmt.Println("Error:", err)
-		return domain.ErrMailNotSent.With("cannot send email")
+		return 0, domain.ErrMailNotSent.With("cannot send email")
 	}
 
-	err = s.repo.CreateStudent(ctx, req, current_time)
+	sid, err := s.repo.CreateStudent(ctx, req, current_time)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return sid, nil
 }
 
 func (s *authService) VerifyEmail(ctx context.Context, sid, code string) error {
@@ -104,9 +104,9 @@ func (s *authService) VerifyEmail(ctx context.Context, sid, code string) error {
 	return nil
 }
 
-func (s *authService) SignUpCompany(ctx context.Context, req *pbv1.CreateCompanyRequest) error {
+func (s *authService) SignUpCompany(ctx context.Context, req *pbv1.CreateCompanyRequest) (int64, error) {
 	if req.Password != req.PasswordConfirm {
-		return domain.ErrPasswordNotMatch
+		return 0, domain.ErrPasswordNotMatch
 	}
 
 	current_time := s.time.Now().Unix()
@@ -116,21 +116,21 @@ func (s *authService) SignUpCompany(ctx context.Context, req *pbv1.CreateCompany
 
 	err := s.repo.CheckEmailExist(ctx, req.Email)
 	if err != nil {
-		return domain.ErrDuplicateEmail
+		return 0, domain.ErrDuplicateEmail
 	}
 
 	createAt := s.time.Now().Unix()
-	err = s.repo.CreateCompany(ctx, req, createAt)
+	cid, err := s.repo.CreateCompany(ctx, req, createAt)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return cid, nil
 }
 
-func (s *authService) SignUpAdmin(ctx context.Context, req *pbv1.CreateAdminRequest) error {
+func (s *authService) SignUpAdmin(ctx context.Context, req *pbv1.CreateAdminRequest) (int64, error) {
 	if req.Password != req.PasswordConfirm {
-		return domain.ErrPasswordNotMatch
+		return 0, domain.ErrPasswordNotMatch
 	}
 
 	current_time := s.time.Now().Unix()
@@ -139,16 +139,16 @@ func (s *authService) SignUpAdmin(ctx context.Context, req *pbv1.CreateAdminRequ
 
 	err := s.repo.CheckEmailExist(ctx, req.Email)
 	if err != nil {
-		return domain.ErrDuplicateEmail
+		return 0, domain.ErrDuplicateEmail
 	}
 
 	createAt := s.time.Now().Unix()
-	err = s.repo.CreateAdmin(ctx, req, createAt)
+	aid, err := s.repo.CreateAdmin(ctx, req, createAt)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return aid, nil
 }
 
 func (s *authService) SignIn(ctx context.Context, req *pbv1.LoginRequest) (string, string, error) {

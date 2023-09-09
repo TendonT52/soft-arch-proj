@@ -24,7 +24,7 @@ func NewAuthServer(s port.AuthServicePort) *AuthServer {
 }
 
 func (s *AuthServer) CreateStudent(ctx context.Context, req *pbv1.CreateStudentRequest) (*pbv1.CreateStudentResponse, error) {
-	err := s.AuthService.SignUpStudent(ctx, req)
+	id, err := s.AuthService.SignUpStudent(ctx, req)
 	if errors.Is(err, domain.ErrPasswordNotMatch) {
 		log.Printf("Passwords do not match: %v", err)
 		return &pbv1.CreateStudentResponse{
@@ -58,11 +58,12 @@ func (s *AuthServer) CreateStudent(ctx context.Context, req *pbv1.CreateStudentR
 	return &pbv1.CreateStudentResponse{
 		Status:  http.StatusCreated,
 		Message: "Your account has been created. Please verify your email",
+		Id:      id,
 	}, nil
 }
 
 func (s *AuthServer) CreateCompany(ctx context.Context, req *pbv1.CreateCompanyRequest) (*pbv1.CreateCompanyResponse, error) {
-	err := s.AuthService.SignUpCompany(ctx, req)
+	id, err := s.AuthService.SignUpCompany(ctx, req)
 	if errors.Is(err, domain.ErrPasswordNotMatch) {
 		log.Printf("Passwords do not match: %v", err)
 		return &pbv1.CreateCompanyResponse{
@@ -89,11 +90,12 @@ func (s *AuthServer) CreateCompany(ctx context.Context, req *pbv1.CreateCompanyR
 	return &pbv1.CreateCompanyResponse{
 		Status:  http.StatusCreated,
 		Message: "The Approval process will take 1-2 days. Thank you for your patience",
+		Id:      id,
 	}, nil
 }
 
 func (s *AuthServer) CreateAdmin(ctx context.Context, req *pbv1.CreateAdminRequest) (*pbv1.CreateAdminResponse, error) {
-	err := s.AuthService.SignUpAdmin(ctx, req)
+	id, err := s.AuthService.SignUpAdmin(ctx, req)
 	if errors.Is(err, domain.ErrPasswordNotMatch) {
 		log.Printf("Passwords do not match: %v", err)
 		return &pbv1.CreateAdminResponse{
@@ -120,6 +122,7 @@ func (s *AuthServer) CreateAdmin(ctx context.Context, req *pbv1.CreateAdminReque
 	return &pbv1.CreateAdminResponse{
 		Status:  http.StatusCreated,
 		Message: "Welcome to admin world!",
+		Id:      id,
 	}, nil
 }
 
