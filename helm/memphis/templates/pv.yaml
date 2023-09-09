@@ -3,7 +3,7 @@ kind: PersistentVolume
 metadata:
   name: {{ printf "%s-persistent-volume" (include "memphis.fullname" .) }}
   labels:
-    type: local
+    service: memphis-persistent
 spec:
   storageClassName: manual
   capacity:
@@ -20,6 +20,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ printf "%s-persistent-claim" (include "memphis.fullname" .) }}
 spec:
+  selector:
+    matchLabels:
+      service: memphis-persistent
   storageClassName: manual
   accessModes:
     - ReadWriteOnce
@@ -34,7 +37,7 @@ kind: PersistentVolume
 metadata:
   name: {{ printf "%s-metadata-persistent-volume" (include "memphis.fullname" .) }}
   labels:
-    type: local
+    service: memphis-meta-persistent
 spec:
   storageClassName: manual
   capacity:
@@ -51,6 +54,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ printf "%s-metadata-persistent-claim" (include "memphis.fullname" .) }}
 spec:
+  selector:
+    matchLabels:
+      service: memphis-meta-persistent
   storageClassName: manual
   accessModes:
     - ReadWriteOnce

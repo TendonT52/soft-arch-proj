@@ -11,25 +11,24 @@ k8s-get:
 gomock:
 	mockgen -source=port/service.go -destination=test/mock_port/mock_service.go -package=mock
 
-init-k8s:
-
-	helm install todo-postgresql ./k8s/postgresql  \
+k8s-run-dev:
+	helm install user-service-postgresql ./helm/postgresql  \
 	--set global.postgresql.auth.postgresPassword=password \
 	--set master.persistence.size=10Gi \
 	--set master.persistence.path="${PWD}/data/postgresql" \
-	--set primary.persistence.existingClaim=todo-postgresql-persistent-claim \
+	--set primary.persistence.existingClaim=user-service-postgresql-persistent-claim \
 	--set volumePermissions.enabled=true
 
-	helm install todo-redis ./k8s/redis \
+	helm install user-service-redis ./helm/redis \
 	--set auth.enabled=true \
 	--set auth.password=password \
 	--set architecture=standalone \
 	--set master.persistence.size=10Gi \
 	--set master.persistence.path="${PWD}/data/redis" \
-	--set master.persistence.existingClaim=todo-redis-persistent-claim \
+	--set master.persistence.existingClaim=user-service-redis-persistent-claim \
 	--set volumePermissions.enabled=true
 
-	helm install todo-memphis ../../helm/memphis \
+	helm install user-service-memphis ../../helm/memphis \
 	--set memphis.creds.rootPwd=password \
 	--set cluster.replicas=1 \
 	--set master.persistence.size=10Gi \
@@ -40,8 +39,12 @@ init-k8s:
 	--set metadata.persistence.existingClaim=memphis-metadata-persistent-claim \
 	--wait
 
+	kubectl create secret generic user-service --from-file=app.env
+	helm install user-service ./helm/user-service
+
 	telepresence helm install
 	telepresence connect
+
 
 # ./k8s/install-helm.sh
 # ./../../helm/install-base-helm.sh
