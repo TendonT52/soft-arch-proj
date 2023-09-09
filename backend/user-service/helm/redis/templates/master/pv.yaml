@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ printf "%s-persistent-volume" (include "postgresql.primary.fullname" .) }}
+  name: {{ printf "%s-persistent-volume" (include "common.names.fullname" .) }}
   labels:
-    type: local
+    service: todo-redis-persistent
 spec:
   storageClassName: manual
   capacity:
@@ -18,8 +18,11 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ printf "%s-persistent-claim" (include "postgresql.primary.fullname" .) }}
+  name: {{ printf "%s-persistent-claim" (include "common.names.fullname" .) }}
 spec:
+  selector:
+    matchLabels:
+      service: todo-redis-persistent
   storageClassName: manual
   accessModes:
     - ReadWriteOnce

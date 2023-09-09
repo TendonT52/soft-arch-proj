@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ printf "%s-persistent-volume" (include "memphis.fullname" .) }}
+  labels:
+    service: memphis-persistent
+spec:
+  storageClassName: manual
+  capacity:
+    storage: {{ .Values.master.persistence.size }}
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: {{ .Values.master.persistence.path }}
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-persistent-claim" (include "memphis.fullname" .) }}
+spec:
+  selector:
+    matchLabels:
+      service: memphis-persistent
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.master.persistence.size }}
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ printf "%s-metadata-persistent-volume" (include "memphis.fullname" .) }}
+  labels:
+    service: memphis-meta-persistent
+spec:
+  storageClassName: manual
+  capacity:
+    storage: {{ .Values.master.metadata.persistence.size }}
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: {{ .Values.master.metadata.persistence.path }}
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-metadata-persistent-claim" (include "memphis.fullname" .) }}
+spec:
+  selector:
+    matchLabels:
+      service: memphis-meta-persistent
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.master.metadata.persistence.size }}
