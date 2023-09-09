@@ -3,9 +3,10 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
-	"time"
+	"strconv"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	"github.com/TikhampornSky/go-auth-verifiedMail/email"
@@ -13,18 +14,19 @@ import (
 	"github.com/TikhampornSky/go-auth-verifiedMail/initializers"
 	"github.com/TikhampornSky/go-auth-verifiedMail/port"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
-	"github.com/thanhpk/randstr"
 )
 
 type authService struct {
 	repo    port.UserRepoPort
 	memphis port.MemphisPort
+	time    port.TimeProvider
 }
 
-func NewAuthService(repo port.UserRepoPort, m port.MemphisPort) port.AuthServicePort {
+func NewAuthService(repo port.UserRepoPort, m port.MemphisPort, t port.TimeProvider) port.AuthServicePort {
 	return &authService{
 		repo:    repo,
 		memphis: m,
+		time:    t,
 	}
 }
 
@@ -32,7 +34,7 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 	if req.Password != req.PasswordConfirm {
 		return domain.ErrPasswordNotMatch
 	}
-	current_time := time.Now().Unix()
+	current_time := s.time.Now().Unix()
 
 	hashedPassword := utils.HashPassword(req.Password, current_time)
 	req.Password = hashedPassword
@@ -46,15 +48,14 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 		return domain.ErrDuplicateEmail
 	}
 
-	createAt := time.Now().Unix()
+	config, _ := initializers.LoadConfig("..")
 	// Generate Verification Code
-	code := randstr.String(20)
-	verification_code := utils.Encode(code)
+	id := email.GetStudentIDFromEmail(req.Email)
+	code := utils.Encode(id, current_time)
 
 	// Send Email
-	config, _ := initializers.LoadConfig(".")
 	emailData := domain.EmailData{
-		URL:     config.ClientOrigin + "/verifyemail/" + code,
+		URL:     config.ClientOrigin + "/verifyemail/" + id + "/" + code,
 		Subject: "Your account verification code",
 		Name:    req.Name,
 		Email:   req.Email,
@@ -72,7 +73,7 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 		return domain.ErrMailNotSent.With("cannot send email")
 	}
 
-	err = s.repo.CreateStudent(ctx, req, verification_code, createAt)
+	err = s.repo.CreateStudent(ctx, req, current_time)
 	if err != nil {
 		return err
 	}
@@ -80,12 +81,26 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 	return nil
 }
 
-func (s *authService) VerifyEmail(ctx context.Context, code string) error {
-	verification_code := utils.Encode(code)
-	err := s.repo.UpdateVerificationCode(ctx, verification_code)
+func (s *authService) VerifyEmail(ctx context.Context, sid, code string) error {
+	studentEmail := sid + "@student.chula.ac.th"
+	salt, err := s.repo.GetSalt(ctx, studentEmail)
 	if err != nil {
 		return err
 	}
+	current_time, err := strconv.ParseInt(salt, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	if !utils.Compare(sid, current_time, code) {
+		return errors.New("invalid code")
+	}
+
+	err = s.repo.UpdateStudentStatus(ctx, studentEmail, true)
+	if err != nil {
+		return errors.New("cannot update student status")
+	}
+
 	return nil
 }
 
@@ -94,7 +109,7 @@ func (s *authService) SignUpCompany(ctx context.Context, req *pbv1.CreateCompany
 		return domain.ErrPasswordNotMatch
 	}
 
-	current_time := time.Now().Unix()
+	current_time := s.time.Now().Unix()
 	hashedPassword := utils.HashPassword(req.Password, current_time)
 
 	req.Password = hashedPassword
@@ -104,7 +119,7 @@ func (s *authService) SignUpCompany(ctx context.Context, req *pbv1.CreateCompany
 		return domain.ErrDuplicateEmail
 	}
 
-	createAt := time.Now().Unix()
+	createAt := s.time.Now().Unix()
 	err = s.repo.CreateCompany(ctx, req, createAt)
 	if err != nil {
 		return err
@@ -118,7 +133,7 @@ func (s *authService) SignUpAdmin(ctx context.Context, req *pbv1.CreateAdminRequ
 		return domain.ErrPasswordNotMatch
 	}
 
-	current_time := time.Now().Unix()
+	current_time := s.time.Now().Unix()
 	hashedPassword := utils.HashPassword(req.Password, current_time)
 	req.Password = hashedPassword
 
@@ -127,7 +142,7 @@ func (s *authService) SignUpAdmin(ctx context.Context, req *pbv1.CreateAdminRequ
 		return domain.ErrDuplicateEmail
 	}
 
-	createAt := time.Now().Unix()
+	createAt := s.time.Now().Unix()
 	err = s.repo.CreateAdmin(ctx, req, createAt)
 	if err != nil {
 		return err

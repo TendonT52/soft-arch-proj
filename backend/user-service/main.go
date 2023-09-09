@@ -28,7 +28,8 @@ func main() {
 	memphis := email.NewMemphis(memphisConn, config.MemphisStationName)
 
 	userRepo := repo.NewUserRepository(db.GetPostgresqlDB(), db.GetRedisDB())
-	authService := service.NewAuthService(userRepo, memphis)
+	timeService := service.NewRealTimeProvider()
+	authService := service.NewAuthService(userRepo, memphis, timeService)
 	userService := service.NewUserService(userRepo, memphis)
 
 	// gRPC Zone

@@ -8,7 +8,6 @@ require (
 	github.com/redis/go-redis/v9 v9.1.0
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.3
-	github.com/thanhpk/randstr v1.0.6
 	google.golang.org/grpc v1.55.0
 )
 

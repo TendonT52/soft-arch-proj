@@ -10,7 +10,7 @@ type AuthServicePort interface {
 	SignUpStudent(ctx context.Context, req *pbv1.CreateStudentRequest) error
 	SignUpCompany(ctx context.Context, req *pbv1.CreateCompanyRequest) error
 	SignUpAdmin(ctx context.Context, req *pbv1.CreateAdminRequest) error
-	VerifyEmail(ctx context.Context, code string) error
+	VerifyEmail(ctx context.Context, sid, code string) error
 	SignIn(ctx context.Context, req *pbv1.LoginRequest) (string, string, error)
 	RefreshAccessToken(ctx context.Context, cookie string) (string, error)
 	LogOut(ctx context.Context, cookie string) error

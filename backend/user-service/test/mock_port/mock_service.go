@@ -123,17 +123,17 @@ func (mr *MockAuthServicePortMockRecorder) SignUpStudent(ctx, req interface{}) *
 }
 
 // VerifyEmail mocks base method.
-func (m *MockAuthServicePort) VerifyEmail(ctx context.Context, code string) error {
+func (m *MockAuthServicePort) VerifyEmail(ctx context.Context, sid, code string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "VerifyEmail", ctx, code)
+	ret := m.ctrl.Call(m, "VerifyEmail", ctx, sid, code)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // VerifyEmail indicates an expected call of VerifyEmail.
-func (mr *MockAuthServicePortMockRecorder) VerifyEmail(ctx, code interface{}) *gomock.Call {
+func (mr *MockAuthServicePortMockRecorder) VerifyEmail(ctx, sid, code interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyEmail", reflect.TypeOf((*MockAuthServicePort)(nil).VerifyEmail), ctx, code)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyEmail", reflect.TypeOf((*MockAuthServicePort)(nil).VerifyEmail), ctx, sid, code)
 }
 
 // MockUserServicePort is a mock of UserServicePort interface.

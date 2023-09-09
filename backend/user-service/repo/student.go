@@ -8,7 +8,7 @@ import (
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 )
 
-func (r *userRepository) CreateStudent(ctx context.Context, student *pbv1.CreateStudentRequest, code string, createTime int64) error {
+func (r *userRepository) CreateStudent(ctx context.Context, student *pbv1.CreateStudentRequest, createTime int64) error {
 	// Start a transaction
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -25,8 +25,8 @@ func (r *userRepository) CreateStudent(ctx context.Context, student *pbv1.Create
 	}
 
 	// Insert into Table students
-	query = "INSERT INTO students (sid, name, description, faculty, major, year, verification_code, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
-	_, err = tx.ExecContext(ctx, query, id, student.Name, student.Description, student.Faculty, student.Major, student.Year, code, createTime, createTime)
+	query = "INSERT INTO students (sid, name, description, faculty, major, year, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
+	_, err = tx.ExecContext(ctx, query, id, student.Name, student.Description, student.Faculty, student.Major, student.Year, createTime, createTime)
 	if err != nil {
 		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
@@ -41,25 +41,14 @@ func (r *userRepository) CreateStudent(ctx context.Context, student *pbv1.Create
 	return nil
 }
 
-func (r *userRepository) UpdateVerificationCode(ctx context.Context, verification_code string) error {
-	queryVerificationCode := "SELECT users.id, users.verified FROM users INNER JOIN students ON users.id = students.sid WHERE students.verification_code = $1;"
-	var id int64
-	var verified bool
-	err := r.db.QueryRowContext(ctx, queryVerificationCode, verification_code).Scan(&id, &verified)
+func (r *userRepository) GetSalt(ctx context.Context, email string) (string, error) {
+	query := "SELECT created_at FROM users WHERE email = $1"
+	var salt string
+	err := r.db.QueryRowContext(ctx, query, email).Scan(&salt)
 	if err != nil {
-		return domain.ErrInternal.From(err.Error(), err)
+		return "", domain.ErrInternal.From(err.Error(), err)
 	}
-	if verified {
-		return domain.ErrAlreadyVerified.With("user already verified")
-	}
-
-	current_timestamp := time.Now().Unix()
-	query := "UPDATE users SET verified = true, updated_at = $2 WHERE id = $1"
-	_, err = r.db.ExecContext(ctx, query, id, current_timestamp)
-	if err != nil {
-		return domain.ErrInternal.From(err.Error(), err)
-	}
-	return nil
+	return salt, nil
 }
 
 func (r *userRepository) GetStudentByID(ctx context.Context, id int64) (*pbv1.Student, error) {
@@ -108,6 +97,16 @@ func (r *userRepository) DeleteStudent(ctx context.Context, id int64) error {
 
 	// Commit the transaction if all insertions were successful
 	err = tx.Commit()
+	if err != nil {
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+
+	return nil
+}
+
+func (r *userRepository) UpdateStudentStatus(ctx context.Context, email string, verified bool) error {
+	query := "UPDATE users SET verified = $1 WHERE email = $2"
+	_, err := r.db.ExecContext(ctx, query, verified, email)
 	if err != nil {
 		return domain.ErrInternal.From(err.Error(), err)
 	}

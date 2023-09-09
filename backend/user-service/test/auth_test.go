@@ -243,10 +243,11 @@ func TestVerifyCodeSuccess(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockAuthServicePort(ctrl)
-	m.EXPECT().VerifyEmail(gomock.Any(), mockCode).Return(nil)
+	m.EXPECT().VerifyEmail(gomock.Any(), "1", mockCode).Return(nil)
 
 	p := &pbv1.VerifyEmailCodeRequest{
 		Code: mockCode,
+		StudentId: "1",
 	}
 	s := server.NewAuthServer(m)
 	r, err := s.VerifyEmailCode(context.Background(), p)
@@ -260,10 +261,11 @@ func TestVerifyCodeAlreadyVerified(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockAuthServicePort(ctrl)
-	m.EXPECT().VerifyEmail(gomock.Any(), mockCode).Return(domain.ErrAlreadyVerified)
+	m.EXPECT().VerifyEmail(gomock.Any(), "2", mockCode).Return(domain.ErrAlreadyVerified)
 
 	p := &pbv1.VerifyEmailCodeRequest{
 		Code: mockCode,
+		StudentId: "2",
 	}
 	s := server.NewAuthServer(m)
 	r, err := s.VerifyEmailCode(context.Background(), p)

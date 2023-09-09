@@ -39,7 +39,8 @@ type Config struct {
 	MemphisStationNameTest string `mapstructure:"MEMPHIS_STATION_NAME_TEST"`
 	MemphisProducer        string `mapstructure:"MEMPHIS_PRODUCER"`
 
-	Pepper string `mapstructure:"PEPPER"`
+	Pepper    string `mapstructure:"PEPPER"`
+	EmailCode string `mapstructure:"EMAIL_CODE"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

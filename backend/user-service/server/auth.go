@@ -203,7 +203,7 @@ func (s *AuthServer) LogOut(ctx context.Context, req *pbv1.LogOutRequest) (*pbv1
 }
 
 func (s *AuthServer) VerifyEmailCode(ctx context.Context, req *pbv1.VerifyEmailCodeRequest) (*pbv1.VerifyEmailCodeResponse, error) {
-	err := s.AuthService.VerifyEmail(ctx, req.Code)
+	err := s.AuthService.VerifyEmail(ctx, req.StudentId, req.Code)
 	if errors.Is(err, domain.ErrAlreadyVerified) {
 		log.Printf("Your account has already been verified: %v", err)
 		return &pbv1.VerifyEmailCodeResponse{

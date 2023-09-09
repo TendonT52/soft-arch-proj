@@ -102,6 +102,7 @@ message LogOutResponse {
 // Verify Email Code
 message VerifyEmailCodeRequest {
   string code = 1;
+  string student_id = 2;
 }
 
 message VerifyEmailCodeResponse {

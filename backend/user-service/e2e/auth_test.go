@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/db"
+	"github.com/TikhampornSky/go-auth-verifiedMail/e2e/mock"
 	"github.com/TikhampornSky/go-auth-verifiedMail/email"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/stretchr/testify/require"
@@ -38,7 +39,8 @@ func TestMain(m *testing.M) {
 	memphis := email.NewMemphis(memphisConn, config.MemphisStationNameTest)
 
 	userRepo := repo.NewUserRepository(db.GetPostgresqlDB(), db.GetRedisDB())
-	authService := service.NewAuthService(userRepo, memphis)
+	timeService := mock.NewMockTimeProvider()
+	authService := service.NewAuthService(userRepo, memphis, timeService)
 	userService := service.NewUserService(userRepo, memphis)
 
 	// gRPC Zone
@@ -59,8 +61,7 @@ func TestCreateStudent(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	id_student, err := utils.GenerateRandomNumber(10)
-	require.NoError(t, err)
+	id_student := utils.GenerateRandomNumber(10)
 
 	tests := map[string]struct {
 		req    *pbv1.CreateStudentRequest
@@ -301,8 +302,7 @@ func TestSignIn(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	id_student, err := utils.GenerateRandomNumber(10)
-	require.NoError(t, err)
+	id_student := utils.GenerateRandomNumber(10)
 	s := &pbv1.CreateStudentRequest{
 		Name:            "Mock SignIn",
 		Email:           id_student + "@student.chula.ac.th",
@@ -412,7 +412,7 @@ func TestRefreshToken(t *testing.T) {
 		PasswordConfirm: "password-test",
 	})
 	u, err := c.SignIn(ctx, &pbv1.LoginRequest{
-		Email:     mock_email2,
+		Email:    mock_email2,
 		Password: "password-test",
 	})
 	require.NoError(t, err)
@@ -511,6 +511,72 @@ func TestLogOut(t *testing.T) {
 			res, err := c.LogOut(ctx, tc.req)
 			if err != nil {
 				t.Errorf("could not log out: %v", err)
+			} else {
+				require.Equal(t, tc.expect.Status, res.Status)
+				require.Equal(t, tc.expect.Message, res.Message)
+			}
+		})
+	}
+}
+
+func TestVerifyEmailCode(t *testing.T) {
+	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		t.Errorf("could not connect to grpc server: %v", err)
+	}
+	defer conn.Close()
+
+	c := pbv1.NewAuthServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	id_student := utils.GenerateRandomNumber(10)
+	s := &pbv1.CreateStudentRequest{
+		Name:            "Mock SignIn",
+		Email:           id_student + "@student.chula.ac.th",
+		Password:        "password-test",
+		PasswordConfirm: "password-test",
+		Description:     "I am a student",
+		Faculty:         "Engineering",
+		Major:           "Computer Engineering",
+		Year:            4,
+	}
+
+	res, err := c.CreateStudent(ctx, s)
+	require.NoError(t, err)
+	require.Equal(t, int64(201), res.Status)
+
+	tests := map[string]struct {
+		req    *pbv1.VerifyEmailCodeRequest
+		expect *pbv1.VerifyEmailCodeResponse
+	}{
+		"success": {
+			req: &pbv1.VerifyEmailCodeRequest{
+				Code:      utils.Encode(id_student, mock.NewMockTimeProvider().Now().Unix()),
+				StudentId: id_student,
+			},
+			expect: &pbv1.VerifyEmailCodeResponse{
+				Status:  200,
+				Message: "verify success",
+			},
+		},
+
+		"wrong code": {
+			req: &pbv1.VerifyEmailCodeRequest{
+				Code: "1234567",
+			},
+			expect: &pbv1.VerifyEmailCodeResponse{
+				Status:  400,
+				Message: "Invalid verification code or user doesn't exists",
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			res, err := c.VerifyEmailCode(ctx, tc.req)
+			if err != nil {
+				t.Errorf("could not verify email code: %v", err)
 			} else {
 				require.Equal(t, tc.expect.Status, res.Status)
 				require.Equal(t, tc.expect.Message, res.Message)
