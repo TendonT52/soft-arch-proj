@@ -206,11 +206,10 @@ func (s *authService) LogOut(ctx context.Context, refreshToken string) error {
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
 
-	// MUST USE REDIS TO LOGOUT
-	// err = s.repo.SetValueRedis(ctx, refreshToken, "logged_out")
-	// if err != nil {
-	// 	return err
-	// }
+	err = s.repo.SetValueRedis(ctx, refreshToken, "logged_out")
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

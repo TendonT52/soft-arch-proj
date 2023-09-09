@@ -11,6 +11,14 @@ import (
 
 type Memphis struct {
 	conn *memphis.Conn
+	stationName string
+}
+
+func NewMemphis(conn *memphis.Conn, stationName string) *Memphis {
+	return &Memphis{
+		conn: conn,
+		stationName: stationName,
+	}
 }
 
 func InitMemphisConnection() *memphis.Conn {
@@ -28,4 +36,12 @@ func InitMemphisConnection() *memphis.Conn {
 	log.Println("Memphis connection established")
 
 	return conn
+}
+
+func (m *Memphis) CreateProducer(stationName string, name string, opts ...memphis.ProducerOpt) (*memphis.Producer, error) {
+	return m.conn.CreateProducer(m.stationName, name, opts...)
+}
+
+func (m *Memphis) GetStationName() string {
+	return m.stationName
 }

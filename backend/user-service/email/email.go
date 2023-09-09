@@ -15,7 +15,7 @@ func SendEmail(conn port.MemphisPort, typeMail string, jsonData []byte) error {
 		return err
 	}
 
-	p, err := conn.CreateProducer(config.MemphisStationName, config.MemphisProducer)
+	p, err := conn.CreateProducer(conn.GetStationName(), config.MemphisProducer)
 	if err != nil {
 		fmt.Printf("Producer failed: %v", err)
 		return err
