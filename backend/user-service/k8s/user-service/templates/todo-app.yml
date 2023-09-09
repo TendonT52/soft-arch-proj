@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-service
+spec:
+  ports:
+    - port: 8080
+  selector:
+    app: todo-service
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-service
+  template:
+    metadata:
+      labels:
+        app: todo-service
+    spec:
+      containers:
+      - name: todo-service
+        image: tendont52/todo-service:{{ .Values.BUILD_VERSION }}
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 8080
+        volumeMounts:
+            - mountPath: "/app/app.env"
+              subPath: app.env
+              name: dot-env-file
+              readOnly: true
+      volumes:
+        - name: dot-env-file
+          secret:
+            secretName: todo-app
