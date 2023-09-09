@@ -28,7 +28,7 @@ k8s-run-dev:
 	--set master.persistence.existingClaim=user-service-redis-persistent-claim \
 	--set volumePermissions.enabled=true
 
-	helm install user-service-memphis ../../helm/memphis \
+	helm install memphis ../../helm/memphis \
 	--set memphis.creds.rootPwd=password \
 	--set cluster.replicas=1 \
 	--set master.persistence.size=10Gi \
@@ -45,6 +45,15 @@ k8s-run-dev:
 	telepresence helm install
 	telepresence connect
 
+k8s-reset:
+	helm uninstall user-service
+	helm uninstall memphis
+	helm uninstall user-service-redis
+	helm uninstall user-service-postgresql
+	kubectl delete secret user-service
+	telepresence quit
+	telepresence helm uninstall
+	rm -rf data/*
 
 # ./k8s/install-helm.sh
 # ./../../helm/install-base-helm.sh
