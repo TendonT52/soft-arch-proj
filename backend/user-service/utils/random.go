@@ -1,9 +1,10 @@
 package utils
 
 import (
-	"crypto/rand"
 	"fmt"
 	"math/big"
+	"math/rand"
+	"time"
 )
 
 func GenerateRandomNumber(length int) (string, error) {
@@ -18,4 +19,19 @@ func GenerateRandomNumber(length int) (string, error) {
 
 	randomNumber := fmt.Sprintf("%0*d", length, randomInt)
 	return randomNumber, nil
+}
+
+func GenerateRandomString(length int) string {
+	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	rand.Seed(time.Now().UnixNano())
+
+	var result string
+	charsetLength := len(charset)
+
+	for i := 0; i < length; i++ {
+		randomIndex := rand.Intn(charsetLength)
+		result += string(charset[randomIndex])
+	}
+
+	return result
 }
