@@ -14,12 +14,12 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func approveMultipleCompanies(t *testing.T, ids []int64, ad *pbv1.LoginResponse, u pbv1.UserServiceClient, status string) {
+func approveMultipleCompanies(t *testing.T, ids []int64, ad *pbv1.LoginResponse, u pbv1.UserServiceClient, com_status string) {
 	for _, id := range ids {
 		aa, err := u.UpdateCompanyStatus(context.Background(), &pbv1.UpdateCompanyStatusRequest{
 			AccessToken: ad.AccessToken,
 			Id:          id,
-			Status:      status,
+			Status:      com_status,
 		})
 		require.Equal(t, int64(200), aa.Status)
 		require.NoError(t, err)
@@ -116,14 +116,17 @@ func TestListApprovedCompanies(t *testing.T) {
 	mail2 := utils.GenerateRandomString(10) + "@company.com"
 	mail3 := utils.GenerateRandomString(10) + "@company.com"
 	mail4 := utils.GenerateRandomString(10) + "@company.com"
+	mail5 := utils.GenerateRandomString(10) + "@company.com"
 
 	c1 := createMockComapny(t, "Mock Company 1", mail1, "Company1 desc", "Bangkok", "0123456789", "Technology")
 	c2 := createMockComapny(t, "Mock Company 2", mail2, "Company2 desc", "Bangkok", "0123456789", "Bank and Tech")
 	c3 := createMockComapny(t, "Mock Company 3 Tech Group", mail3, "Company3 desc", "Bangkok", "0123456789", "Consultant")
 	c4 := createMockComapny(t, "Mock Company 4", mail4, "Company4 desc", "Bangkok", "0123456789", "Food and Beverage")
+	c5 := createMockComapny(t, "Mock Company 5 Tech Company", mail5, "Company5 desc", "Bangkok", "0123456789", "Food")
 
 	// Approve Companies
 	approveMultipleCompanies(t, []int64{c1.Id, c2.Id, c3.Id, c4.Id}, ad, u, "Approve")
+	approveMultipleCompanies(t, []int64{c5.Id}, ad, u, "Reject")
 
 	// Create Student
 	student_access := createMockStudent(t, ad.AccessToken)

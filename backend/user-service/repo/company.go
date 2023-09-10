@@ -2,6 +2,8 @@ package repo
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"strings"
 	"time"
 
@@ -46,6 +48,9 @@ func (r *userRepository) GetCompanyByID(ctx context.Context, id int64) (*pbv1.Co
 	query := "SELECT users.id, companies.name, users.email, companies.description, companies.location, companies.phone, companies.category, companies.status FROM users INNER JOIN companies ON users.id = companies.cid WHERE users.id = $1"
 	var company pbv1.Company
 	err := r.db.QueryRowContext(ctx, query, id).Scan(&company.Id, &company.Name, &company.Email, &company.Description, &company.Location, &company.Phone, &company.Category, &company.Status)
+	if errors.Is(sql.ErrNoRows, err) {
+		return nil, domain.ErrUserIDNotFound.From(err.Error(), err)
+	}
 	if err != nil {
 		return &pbv1.Company{}, domain.ErrInternal.From(err.Error(), err)
 	}
@@ -89,9 +94,10 @@ func (r *userRepository) GetApprovedCompany(ctx context.Context, search string) 
 				NULLIF(ts_rank(to_tsvector(companies.name), query), 0) rank_name,
 				SIMILARITY($2, companies.category || companies.name) similarity
 			WHERE 
-				users.verified = true AND 
-				companies.status = 'Approve' AND
-				query @@ document OR similarity > 0
+				users.verified = true 
+				AND query @@ document 
+				OR similarity > 0
+				AND companies.status = 'Approve'
 			ORDER BY rank_category DESC, rank_name DESC, similarity DESC NULLS LAST
 		`
 

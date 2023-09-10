@@ -72,7 +72,7 @@ func TestGetStudentMe(t *testing.T) {
 				AccessToken: res.AccessToken,
 			},
 			expect: &pbv1.GetStudentResponse{
-				Status:  200,
+				Status: 200,
 				Student: &pbv1.Student{
 					Id:          1,
 					Name:        "Mock SignIn",
@@ -89,7 +89,7 @@ func TestGetStudentMe(t *testing.T) {
 				AccessToken: access_token_wrong,
 			},
 			expect: &pbv1.GetStudentResponse{
-				Status:  500,
+				Status: 500,
 			},
 		},
 	}
@@ -183,7 +183,7 @@ func TestGetStudent(t *testing.T) {
 				Id:          r.Id,
 			},
 			expect: &pbv1.GetStudentResponse{
-				Status:  200,
+				Status: 200,
 				Student: &pbv1.Student{
 					Id:          r.Id,
 					Name:        "Mock Get Student",
@@ -210,18 +210,15 @@ func TestGetStudent(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			res, err := u.GetStudent(ctx, tc.req)
-			if err != nil {
-				t.Errorf("could not sign in: %v", err)
-			} else {
-				require.Equal(t, tc.expect.Status, res.Status)
-				if tc.expect.Student != nil {
-					require.Equal(t, tc.expect.Student.Name, res.Student.Name)
-					require.Equal(t, tc.expect.Student.Email, res.Student.Email)
-					require.Equal(t, tc.expect.Student.Description, res.Student.Description)
-					require.Equal(t, tc.expect.Student.Faculty, res.Student.Faculty)
-					require.Equal(t, tc.expect.Student.Major, res.Student.Major)
-					require.Equal(t, tc.expect.Student.Year, res.Student.Year)
-				}
+			require.NoError(t, err)
+			require.Equal(t, tc.expect.Status, res.Status)
+			if tc.expect.Student != nil {
+				require.Equal(t, tc.expect.Student.Name, res.Student.Name)
+				require.Equal(t, tc.expect.Student.Email, res.Student.Email)
+				require.Equal(t, tc.expect.Student.Description, res.Student.Description)
+				require.Equal(t, tc.expect.Student.Faculty, res.Student.Faculty)
+				require.Equal(t, tc.expect.Student.Major, res.Student.Major)
+				require.Equal(t, tc.expect.Student.Year, res.Student.Year)
 			}
 		})
 	}
@@ -311,20 +308,15 @@ func TestUpdateStudent(t *testing.T) {
 				Status:  404,
 				Message: "user id not found",
 			},
-
 		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			res, err := u.UpdateStudent(ctx, tc.req)
-			if err != nil {
-				t.Errorf("could not sign in: %v", err)
-			} else {
-				require.Equal(t, tc.expect.Status, res.Status)
-				require.Equal(t, tc.expect.Message, res.Message)
-			}
+			require.NoError(t, err)
+			require.Equal(t, tc.expect.Status, res.Status)
+			require.Equal(t, tc.expect.Message, res.Message)
 		})
 	}
 }
-

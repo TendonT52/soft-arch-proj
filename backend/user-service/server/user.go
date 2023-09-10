@@ -168,7 +168,7 @@ func (s *UserServer) GetCompany(ctx context.Context, req *pbv1.GetCompanyRequest
 		log.Println("Error UserId not found: ", err)
 		return &pbv1.GetCompanyResponse{
 			Status:  http.StatusNotFound,
-			Message: "user id not found",
+			Message: "company id not found",
 		}, nil
 	}
 	if err != nil {
