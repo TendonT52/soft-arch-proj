@@ -282,7 +282,7 @@ func (s *UserServer) ListApprovedCompanies(ctx context.Context, req *pbv1.ListAp
 		}, nil
 	}
 
-	log.Println("Success listing all approved companies: ", res)
+	log.Println("Success listing all approved companies: ", len(res))
 	return &pbv1.ListApprovedCompaniesResponse{
 		Status:    http.StatusOK,
 		Message:   "success",

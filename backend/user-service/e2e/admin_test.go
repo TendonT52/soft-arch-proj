@@ -26,6 +26,29 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	// Create Admin
+	admin := &pbv1.CreateAdminRequest{
+		Email:           utils.GenerateRandomString(10) + "@admin.com",
+		Password:        "password-test",
+		PasswordConfirm: "password-test",
+	}
+	a, err := c.CreateAdmin(ctx, admin)
+	require.Equal(t, int64(201), a.Status)
+	require.NoError(t, err)
+
+	// Admin Sign In
+	ad, err := c.SignIn(ctx, &pbv1.LoginRequest{
+		Email:    admin.Email,
+		Password: admin.Password,
+	})
+
+	// Delete all companies in table
+	d, err := u.DeleteCompanies(ctx, &pbv1.DeleteCompaniesRequest{
+		AccessToken: ad.AccessToken,
+	})
+	require.Equal(t, int64(200), d.Status)
+	require.NoError(t, err)
+
 	// Register
 	companyEmail := utils.GenerateRandomString(10) + "@company.com"
 	company := &pbv1.CreateCompanyRequest{
@@ -57,22 +80,6 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	com2, err := c.CreateCompany(ctx, company2)
 	require.Equal(t, int64(201), com2.Status)
 	require.NoError(t, err)
-
-	// Create Admin
-	admin := &pbv1.CreateAdminRequest{
-		Email:           utils.GenerateRandomString(10) + "@admin.com",
-		Password:        "password-test",
-		PasswordConfirm: "password-test",
-	}
-	a, err := c.CreateAdmin(ctx, admin)
-	require.Equal(t, int64(201), a.Status)
-	require.NoError(t, err)
-
-	// Admin Sign In
-	ad, err := c.SignIn(ctx, &pbv1.LoginRequest{
-		Email:    admin.Email,
-		Password: admin.Password,
-	})
 
 	// Generate WRONG token
 	config, _ := initializers.LoadConfig("..")

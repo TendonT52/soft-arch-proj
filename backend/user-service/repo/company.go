@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
@@ -75,6 +76,8 @@ func (r *userRepository) GetAllCompany(ctx context.Context) ([]*pbv1.Company, er
 }
 
 func (r *userRepository) GetApprovedCompany(ctx context.Context, search string) ([]*pbv1.Company, error) {
+	parts := strings.Fields(search)
+	tquery := strings.Join(parts, " | ")
 	query :=
 		`	SELECT 
 			users.id, companies.name, users.email, companies.description, companies.location, companies.phone, companies.category 
@@ -84,15 +87,15 @@ func (r *userRepository) GetApprovedCompany(ctx context.Context, search string) 
 				to_tsquery($1) query,
 				NULLIF(ts_rank(to_tsvector(companies.category), query), 0) rank_category,
 				NULLIF(ts_rank(to_tsvector(companies.name), query), 0) rank_name,
-				SIMILARITY($1, companies.category || companies.name) similarity
+				SIMILARITY($2, companies.category || companies.name) similarity
 			WHERE 
 				users.verified = true AND 
 				companies.status = 'Approve' AND
 				query @@ document OR similarity > 0
-			ORDER BY rank_category, rank_name, similarity DESC NULLS LAST
+			ORDER BY rank_category DESC, rank_name DESC, similarity DESC NULLS LAST
 		`
 
-	rows, err := r.db.QueryContext(ctx, query, search)
+	rows, err := r.db.QueryContext(ctx, query, tquery, search)
 	if err != nil {
 		return nil, domain.ErrInternal.From(err.Error(), err)
 	}
