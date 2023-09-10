@@ -9,6 +9,8 @@ type Config struct {
 	MemphisAccountID       int    `mapstructure:"MEMPHIS_ACCOUNT_ID"`
 	MemphisStationName     string `mapstructure:"MEMPHIS_STATION_NAME"`
 	MemphisConsumer        string `mapstructure:"MEMPHIS_CONSUMER"`
+	MemphisStationNameTest string `mapstructure:"MEMPHIS_STATION_NAME_TEST"`
+	MemphisProducerTest    string `mapstructure:"MEMPHIS_PRODUCER_TEST"`
 
 	EmailFrom string `mapstructure:"EMAIL_FROM"`
 	SMTPHost  string `mapstructure:"SMTP_HOST"`

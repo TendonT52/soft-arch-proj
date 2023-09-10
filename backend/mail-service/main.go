@@ -2,22 +2,20 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
 	"github.com/TikhampornSky/go-mail/config"
-	"github.com/TikhampornSky/go-mail/domain"
-	"github.com/TikhampornSky/go-mail/email"
+	"github.com/TikhampornSky/go-mail/service"
 	"github.com/memphisdev/memphis.go"
 )
 
 const (
 	StudentConfirmEmail = "student_confirm_email"
 	CompanyApproveEmail = "company_approve_email"
-	CompanyRejectEmail = "company_reject_email"
+	CompanyRejectEmail  = "company_reject_email"
 )
 
 func main() {
@@ -40,6 +38,10 @@ func main() {
 	}
 
 	fmt.Println("Consumer created")
+
+	snmpService := service.NewSMTPService(&config)
+	templateService := service.NewTemplateService(&config, snmpService)
+
 	ch := make(chan int)
 	handler := func(msgs []*memphis.Msg, err error, ctx context.Context) {
 		if err != nil {
@@ -49,10 +51,10 @@ func main() {
 
 		for _, msg := range msgs {
 			headers := msg.GetHeaders()
-            messageType := headers["type"]
+			messageType := headers["type"]
 			data := msg.Data()
 			log.Println("Message type...: ", messageType)
-			err := process(data, messageType)
+			err := templateService.ProcessEmailRequest(data, messageType)
 			if err != nil {
 				log.Println("Error while process data: ", err)
 			} else {
@@ -66,15 +68,4 @@ func main() {
 	consumer.SetContext(ctx)
 	consumer.Consume(handler)
 	<-ch
-}
-
-func process(data []byte, mailType string) error {
-	var emailData domain.EmailData
-	err := json.Unmarshal(data, &emailData)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return err
-	}
-
-	return email.SendStudentEmail(&emailData, mailType) 
 }
