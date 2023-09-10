@@ -226,3 +226,105 @@ func TestGetStudent(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateStudent(t *testing.T) {
+	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		t.Errorf("could not connect to grpc server: %v", err)
+	}
+	defer conn.Close()
+
+	c := pbv1.NewAuthServiceClient(conn)
+	u := pbv1.NewUserServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Register
+	id_student := utils.GenerateRandomNumber(10)
+	s := &pbv1.CreateStudentRequest{
+		Name:            "Mock SignIn",
+		Email:           id_student + "@student.chula.ac.th",
+		Password:        "password-test",
+		PasswordConfirm: "password-test",
+		Description:     "I am a student",
+		Faculty:         "Engineering",
+		Major:           "Computer Engineering",
+		Year:            4,
+	}
+	r, err := c.CreateStudent(ctx, s)
+	require.Equal(t, int64(201), r.Status)
+	require.NoError(t, err)
+
+	// Verify Email
+	result, err := c.VerifyEmailCode(ctx, &pbv1.VerifyEmailCodeRequest{
+		StudentId: id_student,
+		Code:      utils.Encode(id_student, mock.NewMockTimeProvider().Now().Unix()),
+	})
+	require.Equal(t, int64(200), result.Status)
+	require.NoError(t, err)
+
+	// Sign In
+	res, err := c.SignIn(ctx, &pbv1.LoginRequest{
+		Email:    s.Email,
+		Password: s.Password,
+	})
+	require.Equal(t, int64(200), res.Status)
+	require.NoError(t, err)
+
+	// Generate WRONG token
+	config, _ := initializers.LoadConfig("..")
+	access_token_wrong, err := utils.CreateToken(config.AccessTokenExpiresIn, 0, config.AccessTokenPrivateKey)
+	require.NoError(t, err)
+
+	tests := map[string]struct {
+		req    *pbv1.UpdateStudentRequest
+		expect *pbv1.UpdateCompanyResponse
+	}{
+		"success": {
+			req: &pbv1.UpdateStudentRequest{
+				AccessToken: res.AccessToken,
+				Student: &pbv1.Student{
+					Name:        "Mock Update Student",
+					Description: "I am a mock student",
+					Faculty:     "Mock Engineering",
+					Major:       "Mock Computer Engineering",
+					Year:        3,
+				},
+			},
+			expect: &pbv1.UpdateCompanyResponse{
+				Status:  200,
+				Message: "Update data for Mock Update Student successfully!",
+			},
+		},
+		"invalid token": {
+			req: &pbv1.UpdateStudentRequest{
+				AccessToken: access_token_wrong,
+				Student: &pbv1.Student{
+					Name:        "Mock Update Student",
+					Description: "I am a mock student",
+					Faculty:     "Mock Engineering",
+					Major:       "Mock Computer Engineering",
+					Year:        3,
+				},
+			},
+			expect: &pbv1.UpdateCompanyResponse{
+				Status:  404,
+				Message: "user id not found",
+			},
+
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			res, err := u.UpdateStudent(ctx, tc.req)
+			if err != nil {
+				t.Errorf("could not sign in: %v", err)
+			} else {
+				require.Equal(t, tc.expect.Status, res.Status)
+				require.Equal(t, tc.expect.Message, res.Message)
+			}
+		})
+	}
+}
+
