@@ -28,7 +28,7 @@ func TestCreateStudentSuccess(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockAuthServicePort(ctrl)
-	m.EXPECT().SignUpStudent(gomock.Any(), &u).Return(nil)
+	m.EXPECT().SignUpStudent(gomock.Any(), &u).Return(int64(1), nil)
 
 	s := server.NewAuthServer(m)
 	r, err := s.CreateStudent(context.Background(), &u)
@@ -52,7 +52,7 @@ func TestCreateStudentPasswordNotMatch(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockAuthServicePort(ctrl)
-	m.EXPECT().SignUpStudent(gomock.Any(), &u).Return(domain.ErrPasswordNotMatch)
+	m.EXPECT().SignUpStudent(gomock.Any(), &u).Return(int64(0), domain.ErrPasswordNotMatch)
 
 	s := server.NewAuthServer(m)
 	r, err := s.CreateStudent(context.Background(), &u)
@@ -76,7 +76,7 @@ func TestCreateStudentNotChulaEmail(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockAuthServicePort(ctrl)
-	m.EXPECT().SignUpStudent(gomock.Any(), &u).Return(domain.ErrNotChulaStudentEmail)
+	m.EXPECT().SignUpStudent(gomock.Any(), &u).Return(int64(0), domain.ErrNotChulaStudentEmail)
 
 	s := server.NewAuthServer(m)
 	r, err := s.CreateStudent(context.Background(), &u)
@@ -100,7 +100,7 @@ func TestCreateStudentDuplicateEmail(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockAuthServicePort(ctrl)
-	m.EXPECT().SignUpStudent(gomock.Any(), &u).Return(domain.ErrDuplicateEmail)
+	m.EXPECT().SignUpStudent(gomock.Any(), &u).Return(int64(0), domain.ErrDuplicateEmail)
 
 	s := server.NewAuthServer(m)
 	r, err := s.CreateStudent(context.Background(), &u)
@@ -124,7 +124,7 @@ func TestCreateCompanySuccess(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockAuthServicePort(ctrl)
-	m.EXPECT().SignUpCompany(gomock.Any(), &u).Return(nil)
+	m.EXPECT().SignUpCompany(gomock.Any(), &u).Return(int64(1), nil)
 
 	s := server.NewAuthServer(m)
 	r, err := s.CreateCompany(context.Background(), &u)
@@ -148,7 +148,7 @@ func TestCreateCompanyPasswordNotMatch(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockAuthServicePort(ctrl)
-	m.EXPECT().SignUpCompany(gomock.Any(), &u).Return(domain.ErrPasswordNotMatch)
+	m.EXPECT().SignUpCompany(gomock.Any(), &u).Return(int64(0), domain.ErrPasswordNotMatch)
 
 	s := server.NewAuthServer(m)
 	r, err := s.CreateCompany(context.Background(), &u)
@@ -172,7 +172,7 @@ func TestCreateCompanyDuplicateEmail(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockAuthServicePort(ctrl)
-	m.EXPECT().SignUpCompany(gomock.Any(), &u).Return(domain.ErrDuplicateEmail)
+	m.EXPECT().SignUpCompany(gomock.Any(), &u).Return(int64(0), domain.ErrDuplicateEmail)
 
 	s := server.NewAuthServer(m)
 	r, err := s.CreateCompany(context.Background(), &u)
@@ -191,7 +191,7 @@ func TestCreateAdminSuccess(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockAuthServicePort(ctrl)
-	m.EXPECT().SignUpAdmin(gomock.Any(), &u).Return(nil)
+	m.EXPECT().SignUpAdmin(gomock.Any(), &u).Return(int64(1), nil)
 
 	s := server.NewAuthServer(m)
 	r, err := s.CreateAdmin(context.Background(), &u)
@@ -210,7 +210,7 @@ func TestCreateAdminPasswordNotMatch(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockAuthServicePort(ctrl)
-	m.EXPECT().SignUpAdmin(gomock.Any(), &u).Return(domain.ErrPasswordNotMatch)
+	m.EXPECT().SignUpAdmin(gomock.Any(), &u).Return(int64(0), domain.ErrPasswordNotMatch)
 
 	s := server.NewAuthServer(m)
 	r, err := s.CreateAdmin(context.Background(), &u)
@@ -229,7 +229,7 @@ func TestCreateAdminDuplicateEmail(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockAuthServicePort(ctrl)
-	m.EXPECT().SignUpAdmin(gomock.Any(), &u).Return(domain.ErrDuplicateEmail)
+	m.EXPECT().SignUpAdmin(gomock.Any(), &u).Return(int64(0), domain.ErrDuplicateEmail)
 
 	s := server.NewAuthServer(m)
 	r, err := s.CreateAdmin(context.Background(), &u)
@@ -243,10 +243,11 @@ func TestVerifyCodeSuccess(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockAuthServicePort(ctrl)
-	m.EXPECT().VerifyEmail(gomock.Any(), mockCode).Return(nil)
+	m.EXPECT().VerifyEmail(gomock.Any(), "1", mockCode).Return(nil)
 
 	p := &pbv1.VerifyEmailCodeRequest{
 		Code: mockCode,
+		StudentId: "1",
 	}
 	s := server.NewAuthServer(m)
 	r, err := s.VerifyEmailCode(context.Background(), p)
@@ -260,10 +261,11 @@ func TestVerifyCodeAlreadyVerified(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockAuthServicePort(ctrl)
-	m.EXPECT().VerifyEmail(gomock.Any(), mockCode).Return(domain.ErrAlreadyVerified)
+	m.EXPECT().VerifyEmail(gomock.Any(), "2", mockCode).Return(domain.ErrAlreadyVerified)
 
 	p := &pbv1.VerifyEmailCodeRequest{
 		Code: mockCode,
+		StudentId: "2",
 	}
 	s := server.NewAuthServer(m)
 	r, err := s.VerifyEmailCode(context.Background(), p)

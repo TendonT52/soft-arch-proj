@@ -40,3 +40,7 @@ func SendEmail(conn port.MemphisPort, typeMail string, jsonData []byte) error {
 func IsChulaStudentEmail(email string) bool {
 	return email[len(email)-20:] == "@student.chula.ac.th"
 }
+
+func GetStudentIDFromEmail(email string) string {
+	return email[:10]
+}

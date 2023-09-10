@@ -39,15 +39,15 @@ func NewUserRepository(db DBTX, redis Redis) port.UserRepoPort {
 	return &userRepository{db: db, redis: redis}
 }
 
-func (r *userRepository) CreateAdmin(ctx context.Context, admin *pbv1.CreateAdminRequest) error {
-	query := "INSERT INTO users (email, password, role, verified) VALUES ($1, $2, $3, $4) RETURNING id"
+func (r *userRepository) CreateAdmin(ctx context.Context, admin *pbv1.CreateAdminRequest, createTime int64) (int64, error) {
+	query := "INSERT INTO users (email, password, role, verified, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
 	var id int64
-	err := r.db.QueryRowContext(ctx, query, admin.Email, admin.Password, "admin", true).Scan(&id)
+	err := r.db.QueryRowContext(ctx, query, admin.Email, admin.Password, "admin", true, createTime, createTime).Scan(&id)
 	if err != nil {
-		return domain.ErrInternal.From(err.Error(), err)
+		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
-	return nil
+	return id, nil
 }
 
 func (r *userRepository) CheckEmailExist(ctx context.Context, email string) error {
@@ -63,20 +63,21 @@ func (r *userRepository) CheckEmailExist(ctx context.Context, email string) erro
 	return nil
 }
 
-func (r *userRepository) GetPassword(ctx context.Context, req *pbv1.LoginRequest) (int64, string, error) {
-	queryVerify := "SELECT id, verified, password FROM users WHERE email = $1;"
+func (r *userRepository) GetPassword(ctx context.Context, req *pbv1.LoginRequest) (int64, string, int64, error) {
+	queryVerify := "SELECT id, verified, password, created_at FROM users WHERE email = $1;"
 	var id int64
 	var verified bool
 	var password string
-	err := r.db.QueryRowContext(ctx, queryVerify, req.Email).Scan(&id, &verified, &password)
+	var created_at int64
+	err := r.db.QueryRowContext(ctx, queryVerify, req.Email).Scan(&id, &verified, &password, &created_at)
 	if err != nil {
-		return 0, "", domain.ErrInternal.From(err.Error(), err)
+		return 0, "", 0, domain.ErrInternal.From(err.Error(), err)
 	}
 	if !verified {
-		return 0, "", domain.ErrNotVerified.With("user not verified")
+		return 0, "", 0, domain.ErrNotVerified.With("user not verified")
 	}
 
-	return id, password, nil
+	return id, password, created_at, nil
 }
 
 func (r *userRepository) CheckUserIDExist(ctx context.Context, id int64) (string, error) {

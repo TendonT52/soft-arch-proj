@@ -81,11 +81,12 @@ func (mr *MockAuthServicePortMockRecorder) SignIn(ctx, req interface{}) *gomock.
 }
 
 // SignUpAdmin mocks base method.
-func (m *MockAuthServicePort) SignUpAdmin(ctx context.Context, req *gen.CreateAdminRequest) error {
+func (m *MockAuthServicePort) SignUpAdmin(ctx context.Context, req *gen.CreateAdminRequest) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignUpAdmin", ctx, req)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // SignUpAdmin indicates an expected call of SignUpAdmin.
@@ -95,11 +96,12 @@ func (mr *MockAuthServicePortMockRecorder) SignUpAdmin(ctx, req interface{}) *go
 }
 
 // SignUpCompany mocks base method.
-func (m *MockAuthServicePort) SignUpCompany(ctx context.Context, req *gen.CreateCompanyRequest) error {
+func (m *MockAuthServicePort) SignUpCompany(ctx context.Context, req *gen.CreateCompanyRequest) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignUpCompany", ctx, req)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // SignUpCompany indicates an expected call of SignUpCompany.
@@ -109,11 +111,12 @@ func (mr *MockAuthServicePortMockRecorder) SignUpCompany(ctx, req interface{}) *
 }
 
 // SignUpStudent mocks base method.
-func (m *MockAuthServicePort) SignUpStudent(ctx context.Context, req *gen.CreateStudentRequest) error {
+func (m *MockAuthServicePort) SignUpStudent(ctx context.Context, req *gen.CreateStudentRequest) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignUpStudent", ctx, req)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // SignUpStudent indicates an expected call of SignUpStudent.
@@ -123,17 +126,17 @@ func (mr *MockAuthServicePortMockRecorder) SignUpStudent(ctx, req interface{}) *
 }
 
 // VerifyEmail mocks base method.
-func (m *MockAuthServicePort) VerifyEmail(ctx context.Context, code string) error {
+func (m *MockAuthServicePort) VerifyEmail(ctx context.Context, sid, code string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "VerifyEmail", ctx, code)
+	ret := m.ctrl.Call(m, "VerifyEmail", ctx, sid, code)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // VerifyEmail indicates an expected call of VerifyEmail.
-func (mr *MockAuthServicePortMockRecorder) VerifyEmail(ctx, code interface{}) *gomock.Call {
+func (mr *MockAuthServicePortMockRecorder) VerifyEmail(ctx, sid, code interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyEmail", reflect.TypeOf((*MockAuthServicePort)(nil).VerifyEmail), ctx, code)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyEmail", reflect.TypeOf((*MockAuthServicePort)(nil).VerifyEmail), ctx, sid, code)
 }
 
 // MockUserServicePort is a mock of UserServicePort interface.
@@ -157,6 +160,20 @@ func NewMockUserServicePort(ctrl *gomock.Controller) *MockUserServicePort {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockUserServicePort) EXPECT() *MockUserServicePortMockRecorder {
 	return m.recorder
+}
+
+// DeleteCompanies mocks base method.
+func (m *MockUserServicePort) DeleteCompanies(ctx context.Context, userId int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteCompanies", ctx, userId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteCompanies indicates an expected call of DeleteCompanies.
+func (mr *MockUserServicePortMockRecorder) DeleteCompanies(ctx, userId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteCompanies", reflect.TypeOf((*MockUserServicePort)(nil).DeleteCompanies), ctx, userId)
 }
 
 // DeleteCompany mocks base method.

@@ -214,3 +214,17 @@ func (s *userService) DeleteCompany(ctx context.Context, userId, id int64) error
 
 	return nil
 }
+
+func (s *userService) DeleteCompanies(ctx context.Context, userId int64) error {
+	err := s.repo.CheckIfAdmin(ctx, userId)
+	if err != nil {
+		return domain.ErrNotAuthorized.With("user not admin")
+	}
+
+	err = s.repo.DeleteCompanies(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

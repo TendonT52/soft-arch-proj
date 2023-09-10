@@ -168,7 +168,7 @@ func (s *UserServer) GetCompany(ctx context.Context, req *pbv1.GetCompanyRequest
 		log.Println("Error UserId not found: ", err)
 		return &pbv1.GetCompanyResponse{
 			Status:  http.StatusNotFound,
-			Message: "user id not found",
+			Message: "company id not found",
 		}, nil
 	}
 	if err != nil {
@@ -254,7 +254,7 @@ func (s *UserServer) ListCompanies(ctx context.Context, req *pbv1.ListCompaniesR
 		}, nil
 	}
 
-	log.Println("Success listing all companies: ", res)
+	log.Println("Success listing all companies: ", len(res))
 	return &pbv1.ListCompaniesResponse{
 		Status:    http.StatusOK,
 		Message:   "success",
@@ -282,7 +282,7 @@ func (s *UserServer) ListApprovedCompanies(ctx context.Context, req *pbv1.ListAp
 		}, nil
 	}
 
-	log.Println("Success listing all approved companies: ", res)
+	log.Println("Success listing all approved companies: ", len(res))
 	return &pbv1.ListApprovedCompaniesResponse{
 		Status:    http.StatusOK,
 		Message:   "success",
@@ -319,6 +319,39 @@ func (s *UserServer) UpdateCompanyStatus(ctx context.Context, req *pbv1.UpdateCo
 	log.Println("Success updating company status: ", req.Id)
 	message := "Update status for company id " + strconv.FormatInt(req.Id, 10) + " successfully!"
 	return &pbv1.UpdateCompanyStatusResponse{
+		Status:  http.StatusOK,
+		Message: message,
+	}, nil
+}
+
+func (s *UserServer) DeleteCompanies(ctx context.Context, req *pbv1.DeleteCompaniesRequest) (*pbv1.DeleteCompaniesResponse, error) {
+	userId, err := utils.ExtractUserIDFromAccessToken(req.AccessToken)
+	if err != nil {
+		log.Println("Error in extract userID: ", err)
+		return &pbv1.DeleteCompaniesResponse{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
+		}, nil
+	}
+
+	err = s.UserService.DeleteCompanies(ctx, userId)
+	if errors.Is(err, domain.ErrNotAuthorized) {
+		return &pbv1.DeleteCompaniesResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Only admin can delete",
+		}, nil
+	}
+	if err != nil {
+		log.Println("Error from delete company: ", err)
+		return &pbv1.DeleteCompaniesResponse{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
+		}, nil
+	}
+
+	log.Println("Success deleting companies!")
+	message := "Delete companies successfully!"
+	return &pbv1.DeleteCompaniesResponse{
 		Status:  http.StatusOK,
 		Message: message,
 	}, nil

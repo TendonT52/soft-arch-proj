@@ -8,7 +8,6 @@ require (
 	github.com/redis/go-redis/v9 v9.1.0
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.3
-	github.com/thanhpk/randstr v1.0.6
 	google.golang.org/grpc v1.55.0
 )
 
@@ -48,10 +47,10 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
-	golang.org/x/crypto v0.9.0
+	golang.org/x/crypto v0.13.0
 	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	google.golang.org/protobuf v1.30.0
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

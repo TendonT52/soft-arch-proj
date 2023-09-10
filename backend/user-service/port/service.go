@@ -7,10 +7,10 @@ import (
 )
 
 type AuthServicePort interface {
-	SignUpStudent(ctx context.Context, req *pbv1.CreateStudentRequest) error
-	SignUpCompany(ctx context.Context, req *pbv1.CreateCompanyRequest) error
-	SignUpAdmin(ctx context.Context, req *pbv1.CreateAdminRequest) error
-	VerifyEmail(ctx context.Context, code string) error
+	SignUpStudent(ctx context.Context, req *pbv1.CreateStudentRequest) (int64, error)
+	SignUpCompany(ctx context.Context, req *pbv1.CreateCompanyRequest) (int64, error)
+	SignUpAdmin(ctx context.Context, req *pbv1.CreateAdminRequest) (int64, error)
+	VerifyEmail(ctx context.Context, sid, code string) error
 	SignIn(ctx context.Context, req *pbv1.LoginRequest) (string, string, error)
 	RefreshAccessToken(ctx context.Context, cookie string) (string, error)
 	LogOut(ctx context.Context, cookie string) error
@@ -28,4 +28,5 @@ type UserServicePort interface {
 	UpdateCompanyStatus(ctx context.Context, userId, id int64, status string) error
 	DeleteStudent(ctx context.Context, userId, id int64) error
 	DeleteCompany(ctx context.Context, userId, id int64) error
+	DeleteCompanies(ctx context.Context, userId int64) error
 }

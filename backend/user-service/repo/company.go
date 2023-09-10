@@ -2,48 +2,55 @@ package repo
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"strings"
+	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 )
 
-func (r *userRepository) CreateCompany(ctx context.Context, company *pbv1.CreateCompanyRequest) error {
+func (r *userRepository) CreateCompany(ctx context.Context, company *pbv1.CreateCompanyRequest, createTime int64) (int64, error) {
 	// Start a transaction
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return domain.ErrInternal.From(err.Error(), err)
+		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Insert into Table users
-	query := "INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING id"
+	query := "INSERT INTO users (email, password, role, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
 	var id int64
-	err = tx.QueryRowContext(ctx, query, company.Email, company.Password, "company").Scan(&id)
+	err = tx.QueryRowContext(ctx, query, company.Email, company.Password, "company", createTime, createTime).Scan(&id)
 	if err != nil {
 		tx.Rollback()
-		return domain.ErrInternal.From(err.Error(), err)
+		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Insert into Table companies
-	query = "INSERT INTO companies (cid, name, description, location, phone, category) VALUES ($1, $2, $3, $4, $5, $6)"
-	_, err = tx.ExecContext(ctx, query, id, company.Name, company.Description, company.Location, company.Phone, company.Category)
+	query = "INSERT INTO companies (cid, name, description, location, phone, category, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
+	_, err = tx.ExecContext(ctx, query, id, company.Name, company.Description, company.Location, company.Phone, company.Category, createTime, createTime)
 	if err != nil {
 		tx.Rollback()
-		return domain.ErrInternal.From(err.Error(), err)
+		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Commit the transaction if all insertions were successful
 	err = tx.Commit()
 	if err != nil {
-		return domain.ErrInternal.From(err.Error(), err)
+		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
-	return nil
+	return id, nil
 }
 
 func (r *userRepository) GetCompanyByID(ctx context.Context, id int64) (*pbv1.Company, error) {
 	query := "SELECT users.id, companies.name, users.email, companies.description, companies.location, companies.phone, companies.category, companies.status FROM users INNER JOIN companies ON users.id = companies.cid WHERE users.id = $1"
 	var company pbv1.Company
 	err := r.db.QueryRowContext(ctx, query, id).Scan(&company.Id, &company.Name, &company.Email, &company.Description, &company.Location, &company.Phone, &company.Category, &company.Status)
+	if errors.Is(sql.ErrNoRows, err) {
+		return nil, domain.ErrUserIDNotFound.From(err.Error(), err)
+	}
 	if err != nil {
 		return &pbv1.Company{}, domain.ErrInternal.From(err.Error(), err)
 	}
@@ -74,6 +81,8 @@ func (r *userRepository) GetAllCompany(ctx context.Context) ([]*pbv1.Company, er
 }
 
 func (r *userRepository) GetApprovedCompany(ctx context.Context, search string) ([]*pbv1.Company, error) {
+	parts := strings.Fields(search)
+	tquery := strings.Join(parts, " | ")
 	query :=
 		`	SELECT 
 			users.id, companies.name, users.email, companies.description, companies.location, companies.phone, companies.category 
@@ -83,15 +92,16 @@ func (r *userRepository) GetApprovedCompany(ctx context.Context, search string) 
 				to_tsquery($1) query,
 				NULLIF(ts_rank(to_tsvector(companies.category), query), 0) rank_category,
 				NULLIF(ts_rank(to_tsvector(companies.name), query), 0) rank_name,
-				SIMILARITY($1, companies.category || companies.name) similarity
+				SIMILARITY($2, companies.category || companies.name) similarity
 			WHERE 
-				users.verified = true AND 
-				companies.status = 'Approve' AND
-				query @@ document OR similarity > 0
-			ORDER BY rank_category, rank_name, similarity DESC NULLS LAST
+				users.verified = true 
+				AND query @@ document 
+				OR similarity > 0
+				AND companies.status = 'Approve'
+			ORDER BY rank_category DESC, rank_name DESC, similarity DESC NULLS LAST
 		`
 
-	rows, err := r.db.QueryContext(ctx, query, search)
+	rows, err := r.db.QueryContext(ctx, query, tquery, search)
 	if err != nil {
 		return nil, domain.ErrInternal.From(err.Error(), err)
 	}
@@ -110,8 +120,9 @@ func (r *userRepository) GetApprovedCompany(ctx context.Context, search string) 
 }
 
 func (r *userRepository) UpdateCompanyByID(ctx context.Context, id int64, req *pbv1.Company) error {
-	query := "UPDATE companies SET name = $1, description = $2, location = $3, phone = $4, category = $5 WHERE cid = $6"
-	_, err := r.db.ExecContext(ctx, query, req.Name, req.Description, req.Location, req.Phone, req.Category, id)
+	current_timestamp := time.Now().Unix()
+	query := "UPDATE companies SET name = $1, description = $2, location = $3, phone = $4, category = $5, updated_at = $6 WHERE cid = $7"
+	_, err := r.db.ExecContext(ctx, query, req.Name, req.Description, req.Location, req.Phone, req.Category, current_timestamp, id)
 	if err != nil {
 		return domain.ErrInternal.From(err.Error(), err)
 	}
@@ -133,16 +144,17 @@ func (r *userRepository) UpdateCompanyStatus(ctx context.Context, id int64, stat
 	} else {
 		verified = false
 	}
-	query := "UPDATE users SET verified = $2, updated_at = current_timestamp WHERE id = $1"
-	_, err = tx.ExecContext(ctx, query, id, verified)
+	current_timestamp := time.Now().Unix()
+	query := "UPDATE users SET verified = $2, updated_at = $3 WHERE id = $1"
+	_, err = tx.ExecContext(ctx, query, id, verified, current_timestamp)
 	if err != nil {
 		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Update Table companies
-	query = "UPDATE companies SET status = $2, updated_at = current_timestamp WHERE cid = $1"
-	_, err = tx.ExecContext(ctx, query, id, status)
+	query = "UPDATE companies SET status = $2, updated_at = $3 WHERE cid = $1"
+	_, err = tx.ExecContext(ctx, query, id, status, current_timestamp)
 	if err != nil {
 		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
@@ -175,6 +187,38 @@ func (r *userRepository) DeleteCompany(ctx context.Context, id int64) error {
 	// Delete from Table users
 	query = "DELETE FROM users WHERE id = $1"
 	_, err = tx.ExecContext(ctx, query, id)
+	if err != nil {
+		tx.Rollback()
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+
+	// Commit the transaction if all insertions were successful
+	err = tx.Commit()
+	if err != nil {
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+
+	return nil
+}
+
+func (r *userRepository) DeleteCompanies(ctx context.Context) error {
+	// Start a transaction
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+
+	// Delete from Table companies
+	query := "DELETE FROM companies WHERE cid > 0"
+	_, err = tx.ExecContext(ctx, query)
+	if err != nil {
+		tx.Rollback()
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+
+	// Delete from Table users
+	query = "DELETE FROM users WHERE role = 'company'"
+	_, err = tx.ExecContext(ctx, query)
 	if err != nil {
 		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)

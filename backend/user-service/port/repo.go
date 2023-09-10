@@ -7,12 +7,12 @@ import (
 )
 
 type UserRepoPort interface {
-	CreateStudent(ctx context.Context, user *pbv1.CreateStudentRequest, code string) error
-	CreateCompany(ctx context.Context, user *pbv1.CreateCompanyRequest) error
-	CreateAdmin(ctx context.Context, user *pbv1.CreateAdminRequest) error
+	CreateStudent(ctx context.Context, user *pbv1.CreateStudentRequest, createTime int64) (int64, error)
+	CreateCompany(ctx context.Context, user *pbv1.CreateCompanyRequest, createTime int64) (int64, error)
+	CreateAdmin(ctx context.Context, user *pbv1.CreateAdminRequest, createTime int64) (int64, error)
 
-	UpdateVerificationCode(ctx context.Context, verification_code string) error
-	GetPassword(ctx context.Context, req *pbv1.LoginRequest) (int64, string, error)
+	GetSalt(ctx context.Context, email string) (string, error)
+	GetPassword(ctx context.Context, req *pbv1.LoginRequest) (int64, string, int64, error)
 	CheckUserIDExist(ctx context.Context, id int64) (string, error)
 	CheckEmailExist(ctx context.Context, email string) error
 	CheckIfAdmin(ctx context.Context, id int64) error
@@ -25,10 +25,12 @@ type UserRepoPort interface {
 	UpdateStudentByID(ctx context.Context, id int64, req *pbv1.Student) error
 	UpdateCompanyByID(ctx context.Context, id int64, req *pbv1.Company) error
 
+	UpdateStudentStatus(ctx context.Context, email string, verified bool) error
 	UpdateCompanyStatus(ctx context.Context, id int64, status string) error
 
 	DeleteStudent(ctx context.Context, id int64) error
 	DeleteCompany(ctx context.Context, id int64) error
+	DeleteCompanies(ctx context.Context) error
 
 	SetValueRedis(ctx context.Context, key string, value string) error
 	GetValueRedis(ctx context.Context, key string) (string, error)
