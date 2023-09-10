@@ -16,6 +16,8 @@ service UserService {
 
     rpc ListCompanies(ListCompaniesRequest) returns (ListCompaniesResponse);
     rpc UpdateCompanyStatus(UpdateCompanyStatusRequest) returns (UpdateCompanyStatusResponse);
+
+    rpc DeleteCompanies(DeleteCompaniesRequest) returns (DeleteCompaniesResponse);
 }
 
 message Student {
@@ -128,6 +130,16 @@ message UpdateCompanyStatusRequest {
 }
 
 message UpdateCompanyStatusResponse {
+    int64 status = 1;
+    string message = 2;
+}
+
+// Delete Company (Internal Purpose)
+message DeleteCompaniesRequest {
+    string access_token = 1;
+}
+
+message DeleteCompaniesResponse {
     int64 status = 1;
     string message = 2;
 }

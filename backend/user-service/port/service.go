@@ -28,4 +28,5 @@ type UserServicePort interface {
 	UpdateCompanyStatus(ctx context.Context, userId, id int64, status string) error
 	DeleteStudent(ctx context.Context, userId, id int64) error
 	DeleteCompany(ctx context.Context, userId, id int64) error
+	DeleteCompanies(ctx context.Context, userId int64) error
 }

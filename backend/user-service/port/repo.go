@@ -30,6 +30,7 @@ type UserRepoPort interface {
 
 	DeleteStudent(ctx context.Context, id int64) error
 	DeleteCompany(ctx context.Context, id int64) error
+	DeleteCompanies(ctx context.Context) error
 
 	SetValueRedis(ctx context.Context, key string, value string) error
 	GetValueRedis(ctx context.Context, key string) (string, error)

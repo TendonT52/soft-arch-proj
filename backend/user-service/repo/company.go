@@ -191,3 +191,35 @@ func (r *userRepository) DeleteCompany(ctx context.Context, id int64) error {
 
 	return nil
 }
+
+func (r *userRepository) DeleteCompanies(ctx context.Context) error {
+	// Start a transaction
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+
+	// Delete from Table companies
+	query := "DELETE FROM companies WHERE cid > 0"
+	_, err = tx.ExecContext(ctx, query)
+	if err != nil {
+		tx.Rollback()
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+
+	// Delete from Table users
+	query = "DELETE FROM users WHERE role = 'company'"
+	_, err = tx.ExecContext(ctx, query)
+	if err != nil {
+		tx.Rollback()
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+
+	// Commit the transaction if all insertions were successful
+	err = tx.Commit()
+	if err != nil {
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+
+	return nil
+}

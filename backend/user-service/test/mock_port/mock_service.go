@@ -162,6 +162,20 @@ func (m *MockUserServicePort) EXPECT() *MockUserServicePortMockRecorder {
 	return m.recorder
 }
 
+// DeleteCompanies mocks base method.
+func (m *MockUserServicePort) DeleteCompanies(ctx context.Context, userId int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteCompanies", ctx, userId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteCompanies indicates an expected call of DeleteCompanies.
+func (mr *MockUserServicePortMockRecorder) DeleteCompanies(ctx, userId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteCompanies", reflect.TypeOf((*MockUserServicePort)(nil).DeleteCompanies), ctx, userId)
+}
+
 // DeleteCompany mocks base method.
 func (m *MockUserServicePort) DeleteCompany(ctx context.Context, userId, id int64) error {
 	m.ctrl.T.Helper()
