@@ -1,1 +1,0 @@
-migrate -database "postgres://postgres:password@todo-postgresql.default:5432/?sslmode=disable" -path migrations up

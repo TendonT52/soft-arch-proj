@@ -135,9 +135,11 @@ func TestUpdateCompanyStatus(t *testing.T) {
 			},
 		},
 	}
+	testOrder := []string{"success approve", "success reject", "fail: not admin", "fail: company already approved"}
 
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
+	for _, testName := range testOrder {
+		tc := tests[testName]
+		t.Run(testName, func(t *testing.T) {
 			res, err := u.UpdateCompanyStatus(ctx, tc.req)
 			require.Equal(t, tc.expect.Status, res.Status)
 			require.Equal(t, tc.expect.Message, res.Message)
