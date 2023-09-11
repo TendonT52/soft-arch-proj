@@ -3,21 +3,61 @@ syntax = "proto3";
 package user;
 
 option go_package = "github.com/TikhampornSky/go-auth-verifiedMail/gen";
+import "google/api/annotations.proto";
 
 service UserService {
-    rpc GetStudentMe(GetStudentMeRequest) returns (GetStudentResponse);
-    rpc GetStudent(GetStudentRequest) returns (GetStudentResponse);
-    rpc UpdateStudent(UpdateStudentRequest) returns (UpdateStudentResponse);
+    rpc GetStudentMe(GetStudentMeRequest) returns (GetStudentResponse) {
+        option (google.api.http) = {
+            get: "/v1/student/me"
+        };
+    }
+    rpc GetStudent(GetStudentRequest) returns (GetStudentResponse) {
+        option (google.api.http) = {
+            get: "/v1/student/{id}"
+        };
+    }
+    rpc UpdateStudent(UpdateStudentRequest) returns (UpdateStudentResponse) {
+        option (google.api.http) = {
+            put: "/v1/student"
+            body: "*"
+        };
+    }
 
-    rpc GetCompanyMe(GetCompanyMeRequest) returns (GetCompanyResponse);
-    rpc GetCompany(GetCompanyRequest) returns (GetCompanyResponse);
-    rpc UpdateCompany(UpdateCompanyRequest) returns (UpdateCompanyResponse);
-    rpc ListApprovedCompanies(ListApprovedCompaniesRequest) returns (ListApprovedCompaniesResponse);
+    rpc GetCompanyMe(GetCompanyMeRequest) returns (GetCompanyResponse) {
+        option (google.api.http) = {
+            get: "/v1/company/me"
+        };
+    }
+    rpc GetCompany(GetCompanyRequest) returns (GetCompanyResponse) {
+        option (google.api.http) = {
+            get: "/v1/company/{id}"
+        };
+    }
+    rpc UpdateCompany(UpdateCompanyRequest) returns (UpdateCompanyResponse) {
+        option (google.api.http) = {
+            put: "/v1/company"
+            body: "*"
+        };
+    }
+    rpc ListApprovedCompanies(ListApprovedCompaniesRequest) returns (ListApprovedCompaniesResponse) {
+        option (google.api.http) = {
+            get: "/v1/companies/approved"
+        };
+    }
 
-    rpc ListCompanies(ListCompaniesRequest) returns (ListCompaniesResponse);
-    rpc UpdateCompanyStatus(UpdateCompanyStatusRequest) returns (UpdateCompanyStatusResponse);
+    rpc ListCompanies(ListCompaniesRequest) returns (ListCompaniesResponse) {
+        option (google.api.http) = {
+            get: "/v1/companies"
+        };
+    }
+    rpc UpdateCompanyStatus(UpdateCompanyStatusRequest) returns (UpdateCompanyStatusResponse) {
+        option (google.api.http) = {
+            put: "/v1/company/status"
+            body: "*"
+        };
+    }
 
-    rpc DeleteCompanies(DeleteCompaniesRequest) returns (DeleteCompaniesResponse);
+    rpc DeleteCompanies(DeleteCompaniesRequest) returns (DeleteCompaniesResponse) {}
 }
 
 message Student {
