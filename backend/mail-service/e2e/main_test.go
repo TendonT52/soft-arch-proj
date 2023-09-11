@@ -28,8 +28,15 @@ func TestMain(m *testing.M) {
 	Conn, err = memphis.Connect(config.MemphisHostName, config.MemphisApplicationUser, memphis.Password(config.MemphisPassword), memphis.AccountId(config.MemphisAccountID))
 	if err != nil {
 		fmt.Printf("Consumer connection failed: %v", err)
+		os.Exit(1)
 	}
 	defer Conn.Close()
+
+	err = clearUnprocessedMessage()
+	if err != nil {
+		fmt.Printf("Clear unprocessed message failed: %v", err)
+		os.Exit(1)
+	}
 
 	MockProducer, err = Conn.CreateProducer(config.MemphisStationNameTest, config.MemphisProducerTest)
 	if err != nil {

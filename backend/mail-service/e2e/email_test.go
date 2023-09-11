@@ -26,9 +26,6 @@ func TestStudentVerification(t *testing.T) {
 	require.NoError(t, err)
 	defer conn.Close()
 
-	err = clearUnprocessedMessage()
-	require.NoError(t, err)
-
 	createMockProducer(domain.StudentConfirmEmail, `{"url": "http://localhost:3000/verify/123456", "subject": "Verify your email", "name": "Tikhamporn", "email": "mock_student@chula.ac.th"}`)
 	c := createConsumer(service.NewTemplateService(&config, service.NewMockSMTPService(&config)))
 	require.Nil(t, c)
@@ -47,9 +44,6 @@ func TestCompanyApprove(t *testing.T) {
 	}
 	require.NoError(t, err)
 	defer conn.Close()
-
-	err = clearUnprocessedMessage()
-	require.NoError(t, err)
 
 	createMockProducer(domain.CompanyApproveEmail, `{"url": "http://localhost:3000/verify/123456", "subject": "Approve Company", "name": "Mock Company", "email": "company@gmail.com"}`)
 	c := createConsumer(service.NewTemplateService(&config, service.NewMockSMTPService(&config)))
@@ -70,9 +64,6 @@ func TestCompanyReject(t *testing.T) {
 	require.NoError(t, err)
 	defer conn.Close()
 
-	err = clearUnprocessedMessage()
-	require.NoError(t, err)
-
 	createMockProducer(domain.CompanyRejectEmail, `{"url": "http://localhost:3000/verify/123456", "subject": "Reject Company", "name": "Mock Company2", "email": "company2@gmail.com"}`)
 	c := createConsumer(service.NewTemplateService(&config, service.NewMockSMTPService(&config)))
 	require.Nil(t, c)
@@ -91,9 +82,6 @@ func TestUnknowEmailType(t *testing.T) {
 	}
 	require.NoError(t, err)
 	defer conn.Close()
-
-	err = clearUnprocessedMessage()
-	require.NoError(t, err)
 
 	createMockProducer("UnknownType", `{"url": "http://localhost:3000/verify/123456", "subject": "Reject Company", "name": "Mock Company2", "email": "company2@gmail.com"}`)
 	c := createConsumer(service.NewTemplateService(&config, service.NewMockSMTPService(&config)))
