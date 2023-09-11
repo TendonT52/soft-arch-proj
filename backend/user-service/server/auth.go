@@ -186,7 +186,6 @@ func (s *AuthServer) RefreshToken(ctx context.Context, req *pbv1.RefreshTokenReq
 }
 
 func (s *AuthServer) LogOut(ctx context.Context, req *pbv1.LogOutRequest) (*pbv1.LogOutResponse, error) {
-	// TODO: Test when connect with Redis
 	err := s.AuthService.LogOut(ctx, req.RefreshToken)
 	if err != nil {
 		log.Printf("Error: %v", err)
