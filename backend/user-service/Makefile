@@ -54,6 +54,3 @@ k8s-reset:
 	telepresence quit
 	telepresence helm uninstall
 	rm -rf data/*
-
-# ./k8s/install-helm.sh
-# ./../../helm/install-base-helm.sh
