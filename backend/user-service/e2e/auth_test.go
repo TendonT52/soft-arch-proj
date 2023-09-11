@@ -132,9 +132,11 @@ func TestCreateStudent(t *testing.T) {
 			},
 		},
 	}
+	testOrder := []string{"success", "email already exists", "password and password confirm not match", "email is not student.chula.ac.th"}
 
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
+	for _, testName := range testOrder {
+		tc := tests[testName]
+		t.Run(testName, func(t *testing.T) {
 			res, err := c.CreateStudent(ctx, tc.req)
 			if err != nil {
 				t.Errorf("could not create student: %v", err)
@@ -212,9 +214,11 @@ func TestCreateCompany(t *testing.T) {
 			},
 		},
 	}
+	testOrder := []string{"success", "email already exists", "password and password confirm not match"}
 
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
+	for _, testName := range testOrder {
+		tc := tests[testName]
+		t.Run(testName, func(t *testing.T) {
 			res, err := c.CreateCompany(ctx, tc.req)
 			if err != nil {
 				t.Errorf("could not create company: %v", err)
@@ -277,9 +281,11 @@ func TestCreateAdmin(t *testing.T) {
 			},
 		},
 	}
+	testOrder := []string{"success", "email already exists", "password and password confirm not match"}
 
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
+	for _, testName := range testOrder {
+		tc := tests[testName]
+		t.Run(testName, func(t *testing.T) {
 			res, err := c.CreateAdmin(ctx, tc.req)
 			if err != nil {
 				t.Errorf("could not create admin: %v", err)
@@ -453,9 +459,11 @@ func TestRefreshToken(t *testing.T) {
 			},
 		},
 	}
+	testOrder := []string{"success", "user not found", "already logged out"}
 
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
+	for _, testName := range testOrder {
+		tc := tests[testName]
+		t.Run(testName, func(t *testing.T) {
 			res, err := c.RefreshToken(ctx, tc.req)
 			if err != nil {
 				t.Errorf("could not refresh token: %v", err)
@@ -571,9 +579,11 @@ func TestVerifyEmailCode(t *testing.T) {
 			},
 		},
 	}
+	testOrder := []string{"success", "wrong code"}
 
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
+	for _, testName := range testOrder {
+		tc := tests[testName]
+		t.Run(testName, func(t *testing.T) {
 			res, err := c.VerifyEmailCode(ctx, tc.req)
 			if err != nil {
 				t.Errorf("could not verify email code: %v", err)
