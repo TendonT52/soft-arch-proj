@@ -4,14 +4,30 @@ import (
 	"fmt"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
+	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	"github.com/TikhampornSky/go-auth-verifiedMail/port"
+	"google.golang.org/protobuf/proto"
 	"github.com/memphisdev/memphis.go"
 )
 
-func SendEmail(conn port.MemphisPort, typeMail string, jsonData []byte) error {
+func SendEmail(conn port.MemphisPort, typeMail, url, subject, name, email string) error {
 	config, err := config.LoadConfig("../")
 	if err != nil {
 		fmt.Printf("Config failed: %v", err)
+		return err
+	}
+
+	// Send Email
+	emailData := pbv1.EmailData{
+		URL:     url,
+		Subject: subject,
+		Name:    name,
+		Email:   email,
+	}
+
+	data, err := proto.Marshal(&emailData)
+	if err != nil {
+		fmt.Println("Error:", err)
 		return err
 	}
 
@@ -29,7 +45,7 @@ func SendEmail(conn port.MemphisPort, typeMail string, jsonData []byte) error {
 		return err
 	}
 
-	err = p.Produce([]byte(jsonData), memphis.MsgHeaders(hdrs))
+	err = p.Produce([]byte(data), memphis.MsgHeaders(hdrs))
 	if err != nil {
 		fmt.Printf("Produce failed: %v", err)
 		return err

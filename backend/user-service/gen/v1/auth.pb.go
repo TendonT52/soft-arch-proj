@@ -545,7 +545,7 @@ type LoginResponse struct {
 
 	Status       int64  `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
 	Message      string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	AccessToken  string `protobuf:"bytes,3,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	AccessToken  string `protobuf:"bytes,3,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"` // need to set in cookie or authorization header
 	RefreshToken string `protobuf:"bytes,4,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
 }
 
@@ -664,7 +664,7 @@ type RefreshTokenResponse struct {
 
 	Status      int64  `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
 	Message     string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	AccessToken string `protobuf:"bytes,3,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	AccessToken string `protobuf:"bytes,3,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"` // need to set in cookie or authorization header
 }
 
 func (x *RefreshTokenResponse) Reset() {

@@ -22,6 +22,7 @@ func main() {
 		log.Fatalf("Something went wrong. Could not connect to the database. %s", err)
 	}
 
+	
 	memphisConn := email.InitMemphisConnection()
 	defer memphisConn.Close()
 

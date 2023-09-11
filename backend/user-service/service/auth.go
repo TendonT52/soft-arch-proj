@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -48,26 +47,12 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 		return 0, domain.ErrDuplicateEmail
 	}
 
-	config, _ := config.LoadConfig("..")
 	// Generate Verification Code
 	id := email.GetStudentIDFromEmail(req.Email)
 	code := utils.Encode(id, current_time)
 
-	// Send Email
-	emailData := domain.EmailData{
-		URL:     config.ClientOrigin + "/verifyemail/" + id + "/" + code,
-		Subject: "Your account verification code",
-		Name:    req.Name,
-		Email:   req.Email,
-	}
-
-	jsonData, err := json.Marshal(emailData)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return 0, err
-	}
-
-	err = email.SendEmail(s.memphis, domain.StudentConfirmEmail, jsonData)
+	config, _ := config.LoadConfig("..")
+	err = email.SendEmail(s.memphis, domain.StudentConfirmEmail, config.ClientOrigin+"/verifyemail/"+id+"/"+code, "Your account verification code", req.Name, req.Email)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return 0, domain.ErrMailNotSent.With("cannot send email")

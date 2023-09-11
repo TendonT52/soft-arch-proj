@@ -36,10 +36,10 @@ func InitMemphisConnection() *memphis.Conn {
 	}
 	log.Println("Successfully connected to the Memphis server")
 
-	_, err = conn.CreateStation(config.MemphisStationName, 
-		memphis.RetentionVal(config.MemphisRetentionVal), 
-		memphis.Replicas(config.MemphisReplicas), 
-		memphis.IdempotencyWindow(time.Duration(config.MemphisIdempotency) * time.Minute), 
+	_, err = conn.CreateStation(config.MemphisStationName,
+		memphis.RetentionVal(config.MemphisRetentionVal),
+		memphis.Replicas(config.MemphisReplicas),
+		memphis.IdempotencyWindow(time.Duration(config.MemphisIdempotency)*time.Minute),
 		memphis.PartitionsNumber(config.MemphisPartitions),
 	)
 	if err != nil {
@@ -47,10 +47,10 @@ func InitMemphisConnection() *memphis.Conn {
 		os.Exit(1)
 	}
 
-	_, err = conn.CreateStation(config.MemphisStationNameTest, 
-		memphis.RetentionVal(config.MemphisRetentionValTest), 
-		memphis.Replicas(config.MemphisReplicas), 
-		memphis.IdempotencyWindow(time.Duration(config.MemphisIdempotency) * time.Minute), 
+	_, err = conn.CreateStation(config.MemphisStationNameTest,
+		memphis.RetentionVal(config.MemphisRetentionValTest),
+		memphis.Replicas(config.MemphisReplicas),
+		memphis.IdempotencyWindow(time.Duration(config.MemphisIdempotency)*time.Minute),
 		memphis.PartitionsNumber(config.MemphisPartitions),
 	)
 	if err != nil {
