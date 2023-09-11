@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/TikhampornSky/go-mail/config"
-	"github.com/TikhampornSky/go-mail/domain"
+	pbv1 "github.com/TikhampornSky/go-mail/gen/v1"
 	"github.com/TikhampornSky/go-mail/port"
 	"github.com/k3a/html2text"
 	"gopkg.in/gomail.v2"
@@ -20,7 +20,7 @@ func NewSMTPService(config *config.Config) port.SmtpService {
 	return &smtpService{Config: config}
 }
 
-func (s *smtpService) SendEmail(data *domain.EmailData, body bytes.Buffer) error {
+func (s *smtpService) SendEmail(data *pbv1.EmailData, body bytes.Buffer) error {
 	config, err := config.LoadConfig("../")
 
 	if err != nil {

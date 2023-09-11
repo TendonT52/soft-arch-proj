@@ -92,7 +92,7 @@ func createConsumer(templateService port.TemplateService) error {
 	return nil
 }
 
-func createMockProducer(typeMail string, jsonData string) {
+func createMockProducer(typeMail string, data []byte) {
 	hdrs := memphis.Headers{}
 	hdrs.New()
 	err := hdrs.Add("type", typeMail)
@@ -101,7 +101,7 @@ func createMockProducer(typeMail string, jsonData string) {
 		os.Exit(1)
 	}
 
-	err = MockProducer.Produce([]byte(jsonData), memphis.MsgHeaders(hdrs))
+	err = MockProducer.Produce([]byte(data), memphis.MsgHeaders(hdrs))
 	if err != nil {
 		fmt.Printf("Produce failed: %v", err)
 		os.Exit(1)

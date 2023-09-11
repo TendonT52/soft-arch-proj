@@ -4,7 +4,7 @@ import (
 	"bytes"
 
 	"github.com/TikhampornSky/go-mail/config"
-	"github.com/TikhampornSky/go-mail/domain"
+	pbv1 "github.com/TikhampornSky/go-mail/gen/v1"
 	"github.com/TikhampornSky/go-mail/port"
 )
 
@@ -16,6 +16,6 @@ func NewMockSMTPService(config *config.Config) port.SmtpService {
 	return &mockSmtpService{Config: config}
 }
 
-func (s *mockSmtpService) SendEmail(data *domain.EmailData, body bytes.Buffer) error {
+func (s *mockSmtpService) SendEmail(data *pbv1.EmailData, body bytes.Buffer) error {
 	return nil
 }

@@ -2,7 +2,6 @@ package service
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -12,6 +11,8 @@ import (
 	"github.com/TikhampornSky/go-mail/config"
 	"github.com/TikhampornSky/go-mail/domain"
 	"github.com/TikhampornSky/go-mail/port"
+	pbv1 "github.com/TikhampornSky/go-mail/gen/v1"
+	"google.golang.org/protobuf/proto"
 )
 
 type templateService struct {
@@ -46,8 +47,8 @@ func parseTemplateDir(dir string) (*template.Template, error) {
 }
 
 func (e *templateService) ProcessEmailRequest(rawData []byte, typeMail string) error {
-	var data domain.EmailData
-	err := json.Unmarshal(rawData, &data)
+	var data pbv1.EmailData
+	err := proto.Unmarshal(rawData, &data)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return err

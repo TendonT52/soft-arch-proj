@@ -2,8 +2,7 @@ package port
 
 import (
 	"bytes"
-
-	"github.com/TikhampornSky/go-mail/domain"
+	pbv1 "github.com/TikhampornSky/go-mail/gen/v1"
 )
 
 type TemplateService interface {
@@ -11,5 +10,5 @@ type TemplateService interface {
 }
 
 type SmtpService interface {
-	SendEmail(data *domain.EmailData, body bytes.Buffer) error
+	SendEmail(data *pbv1.EmailData, body bytes.Buffer) error
 }

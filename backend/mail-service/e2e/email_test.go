@@ -10,6 +10,8 @@ import (
 	"github.com/TikhampornSky/go-mail/service"
 	"github.com/memphisdev/memphis.go"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/proto"
+	pbv1 "github.com/TikhampornSky/go-mail/gen/v1"
 )
 
 func TestStudentVerification(t *testing.T) {
@@ -26,7 +28,17 @@ func TestStudentVerification(t *testing.T) {
 	require.NoError(t, err)
 	defer conn.Close()
 
-	createMockProducer(domain.StudentConfirmEmail, `{"url": "http://localhost:3000/verify/123456", "subject": "Verify your email", "name": "Tikhamporn", "email": "mock_student@chula.ac.th"}`)
+	emailData := pbv1.EmailData{
+		URL:     "http://localhost:3000/verify/123456",
+		Subject: "Verify your email",
+		Name:    "Tikhamporn",
+		Email:   "mock_student@chula.ac.th",
+	}
+
+	data, err := proto.Marshal(&emailData)
+	require.NoError(t, err)
+
+	createMockProducer(domain.StudentConfirmEmail, data)
 	c := createConsumer(service.NewTemplateService(&config, service.NewMockSMTPService(&config)))
 	require.Nil(t, c)
 }
@@ -45,7 +57,16 @@ func TestCompanyApprove(t *testing.T) {
 	require.NoError(t, err)
 	defer conn.Close()
 
-	createMockProducer(domain.CompanyApproveEmail, `{"url": "http://localhost:3000/verify/123456", "subject": "Approve Company", "name": "Mock Company", "email": "company@gmail.com"}`)
+	emailData := pbv1.EmailData{
+		Subject: "Approve Company",
+		Name:    "Tikhamporn",
+		Email:   "company1@gmail.comm",
+	}
+
+	data, err := proto.Marshal(&emailData)
+	require.NoError(t, err)
+
+	createMockProducer(domain.CompanyApproveEmail, data)
 	c := createConsumer(service.NewTemplateService(&config, service.NewMockSMTPService(&config)))
 	require.Nil(t, c)
 }
@@ -64,7 +85,16 @@ func TestCompanyReject(t *testing.T) {
 	require.NoError(t, err)
 	defer conn.Close()
 
-	createMockProducer(domain.CompanyRejectEmail, `{"url": "http://localhost:3000/verify/123456", "subject": "Reject Company", "name": "Mock Company2", "email": "company2@gmail.com"}`)
+	emailData := pbv1.EmailData{
+		Subject: "Reject Company",
+		Name:    "Tepsut",
+		Email:   "company2@gmail.comm",
+	}
+
+	data, err := proto.Marshal(&emailData)
+	require.NoError(t, err)
+
+	createMockProducer(domain.CompanyRejectEmail, data)
 	c := createConsumer(service.NewTemplateService(&config, service.NewMockSMTPService(&config)))
 	require.Nil(t, c)
 }
@@ -83,7 +113,16 @@ func TestUnknowEmailType(t *testing.T) {
 	require.NoError(t, err)
 	defer conn.Close()
 
-	createMockProducer("UnknownType", `{"url": "http://localhost:3000/verify/123456", "subject": "Reject Company", "name": "Mock Company2", "email": "company2@gmail.com"}`)
+	emailData := pbv1.EmailData{
+		Subject: "Approve Company",
+		Name:    "Tikhamporn",
+		Email:   "company3@gmail.comm",
+	}
+
+	data, err := proto.Marshal(&emailData)
+	require.NoError(t, err)
+
+	createMockProducer("UnknownType", data)
 	c := createConsumer(service.NewTemplateService(&config, service.NewMockSMTPService(&config)))
 	require.ErrorIs(t, c, domain.ErrKindUnknown)
 }
