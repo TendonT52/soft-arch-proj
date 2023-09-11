@@ -12,6 +12,7 @@ gomock:
 	mockgen -source=port/service.go -destination=test/mock_port/mock_service.go -package=mock
 
 k8s-run-dev:
+
 	helm install user-service-postgresql ./helm/postgresql  \
 	--set global.postgresql.auth.postgresPassword=password \
 	--set master.persistence.size=10Gi \
