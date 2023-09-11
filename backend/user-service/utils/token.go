@@ -6,7 +6,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/TikhampornSky/go-auth-verifiedMail/initializers"
+	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -70,7 +70,7 @@ func ValidateToken(token string, publicKey string) (interface{}, error) {
 }
 
 func ExtractUserIDFromAccessToken(access_token string) (int64, error) {
-	config, _ := initializers.LoadConfig("..")
+	config, _ := config.LoadConfig("..")
 	sub, err := ValidateToken(access_token, config.AccessTokenPublicKey)
 	if err != nil {
 		return -1, err

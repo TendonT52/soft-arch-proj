@@ -3,13 +3,13 @@ package email
 import (
 	"fmt"
 
-	"github.com/TikhampornSky/go-auth-verifiedMail/initializers"
+	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/TikhampornSky/go-auth-verifiedMail/port"
 	"github.com/memphisdev/memphis.go"
 )
 
 func SendEmail(conn port.MemphisPort, typeMail string, jsonData []byte) error {
-	config, err := initializers.LoadConfig("../")
+	config, err := config.LoadConfig("../")
 	if err != nil {
 		fmt.Printf("Config failed: %v", err)
 		return err

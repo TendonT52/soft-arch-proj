@@ -15,15 +15,15 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
-	"github.com/TikhampornSky/go-auth-verifiedMail/initializers"
 	"github.com/TikhampornSky/go-auth-verifiedMail/repo"
 	"github.com/TikhampornSky/go-auth-verifiedMail/server"
 	"github.com/TikhampornSky/go-auth-verifiedMail/service"
 )
 
 func TestMain(m *testing.M) {
-	config, err := initializers.LoadConfig("..")
+	config, err := config.LoadConfig("..")
 	if err != nil {
 		log.Fatal("? Could not load environment variables", err)
 	}
@@ -406,7 +406,7 @@ func TestRefreshToken(t *testing.T) {
 	})
 
 	// Wrong token (Unknown person)
-	config, _ := initializers.LoadConfig("..")
+	config, _ := config.LoadConfig("..")
 	refresh_token_wrong, err := utils.CreateToken(config.RefreshTokenExpiresIn, 0, config.RefreshTokenPrivateKey)
 	require.NoError(t, err)
 

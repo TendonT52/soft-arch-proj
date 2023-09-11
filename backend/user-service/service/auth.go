@@ -8,10 +8,10 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	"github.com/TikhampornSky/go-auth-verifiedMail/email"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
-	"github.com/TikhampornSky/go-auth-verifiedMail/initializers"
 	"github.com/TikhampornSky/go-auth-verifiedMail/port"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 )
@@ -48,7 +48,7 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 		return 0, domain.ErrDuplicateEmail
 	}
 
-	config, _ := initializers.LoadConfig("..")
+	config, _ := config.LoadConfig("..")
 	// Generate Verification Code
 	id := email.GetStudentIDFromEmail(req.Email)
 	code := utils.Encode(id, current_time)
@@ -161,7 +161,7 @@ func (s *authService) SignIn(ctx context.Context, req *pbv1.LoginRequest) (strin
 	}
 
 	// Generate token
-	config, _ := initializers.LoadConfig("..")
+	config, _ := config.LoadConfig("..")
 	access_token, err := utils.CreateToken(config.AccessTokenExpiresIn, id, config.AccessTokenPrivateKey)
 	if err != nil {
 		return "", "", err
@@ -181,7 +181,7 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 		return "", domain.ErrInternal.With("your token has been logged out!")
 	}
 
-	config, _ := initializers.LoadConfig("..")
+	config, _ := config.LoadConfig("..")
 	sub, err := utils.ValidateToken(refreshToken, config.RefreshTokenPublicKey)
 	if err != nil {
 		return "", err
@@ -205,7 +205,7 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 }
 
 func (s *authService) LogOut(ctx context.Context, refreshToken string) error {
-	config, _ := initializers.LoadConfig("..")
+	config, _ := config.LoadConfig("..")
 	sub, err := utils.ValidateToken(refreshToken, config.RefreshTokenPublicKey)
 	if err != nil {
 		return err

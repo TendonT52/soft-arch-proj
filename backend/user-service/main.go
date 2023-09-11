@@ -3,16 +3,16 @@ package main
 import (
 	"log"
 
+	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/TikhampornSky/go-auth-verifiedMail/db"
 	"github.com/TikhampornSky/go-auth-verifiedMail/email"
-	"github.com/TikhampornSky/go-auth-verifiedMail/initializers"
 	"github.com/TikhampornSky/go-auth-verifiedMail/repo"
 	"github.com/TikhampornSky/go-auth-verifiedMail/server"
 	"github.com/TikhampornSky/go-auth-verifiedMail/service"
 )
 
 func main() {
-	config, err := initializers.LoadConfig(".")
+	config, err := config.LoadConfig(".")
 	if err != nil {
 		log.Fatal("? Could not load environment variables", err)
 	}

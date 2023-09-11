@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
-	"github.com/TikhampornSky/go-auth-verifiedMail/initializers"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -82,7 +82,7 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := initializers.LoadConfig("..")
+	config, _ := config.LoadConfig("..")
 	access_token_wrong, err := utils.CreateToken(config.AccessTokenExpiresIn, 0, config.AccessTokenPrivateKey)
 	require.NoError(t, err)
 
@@ -213,7 +213,7 @@ func TestListCompanies(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := initializers.LoadConfig("..")
+	config, _ := config.LoadConfig("..")
 	access_token_wrong, err := utils.CreateToken(config.AccessTokenExpiresIn, 0, config.AccessTokenPrivateKey)
 	require.NoError(t, err)
 
