@@ -6,6 +6,9 @@ import (
 	"log"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
 	"github.com/redis/go-redis/v9"
 )
@@ -22,6 +25,24 @@ func NewDatabase(config *config.Config) (*Database, error) {
 		return nil, err
 	}
 	log.Println("Successfully connected to the postgresql database")
+
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return nil, err
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://" + config.MigrationPath,
+		"postgres", driver)
+	
+	if m == nil {
+		return nil, err
+	}
+	err = m.Up()
+	if err != nil && err != migrate.ErrNoChange {
+		return nil, err
+	}
+	log.Println("Successfully applied migrations")
 
 	redis := redis.NewClient(&redis.Options{
 		Addr:     config.REDISHost + ":" + config.REDISPort,

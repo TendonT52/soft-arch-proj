@@ -28,7 +28,8 @@ func TestMain(m *testing.M) {
 		log.Fatal("? Could not load environment variables", err)
 	}
 
-	db, err := db.NewDatabase(&config)
+	os.Chdir("../")
+	db, err := db.NewDatabase(config)
 	if err != nil {
 		log.Fatalf("Something went wrong. Could not connect to the database. %s", err)
 	}

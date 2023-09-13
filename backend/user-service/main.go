@@ -17,12 +17,12 @@ func main() {
 		log.Fatal("? Could not load environment variables", err)
 	}
 
-	db, err := db.NewDatabase(&config)
+	db, err := db.NewDatabase(config)
 	if err != nil {
 		log.Fatalf("Something went wrong. Could not connect to the database. %s", err)
 	}
+	defer db.Close()
 
-	
 	memphisConn := email.InitMemphisConnection()
 	defer memphisConn.Close()
 
