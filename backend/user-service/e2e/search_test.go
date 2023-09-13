@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
+	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	"github.com/TikhampornSky/go-auth-verifiedMail/e2e/mock"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
@@ -108,7 +109,10 @@ func TestListApprovedCompanies(t *testing.T) {
 
 	// Generate WRONG token
 	config, _ := config.LoadConfig("..")
-	access_token_wrong, err := utils.CreateToken(config.AccessTokenExpiresIn, 0, config.AccessTokenPrivateKey)
+	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
+		UserId: 0,
+		Role:   domain.StudentRole,
+	}, config.AccessTokenPrivateKey)
 	require.NoError(t, err)
 
 	// name, email, description, location, phone, category

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
+	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/stretchr/testify/require"
@@ -83,7 +84,10 @@ func TestUpdateCompanyStatus(t *testing.T) {
 
 	// Generate WRONG token
 	config, _ := config.LoadConfig("..")
-	access_token_wrong, err := utils.CreateToken(config.AccessTokenExpiresIn, 0, config.AccessTokenPrivateKey)
+	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
+		UserId: 0,
+		Role:   domain.CompanyRole,
+	}, config.AccessTokenPrivateKey)
 	require.NoError(t, err)
 
 	tests := map[string]struct {
@@ -214,7 +218,10 @@ func TestListCompanies(t *testing.T) {
 
 	// Generate WRONG token
 	config, _ := config.LoadConfig("..")
-	access_token_wrong, err := utils.CreateToken(config.AccessTokenExpiresIn, 0, config.AccessTokenPrivateKey)
+	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	}, config.AccessTokenPrivateKey)
 	require.NoError(t, err)
 
 	// name, email, description, location, phone, category

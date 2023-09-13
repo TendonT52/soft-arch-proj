@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/db"
+	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	"github.com/TikhampornSky/go-auth-verifiedMail/e2e/mock"
 	"github.com/TikhampornSky/go-auth-verifiedMail/email"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
@@ -408,7 +409,10 @@ func TestRefreshToken(t *testing.T) {
 
 	// Wrong token (Unknown person)
 	config, _ := config.LoadConfig("..")
-	refresh_token_wrong, err := utils.CreateToken(config.RefreshTokenExpiresIn, 0, config.RefreshTokenPrivateKey)
+	refresh_token_wrong, err := utils.CreateAccessToken(config.RefreshTokenExpiresIn, &pbv1.Payload{
+		UserId: 0,
+		Role:   domain.StudentRole,
+	}, config.RefreshTokenPrivateKey)
 	require.NoError(t, err)
 
 	// Person 2 Already logged out

@@ -3,14 +3,14 @@ package utils
 import (
 	"encoding/base64"
 	"fmt"
-	"math"
 	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
+	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	"github.com/golang-jwt/jwt"
 )
 
-func CreateToken(ttl time.Duration, payload interface{}, privateKey string) (string, error) {
+func CreateAccessToken(ttl time.Duration, payload *pbv1.Payload, privateKey string) (string, error) {
 	decodedPrivateKey, err := base64.StdEncoding.DecodeString(privateKey)
 	if err != nil {
 		return "", fmt.Errorf("could not decode key: %w", err)
@@ -23,9 +23,9 @@ func CreateToken(ttl time.Duration, payload interface{}, privateKey string) (str
 
 	now := time.Now().UTC()
 
-	// "claims" are pieces of information that provide context about an entity, often encoded within tokens.
 	claims := make(jwt.MapClaims)
-	claims["sub"] = payload
+	claims["userId"] = payload.UserId
+	claims["role"] = payload.Role
 	claims["exp"] = now.Add(ttl).Unix()
 	claims["iat"] = now.Unix()
 	claims["nbf"] = now.Unix()
@@ -39,7 +39,7 @@ func CreateToken(ttl time.Duration, payload interface{}, privateKey string) (str
 	return token, nil
 }
 
-func ValidateToken(token string, publicKey string) (interface{}, error) {
+func ValidateToken(token string, publicKey string) (*pbv1.Payload, error) {
 	decodedPublicKey, err := base64.StdEncoding.DecodeString(publicKey)
 	if err != nil {
 		return nil, fmt.Errorf("could not decode: %w", err)
@@ -47,7 +47,7 @@ func ValidateToken(token string, publicKey string) (interface{}, error) {
 
 	key, err := jwt.ParseRSAPublicKeyFromPEM(decodedPublicKey)
 	if err != nil {
-		return "", fmt.Errorf("validate: parse key: %w", err)
+		return nil, fmt.Errorf("validate: parse key: %w", err)
 	}
 
 	parsedToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
@@ -66,20 +66,47 @@ func ValidateToken(token string, publicKey string) (interface{}, error) {
 		return nil, fmt.Errorf("validate: invalid token")
 	}
 
-	return claims["sub"], nil
+	payload := &pbv1.Payload{
+		UserId: int64(claims["userId"].(float64)),
+		Role:   claims["role"].(string),
+	}
+
+	return payload, nil
 }
 
-func ExtractUserIDFromAccessToken(access_token string) (int64, error) {
+
+func ValidateAccessToken(token string) (*pbv1.Payload, error) {
 	config, _ := config.LoadConfig("..")
-	sub, err := ValidateToken(access_token, config.AccessTokenPublicKey)
+	decodedPublicKey, err := base64.StdEncoding.DecodeString(config.AccessTokenPublicKey)
 	if err != nil {
-		return -1, err
+		return nil, fmt.Errorf("could not decode: %w", err)
 	}
 
-	val, ok := sub.(float64)
-	if !ok {
-		return -1, fmt.Errorf("Invalid id in token")
+	key, err := jwt.ParseRSAPublicKeyFromPEM(decodedPublicKey)
+	if err != nil {
+		return nil, fmt.Errorf("validate: parse key: %w", err)
 	}
 
-	return int64(math.Round(val)), nil
+	parsedToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("unexpected method: %s", t.Header["alg"])
+		}
+		return key, nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("validate: %w", err)
+	}
+
+	claims, ok := parsedToken.Claims.(jwt.MapClaims)
+	if !ok || !parsedToken.Valid {
+		return nil, fmt.Errorf("validate: invalid token")
+	}
+
+	payload := &pbv1.Payload{
+		UserId: int64(claims["userId"].(float64)),
+		Role:   claims["role"].(string),
+	}
+
+	return payload, nil
 }

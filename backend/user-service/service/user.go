@@ -101,7 +101,7 @@ func (s *userService) UpdateStudentMe(ctx context.Context, id int64, req *pbv1.S
 	if err != nil {
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
-	if role != "student" {
+	if role != domain.StudentRole {
 		return domain.ErrNotAuthorized.With("user not student")
 	}
 
@@ -118,7 +118,7 @@ func (s *userService) UpdateCompanyMe(ctx context.Context, id int64, req *pbv1.C
 	if err != nil {
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
-	if role != "company" {
+	if role != domain.CompanyRole {
 		return domain.ErrNotAuthorized.With("user not company")
 	}
 
@@ -173,7 +173,7 @@ func (s *userService) DeleteStudent(ctx context.Context, userId, id int64) error
 	if err != nil {
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
-	if role != "admin" {
+	if role != domain.AdminRole {
 		return domain.ErrNotAuthorized.With("user not admin")
 	}
 
@@ -190,7 +190,7 @@ func (s *userService) DeleteCompany(ctx context.Context, userId, id int64) error
 	if err != nil {
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
-	if role != "admin" {
+	if role != domain.AdminRole {
 		return domain.ErrNotAuthorized.With("user not admin")
 	}
 
