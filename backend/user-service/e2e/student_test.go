@@ -64,7 +64,7 @@ func TestGetStudentMe(t *testing.T) {
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
 		UserId: 0,
 		Role:   domain.StudentRole,
-	}, config.AccessTokenPrivateKey)
+	})
 	require.NoError(t, err)
 
 	tests := map[string]struct {
@@ -277,7 +277,7 @@ func TestUpdateStudent(t *testing.T) {
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
 		UserId: 0,
 		Role:   domain.StudentRole,
-	}, config.AccessTokenPrivateKey)
+	})
 	require.NoError(t, err)
 
 	tests := map[string]struct {

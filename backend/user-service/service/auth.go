@@ -152,15 +152,15 @@ func (s *authService) SignIn(ctx context.Context, req *pbv1.LoginRequest) (strin
 	access_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
 		UserId: u.Id,
 		Role:   u.Role,
-	}, config.AccessTokenPrivateKey)
+	})
 	if err != nil {
 		return "", "", err
 	}
 
-	refresh_token, err := utils.CreateAccessToken(config.RefreshTokenExpiresIn, &pbv1.Payload{
+	refresh_token, err := utils.CreateRefreshToken(config.RefreshTokenExpiresIn, &pbv1.Payload{
 		UserId: u.Id,
 		Role:   u.Role,
-	}, config.RefreshTokenPrivateKey)
+	})
 	if err != nil {
 		return "", "", err
 	}
@@ -175,7 +175,7 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 	}
 
 	config, _ := config.LoadConfig("..")
-	sub, err := utils.ValidateToken(refreshToken, config.RefreshTokenPublicKey)
+	sub, err := utils.ValidateRefreshToken(refreshToken)
 	if err != nil {
 		return "", err
 	}
@@ -188,7 +188,7 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 	access_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
 		UserId: sub.UserId,
 		Role:   sub.Role,
-	}, config.AccessTokenPrivateKey)
+	})
 	if err != nil {
 		return "", err
 	}
@@ -197,8 +197,7 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 }
 
 func (s *authService) LogOut(ctx context.Context, refreshToken string) error {
-	config, _ := config.LoadConfig("..")
-	sub, err := utils.ValidateToken(refreshToken, config.RefreshTokenPublicKey)
+	sub, err := utils.ValidateRefreshToken(refreshToken)
 	if err != nil {
 		return err
 	}

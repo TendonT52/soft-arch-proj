@@ -112,7 +112,7 @@ func TestListApprovedCompanies(t *testing.T) {
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
 		UserId: 0,
 		Role:   domain.StudentRole,
-	}, config.AccessTokenPrivateKey)
+	})
 	require.NoError(t, err)
 
 	// name, email, description, location, phone, category

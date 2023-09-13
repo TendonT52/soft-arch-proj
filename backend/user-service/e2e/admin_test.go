@@ -87,7 +87,7 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
 		UserId: 0,
 		Role:   domain.CompanyRole,
-	}, config.AccessTokenPrivateKey)
+	})
 	require.NoError(t, err)
 
 	tests := map[string]struct {
@@ -221,7 +221,7 @@ func TestListCompanies(t *testing.T) {
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
 		UserId: 0,
 		Role:   domain.AdminRole,
-	}, config.AccessTokenPrivateKey)
+	})
 	require.NoError(t, err)
 
 	// name, email, description, location, phone, category

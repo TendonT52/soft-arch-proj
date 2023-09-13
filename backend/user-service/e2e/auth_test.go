@@ -409,10 +409,10 @@ func TestRefreshToken(t *testing.T) {
 
 	// Wrong token (Unknown person)
 	config, _ := config.LoadConfig("..")
-	refresh_token_wrong, err := utils.CreateAccessToken(config.RefreshTokenExpiresIn, &pbv1.Payload{
+	refresh_token_wrong, err := utils.CreateRefreshToken(config.RefreshTokenExpiresIn, &pbv1.Payload{
 		UserId: 0,
 		Role:   domain.StudentRole,
-	}, config.RefreshTokenPrivateKey)
+	})
 	require.NoError(t, err)
 
 	// Person 2 Already logged out

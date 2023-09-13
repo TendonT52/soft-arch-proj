@@ -19,7 +19,7 @@ func createMockToken(t *testing.T, id int64, role string) string {
 	mock_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
 		UserId: id,
 		Role:   role,
-	}, config.AccessTokenPrivateKey)
+	})
 	require.NoError(t, err)
 	return mock_token
 }
