@@ -21,8 +21,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Something went wrong. Could not connect to the database. %s", err)
 	}
+	defer db.Close()
 
-	
 	memphisConn := email.InitMemphisConnection()
 	defer memphisConn.Close()
 

@@ -3,6 +3,7 @@ package config
 import (
 	"time"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 )
 
@@ -59,12 +60,14 @@ func LoadConfig(path string) (config Config, err error) {
 
 	err = viper.ReadInConfig()
 	if err != nil {
-		return
+		return Config{}, err
 	}
 
-	err = viper.Unmarshal(&config)
+	err = viper.Unmarshal(&config, func(dc *mapstructure.DecoderConfig) {
+		dc.ErrorUnset = true
+	})
 	if err != nil {
-		return
+		return Config{}, err
 	}
 	return
 }
