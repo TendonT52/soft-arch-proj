@@ -26,7 +26,6 @@ brew install kubectl
 ```bash
 go get -u -d github.com/golang-migrate/migrate/cmd/migrate
 cd $GOPATH/src/github.com/golang-migrate/migrate/cmd/migrate
-# go build -tags 'postgres' -o $GOPATH/bin/migrate github.com/golang-migrate/migrate/cmd/migrate
 ```
 
 ### Install Telepresence
@@ -48,7 +47,7 @@ brew install datawire/blackbird/telepresence-arm64
 Run the following script to set up Kubernetes:
 
 ```bash
-./k8s-setup.sh
+make k8s-run-dev
 ```
 
 ### Setup Database
@@ -56,16 +55,8 @@ Run the following script to set up Kubernetes:
 Run the following script to set up the database:
 
 ```bash
-./migration.sh
+make migrate-up
 ```
-
-## Database UI
-
-Access the database UI using the following URL:
-
-- URL: [http://todo-pgadmin.default/](http://todo-pgadmin.default/)
-- Username: admin@admin.com
-- Password: mypassword
 
 ## Connecting to gRPC
 
@@ -75,16 +66,40 @@ To connect to gRPC using your application, use the following host and port:
 - Port: 8080
 
 ## Generating gRPC Code
-
-Use the `compile-protos.sh` script to generate gRPC code:
+Run the following script to generate gRPC code:
 
 ```bash
-./compile-protos.sh
+make gen-proto
+```
+
+## Running the Application
+Run the following script to run the application:
+
+```bash
+go run .
+```
+
+## Testing the Application
+Run the following script to test the application:
+
+```bash
+make test-all
 ```
 
 ## Database Details
-
-- Database Host: user-postgres.default
+Postgresql
+- Host: user-service-postgresql.default
 - Port: 5432
-- Username: root
-- Password: mypassword
+- Username: postgres
+- Password: password
+
+Redis
+- Host: user-service-redis-master.default
+- Port: 6379
+- Password: password
+
+Memphis
+- Host: memphis.default
+- Port: 9000
+- username: root
+- password: password
