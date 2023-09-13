@@ -18,10 +18,6 @@ type Database struct {
 	redis *redis.Client
 }
 
-const (
-	migrationsPath = "./migrations"
-)
-
 func NewDatabase(config *config.Config) (*Database, error) {
 	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s", config.DBUserName, config.DBUserPassword, config.DBHost, config.DBPort, config.DBName, "disable")
 	db, err := sql.Open("postgres", connStr)
@@ -36,7 +32,7 @@ func NewDatabase(config *config.Config) (*Database, error) {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://" + migrationsPath,
+		"file://" + config.MigrationPath,
 		"postgres", driver)
 	
 	if m == nil {

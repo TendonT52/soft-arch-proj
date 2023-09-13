@@ -49,9 +49,11 @@ type Config struct {
 
 	Pepper    string `mapstructure:"PEPPER"`
 	EmailCode string `mapstructure:"EMAIL_CODE"`
+
+	MigrationPath string `mapstructure:"MIGRATION_PATH"`
 }
 
-func LoadConfig(path string) (config Config, err error) {
+func LoadConfig(path string) (config *Config, err error) {
 	viper.AddConfigPath(path)
 	viper.SetConfigType("env")
 	viper.SetConfigName("app")
@@ -60,14 +62,14 @@ func LoadConfig(path string) (config Config, err error) {
 
 	err = viper.ReadInConfig()
 	if err != nil {
-		return Config{}, err
+		return nil, err
 	}
 
 	err = viper.Unmarshal(&config, func(dc *mapstructure.DecoderConfig) {
 		dc.ErrorUnset = true
 	})
 	if err != nil {
-		return Config{}, err
+		return nil, err
 	}
 	return
 }
