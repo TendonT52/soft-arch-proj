@@ -156,7 +156,6 @@ func (s *AuthServer) SignIn(ctx context.Context, req *pbv1.LoginRequest) (*pbv1.
 		Message:      "Login success",
 		AccessToken:  access_token,
 		RefreshToken: refresh_token,
-		LoggedIn:     "true",
 	}, nil
 }
 
@@ -183,12 +182,10 @@ func (s *AuthServer) RefreshToken(ctx context.Context, req *pbv1.RefreshTokenReq
 		Status:      http.StatusOK,
 		Message:     "Refresh token success",
 		AccessToken: access_token,
-		LoggedIn:    "true",
 	}, nil
 }
 
 func (s *AuthServer) LogOut(ctx context.Context, req *pbv1.LogOutRequest) (*pbv1.LogOutResponse, error) {
-	// TODO: Test when connect with Redis
 	err := s.AuthService.LogOut(ctx, req.RefreshToken)
 	if err != nil {
 		log.Printf("Error: %v", err)

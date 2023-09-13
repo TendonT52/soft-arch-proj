@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
-	"github.com/TikhampornSky/go-auth-verifiedMail/initializers"
 	"github.com/TikhampornSky/go-auth-verifiedMail/server"
 	mock "github.com/TikhampornSky/go-auth-verifiedMail/test/mock_port"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
@@ -15,7 +15,7 @@ import (
 )
 
 func createMockToken(t *testing.T, id int64) string {
-	config, _ := initializers.LoadConfig("..")
+	config, _ := config.LoadConfig("..")
 	mock_token, err := utils.CreateToken(config.AccessTokenExpiresIn, id, config.AccessTokenPrivateKey)
 	require.NoError(t, err)
 	return mock_token

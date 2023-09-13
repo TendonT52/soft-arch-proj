@@ -1,4 +1,4 @@
-package initializers
+package config
 
 import (
 	"time"
@@ -38,6 +38,13 @@ type Config struct {
 	MemphisStationName     string `mapstructure:"MEMPHIS_STATION_NAME"`
 	MemphisStationNameTest string `mapstructure:"MEMPHIS_STATION_NAME_TEST"`
 	MemphisProducer        string `mapstructure:"MEMPHIS_PRODUCER"`
+
+	MemphisRetentionVal     int    `mapstructure:"MEMPHIS_RETENTION_VAL"`
+	MemphisRetentionValTest int    `mapstructure:"MEMPHIS_RETENTION_VAL_TEST"`
+	MemphisReplicas         int    `mapstructure:"MEMPHIS_REPLICAS"`
+	MemphisIdempotency      int    `mapstructure:"MEMPHIS_IDEMPOTENCY"`
+	MemphisPartitions       int    `mapstructure:"MEMPHIS_PARTITIONS"`
+	MemphisSchemaName       string `mapstructure:"MEMPHIS_SCHEMA_NAME"`
 
 	Pepper    string `mapstructure:"PEPPER"`
 	EmailCode string `mapstructure:"EMAIL_CODE"`

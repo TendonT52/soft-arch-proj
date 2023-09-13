@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS companies_search_idx;

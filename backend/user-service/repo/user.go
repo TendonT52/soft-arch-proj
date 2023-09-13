@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
-	"github.com/TikhampornSky/go-auth-verifiedMail/initializers"
+	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	"github.com/TikhampornSky/go-auth-verifiedMail/port"
 	"github.com/redis/go-redis/v9"
-	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 )
 
 type DBTX interface {
@@ -106,7 +106,7 @@ func (r *userRepository) CheckIfAdmin(ctx context.Context, id int64) error {
 
 // Redis Zone //
 func (r *userRepository) SetValueRedis(ctx context.Context, key string, value string) error {
-	config, _ := initializers.LoadConfig("..")
+	config, _ := config.LoadConfig("..")
 	err := r.redis.Set(ctx, key, value, time.Duration(config.REDISTimeout)*time.Minute).Err()
 	if err != nil {
 		return domain.ErrInternal.From(err.Error(), err)
