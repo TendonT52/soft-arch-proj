@@ -157,10 +157,8 @@ func (s *authService) SignIn(ctx context.Context, req *pbv1.LoginRequest) (strin
 		return "", "", err
 	}
 
-	refresh_token, err := utils.CreateRefreshToken(config.RefreshTokenExpiresIn, &pbv1.Payload{
-		UserId: u.Id,
-		Role:   u.Role,
-	})
+	fmt.Println("===> ", u.Id)
+	refresh_token, err := utils.CreateRefreshToken(config.RefreshTokenExpiresIn, u.Id)
 	if err != nil {
 		return "", "", err
 	}
@@ -175,19 +173,19 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 	}
 
 	config, _ := config.LoadConfig("..")
-	sub, err := utils.ValidateRefreshToken(refreshToken)
+	userId, err := utils.ValidateRefreshToken(refreshToken)
 	if err != nil {
 		return "", err
 	}
 
-	_, err = s.repo.CheckUserIDExist(ctx, sub.UserId)
+	role, err := s.repo.CheckUserIDExist(ctx, userId)
 	if err != nil {
 		return "", domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
 
 	access_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
-		UserId: sub.UserId,
-		Role:   sub.Role,
+		UserId: userId,
+		Role:   role,
 	})
 	if err != nil {
 		return "", err
@@ -197,12 +195,12 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 }
 
 func (s *authService) LogOut(ctx context.Context, refreshToken string) error {
-	sub, err := utils.ValidateRefreshToken(refreshToken)
+	userId, err := utils.ValidateRefreshToken(refreshToken)
 	if err != nil {
 		return err
 	}
 
-	_, err = s.repo.CheckUserIDExist(ctx, sub.UserId)
+	_, err = s.repo.CheckUserIDExist(ctx, userId)
 	if err != nil {
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
