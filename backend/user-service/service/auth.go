@@ -149,7 +149,7 @@ func (s *authService) SignIn(ctx context.Context, req *pbv1.LoginRequest) (strin
 
 	// Generate token
 	config, _ := config.LoadConfig("..")
-	access_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
+	access_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: u.Id,
 		Role:   u.Role,
 	})
@@ -183,7 +183,7 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 		return "", domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
 
-	access_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
+	access_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: userId,
 		Role:   role,
 	})

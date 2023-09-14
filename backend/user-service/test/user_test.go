@@ -16,7 +16,7 @@ import (
 
 func createMockToken(t *testing.T, id int64, role string) string {
 	config, _ := config.LoadConfig("..")
-	mock_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
+	mock_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: id,
 		Role:   role,
 	})

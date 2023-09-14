@@ -78,7 +78,7 @@ func TestGetCompanyMe(t *testing.T) {
 
 	// Generate WRONG token
 	config, _ := config.LoadConfig("..")
-	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &pbv1.Payload{
+	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: 0,
 		Role:   domain.CompanyRole,
 	})

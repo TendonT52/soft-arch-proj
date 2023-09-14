@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
-	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
+	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	"github.com/golang-jwt/jwt"
 )
 
-func CreateAccessToken(ttl time.Duration, payload *pbv1.Payload) (string, error) {
+func CreateAccessToken(ttl time.Duration, payload *domain.Payload) (string, error) {
 	config, _ := config.LoadConfig("..")
 	decodedPrivateKey, err := base64.StdEncoding.DecodeString(config.AccessTokenPrivateKey)
 	if err != nil {
@@ -60,7 +60,7 @@ func CreateRefreshToken(ttl time.Duration, userId int64) (string, error) {
 	return tokenString, nil
 }
 
-func ValidateAccessToken(token string) (*pbv1.Payload, error) {
+func ValidateAccessToken(token string) (*domain.Payload, error) {
 	config, _ := config.LoadConfig("..")
 	decodedPublicKey, err := base64.StdEncoding.DecodeString(config.AccessTokenPublicKey)
 	if err != nil {
@@ -88,7 +88,7 @@ func ValidateAccessToken(token string) (*pbv1.Payload, error) {
 		return nil, fmt.Errorf("validate: invalid token")
 	}
 
-	payload := &pbv1.Payload{
+	payload := &domain.Payload{
 		UserId: int64(claims["userId"].(float64)),
 		Role:   claims["role"].(string),
 	}
