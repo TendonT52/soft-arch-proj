@@ -60,6 +60,15 @@ service UserService {
     rpc DeleteCompanies(DeleteCompaniesRequest) returns (DeleteCompaniesResponse) {}
 }
 
+message User {
+    int64 id = 1;
+    string email = 2;
+    string password = 3;
+    string role = 4;
+    bool verified = 5;
+    int64 created_at = 6;
+}
+
 message Student {
     int64 id = 1;
     string name = 2;

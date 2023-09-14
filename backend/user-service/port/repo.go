@@ -12,7 +12,7 @@ type UserRepoPort interface {
 	CreateAdmin(ctx context.Context, user *pbv1.CreateAdminRequest, createTime int64) (int64, error)
 
 	GetSalt(ctx context.Context, email string) (string, error)
-	GetPassword(ctx context.Context, req *pbv1.LoginRequest) (int64, string, int64, error)
+	GetUser(ctx context.Context, req *pbv1.LoginRequest) (*pbv1.User, error)
 	CheckUserIDExist(ctx context.Context, id int64) (string, error)
 	CheckEmailExist(ctx context.Context, email string) error
 	CheckIfAdmin(ctx context.Context, id int64) error

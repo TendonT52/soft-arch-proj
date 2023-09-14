@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math"
 	"strconv"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
@@ -137,22 +136,29 @@ func (s *authService) SignUpAdmin(ctx context.Context, req *pbv1.CreateAdminRequ
 }
 
 func (s *authService) SignIn(ctx context.Context, req *pbv1.LoginRequest) (string, string, error) {
-	id, password, db_time, err := s.repo.GetPassword(ctx, req)
+	u, err := s.repo.GetUser(ctx, req)
 	if err != nil {
 		return "", "", err
 	}
-	if err := utils.VerifyPassword(password, req.Password, db_time); err != nil {
+	if !u.Verified {
+		return "", "", domain.ErrNotVerified.With("user not verified")
+	}
+	if err := utils.VerifyPassword(u.Password, req.Password, u.CreatedAt); err != nil {
 		return "", "", domain.ErrPasswordNotMatch
 	}
 
 	// Generate token
 	config, _ := config.LoadConfig("..")
-	access_token, err := utils.CreateToken(config.AccessTokenExpiresIn, id, config.AccessTokenPrivateKey)
+	access_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
+		UserId: u.Id,
+		Role:   u.Role,
+	})
 	if err != nil {
 		return "", "", err
 	}
 
-	refresh_token, err := utils.CreateToken(config.RefreshTokenExpiresIn, id, config.RefreshTokenPrivateKey)
+	fmt.Println("===> ", u.Id)
+	refresh_token, err := utils.CreateRefreshToken(config.RefreshTokenExpiresIn, u.Id)
 	if err != nil {
 		return "", "", err
 	}
@@ -167,21 +173,20 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 	}
 
 	config, _ := config.LoadConfig("..")
-	sub, err := utils.ValidateToken(refreshToken, config.RefreshTokenPublicKey)
+	userId, err := utils.ValidateRefreshToken(refreshToken)
 	if err != nil {
 		return "", err
 	}
 
-	val, ok := sub.(float64)
-	if !ok {
-		return "", domain.ErrInternal.With("cannot convert sub to float64")
-	}
-	_, err = s.repo.CheckUserIDExist(ctx, int64(math.Round(val)))
+	role, err := s.repo.CheckUserIDExist(ctx, userId)
 	if err != nil {
 		return "", domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
 
-	access_token, err := utils.CreateToken(config.AccessTokenExpiresIn, int64(math.Round(val)), config.AccessTokenPrivateKey)
+	access_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
+		UserId: userId,
+		Role:   role,
+	})
 	if err != nil {
 		return "", err
 	}
@@ -190,17 +195,12 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 }
 
 func (s *authService) LogOut(ctx context.Context, refreshToken string) error {
-	config, _ := config.LoadConfig("..")
-	sub, err := utils.ValidateToken(refreshToken, config.RefreshTokenPublicKey)
+	userId, err := utils.ValidateRefreshToken(refreshToken)
 	if err != nil {
 		return err
 	}
 
-	val, ok := sub.(float64)
-	if !ok {
-		return domain.ErrInternal.With("cannot convert sub to float64")
-	}
-	_, err = s.repo.CheckUserIDExist(ctx, int64(math.Round(val)))
+	_, err = s.repo.CheckUserIDExist(ctx, userId)
 	if err != nil {
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}

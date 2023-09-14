@@ -21,7 +21,7 @@ func (r *userRepository) CreateCompany(ctx context.Context, company *pbv1.Create
 	// Insert into Table users
 	query := "INSERT INTO users (email, password, role, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
 	var id int64
-	err = tx.QueryRowContext(ctx, query, company.Email, company.Password, "company", createTime, createTime).Scan(&id)
+	err = tx.QueryRowContext(ctx, query, company.Email, company.Password, domain.CompanyRole, createTime, createTime).Scan(&id)
 	if err != nil {
 		tx.Rollback()
 		return 0, domain.ErrInternal.From(err.Error(), err)

@@ -20,7 +20,7 @@ func (r *userRepository) CreateStudent(ctx context.Context, student *pbv1.Create
 	// Insert into Table users
 	query := "INSERT INTO users (email, password, role, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
 	var id int64
-	err = tx.QueryRowContext(ctx, query, student.Email, student.Password, "student", createTime, createTime).Scan(&id)
+	err = tx.QueryRowContext(ctx, query, student.Email, student.Password, domain.StudentRole, createTime, createTime).Scan(&id)
 	if err != nil {
 		tx.Rollback()
 		return 0, domain.ErrInternal.From(err.Error(), err)
@@ -57,7 +57,7 @@ func (r *userRepository) GetStudentByID(ctx context.Context, id int64) (*pbv1.St
 	query := "SELECT users.id, students.name, users.email, students.description, students.faculty, students.major, students.year FROM users INNER JOIN students ON users.id = students.sid WHERE users.id = $1"
 	var student pbv1.Student
 	err := r.db.QueryRowContext(ctx, query, id).Scan(&student.Id, &student.Name, &student.Email, &student.Description, &student.Faculty, &student.Major, &student.Year)
-	if errors.Is(err, sql.ErrNoRows){
+	if errors.Is(err, sql.ErrNoRows) {
 		return &pbv1.Student{}, domain.ErrUserIDNotFound.From(err.Error(), err)
 	}
 	if err != nil {

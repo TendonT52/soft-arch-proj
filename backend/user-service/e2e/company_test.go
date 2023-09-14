@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
+	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/stretchr/testify/require"
@@ -77,7 +78,10 @@ func TestGetCompanyMe(t *testing.T) {
 
 	// Generate WRONG token
 	config, _ := config.LoadConfig("..")
-	access_token_wrong, err := utils.CreateToken(config.AccessTokenExpiresIn, 0, config.AccessTokenPrivateKey)
+	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
+		UserId: 0,
+		Role:   domain.CompanyRole,
+	})
 	require.NoError(t, err)
 
 	tests := map[string]struct {

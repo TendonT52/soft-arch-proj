@@ -408,7 +408,7 @@ func TestRefreshToken(t *testing.T) {
 
 	// Wrong token (Unknown person)
 	config, _ := config.LoadConfig("..")
-	refresh_token_wrong, err := utils.CreateToken(config.RefreshTokenExpiresIn, 0, config.RefreshTokenPrivateKey)
+	refresh_token_wrong, err := utils.CreateRefreshToken(config.RefreshTokenExpiresIn, 0)
 	require.NoError(t, err)
 
 	// Person 2 Already logged out
@@ -450,6 +450,7 @@ func TestRefreshToken(t *testing.T) {
 				Message: "the user belonging to this token no logger exists",
 			},
 		},
+
 		"already logged out": {
 			req: &pbv1.RefreshTokenRequest{
 				RefreshToken: u.RefreshToken,
@@ -475,6 +476,7 @@ func TestRefreshToken(t *testing.T) {
 		})
 	}
 }
+
 
 func TestLogOut(t *testing.T) {
 	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))

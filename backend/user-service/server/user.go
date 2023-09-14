@@ -26,7 +26,7 @@ func NewUserServer(s port.UserServicePort) *UserServer {
 
 // Student Zone
 func (s *UserServer) GetStudentMe(ctx context.Context, req *pbv1.GetStudentMeRequest) (*pbv1.GetStudentResponse, error) {
-	id, err := utils.ExtractUserIDFromAccessToken(req.AccessToken)
+	payload, err := utils.ValidateAccessToken(req.AccessToken)
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.GetStudentResponse{
@@ -34,7 +34,8 @@ func (s *UserServer) GetStudentMe(ctx context.Context, req *pbv1.GetStudentMeReq
 			Message: err.Error(),
 		}, nil
 	}
-	res, err := s.UserService.GetStudentMe(ctx, id)
+
+	res, err := s.UserService.GetStudentMe(ctx, payload.UserId)
 	if err != nil {
 		log.Println("Error from get student (Me): ", err)
 		return &pbv1.GetStudentResponse{
@@ -52,7 +53,7 @@ func (s *UserServer) GetStudentMe(ctx context.Context, req *pbv1.GetStudentMeReq
 }
 
 func (s *UserServer) GetStudent(ctx context.Context, req *pbv1.GetStudentRequest) (*pbv1.GetStudentResponse, error) {
-	userId, err := utils.ExtractUserIDFromAccessToken(req.AccessToken)
+	payload, err := utils.ValidateAccessToken(req.AccessToken)
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.GetStudentResponse{
@@ -60,7 +61,8 @@ func (s *UserServer) GetStudent(ctx context.Context, req *pbv1.GetStudentRequest
 			Message: err.Error(),
 		}, nil
 	}
-	res, err := s.UserService.GetStudentByID(ctx, userId, req.Id)
+
+	res, err := s.UserService.GetStudentByID(ctx, payload.UserId, req.Id)
 	if errors.Is(err, domain.ErrUserIDNotFound) {
 		log.Println("Error UserId not found: ", err)
 		return &pbv1.GetStudentResponse{
@@ -85,7 +87,7 @@ func (s *UserServer) GetStudent(ctx context.Context, req *pbv1.GetStudentRequest
 }
 
 func (s *UserServer) UpdateStudent(ctx context.Context, req *pbv1.UpdateStudentRequest) (*pbv1.UpdateStudentResponse, error) {
-	userId, err := utils.ExtractUserIDFromAccessToken(req.AccessToken)
+	payload, err := utils.ValidateAccessToken(req.AccessToken)
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.UpdateStudentResponse{
@@ -94,7 +96,7 @@ func (s *UserServer) UpdateStudent(ctx context.Context, req *pbv1.UpdateStudentR
 		}, nil
 	}
 
-	err = s.UserService.UpdateStudentMe(ctx, userId, req.Student)
+	err = s.UserService.UpdateStudentMe(ctx, payload.UserId, req.Student)
 	if errors.Is(err, domain.ErrUserIDNotFound) {
 		log.Println("Error UserId not found: ", err)
 		return &pbv1.UpdateStudentResponse{
@@ -127,7 +129,7 @@ func (s *UserServer) UpdateStudent(ctx context.Context, req *pbv1.UpdateStudentR
 
 // Company Zone
 func (s *UserServer) GetCompanyMe(ctx context.Context, req *pbv1.GetCompanyMeRequest) (*pbv1.GetCompanyResponse, error) {
-	id, err := utils.ExtractUserIDFromAccessToken(req.AccessToken)
+	payload, err := utils.ValidateAccessToken(req.AccessToken)
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.GetCompanyResponse{
@@ -135,7 +137,8 @@ func (s *UserServer) GetCompanyMe(ctx context.Context, req *pbv1.GetCompanyMeReq
 			Message: err.Error(),
 		}, nil
 	}
-	res, err := s.UserService.GetCompanyMe(ctx, id)
+
+	res, err := s.UserService.GetCompanyMe(ctx, payload.UserId)
 	if err != nil {
 		log.Println("Error from get company (Me): ", err)
 		return &pbv1.GetCompanyResponse{
@@ -154,7 +157,7 @@ func (s *UserServer) GetCompanyMe(ctx context.Context, req *pbv1.GetCompanyMeReq
 }
 
 func (s *UserServer) GetCompany(ctx context.Context, req *pbv1.GetCompanyRequest) (*pbv1.GetCompanyResponse, error) {
-	userId, err := utils.ExtractUserIDFromAccessToken(req.AccessToken)
+	payload, err := utils.ValidateAccessToken(req.AccessToken)
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.GetCompanyResponse{
@@ -163,7 +166,7 @@ func (s *UserServer) GetCompany(ctx context.Context, req *pbv1.GetCompanyRequest
 		}, nil
 	}
 
-	res, err := s.UserService.GetCompanyByID(ctx, userId, req.Id)
+	res, err := s.UserService.GetCompanyByID(ctx, payload.UserId, req.Id)
 	if errors.Is(err, domain.ErrUserIDNotFound) {
 		log.Println("Error UserId not found: ", err)
 		return &pbv1.GetCompanyResponse{
@@ -188,7 +191,7 @@ func (s *UserServer) GetCompany(ctx context.Context, req *pbv1.GetCompanyRequest
 }
 
 func (s *UserServer) UpdateCompany(ctx context.Context, req *pbv1.UpdateCompanyRequest) (*pbv1.UpdateCompanyResponse, error) {
-	userId, err := utils.ExtractUserIDFromAccessToken(req.AccessToken)
+	payload, err := utils.ValidateAccessToken(req.AccessToken)
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.UpdateCompanyResponse{
@@ -197,7 +200,7 @@ func (s *UserServer) UpdateCompany(ctx context.Context, req *pbv1.UpdateCompanyR
 		}, nil
 	}
 
-	err = s.UserService.UpdateCompanyMe(ctx, userId, req.Company)
+	err = s.UserService.UpdateCompanyMe(ctx, payload.UserId, req.Company)
 	if errors.Is(err, domain.ErrUserIDNotFound) {
 		log.Println("Error UserId not found: ", err)
 		return &pbv1.UpdateCompanyResponse{
@@ -229,7 +232,7 @@ func (s *UserServer) UpdateCompany(ctx context.Context, req *pbv1.UpdateCompanyR
 }
 
 func (s *UserServer) ListCompanies(ctx context.Context, req *pbv1.ListCompaniesRequest) (*pbv1.ListCompaniesResponse, error) {
-	userId, err := utils.ExtractUserIDFromAccessToken(req.AccessToken)
+	payload, err := utils.ValidateAccessToken(req.AccessToken)
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.ListCompaniesResponse{
@@ -238,7 +241,7 @@ func (s *UserServer) ListCompanies(ctx context.Context, req *pbv1.ListCompaniesR
 		}, nil
 	}
 
-	res, err := s.UserService.GetAllCompany(ctx, userId)
+	res, err := s.UserService.GetAllCompany(ctx, payload.UserId)
 	if errors.Is(err, domain.ErrNotAuthorized) {
 		log.Println("Error NOT Authorize: ", err)
 		return &pbv1.ListCompaniesResponse{
@@ -264,7 +267,7 @@ func (s *UserServer) ListCompanies(ctx context.Context, req *pbv1.ListCompaniesR
 }
 
 func (s *UserServer) ListApprovedCompanies(ctx context.Context, req *pbv1.ListApprovedCompaniesRequest) (*pbv1.ListApprovedCompaniesResponse, error) {
-	userId, err := utils.ExtractUserIDFromAccessToken(req.AccessToken)
+	payload, err := utils.ValidateAccessToken(req.AccessToken)
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.ListApprovedCompaniesResponse{
@@ -273,7 +276,7 @@ func (s *UserServer) ListApprovedCompanies(ctx context.Context, req *pbv1.ListAp
 		}, nil
 	}
 
-	res, err := s.UserService.GetApprovedCompany(ctx, userId, req.Search)
+	res, err := s.UserService.GetApprovedCompany(ctx, payload.UserId, req.Search)
 	if err != nil {
 		log.Println("Error from list approved companies: ", err)
 		return &pbv1.ListApprovedCompaniesResponse{
@@ -292,7 +295,7 @@ func (s *UserServer) ListApprovedCompanies(ctx context.Context, req *pbv1.ListAp
 }
 
 func (s *UserServer) UpdateCompanyStatus(ctx context.Context, req *pbv1.UpdateCompanyStatusRequest) (*pbv1.UpdateCompanyStatusResponse, error) {
-	userId, err := utils.ExtractUserIDFromAccessToken(req.AccessToken)
+	payload, err := utils.ValidateAccessToken(req.AccessToken)
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.UpdateCompanyStatusResponse{
@@ -301,7 +304,7 @@ func (s *UserServer) UpdateCompanyStatus(ctx context.Context, req *pbv1.UpdateCo
 		}, nil
 	}
 
-	err = s.UserService.UpdateCompanyStatus(ctx, userId, req.Id, req.Status)
+	err = s.UserService.UpdateCompanyStatus(ctx, payload.UserId, req.Id, req.Status)
 	if errors.Is(err, domain.ErrNotAuthorized) {
 		return &pbv1.UpdateCompanyStatusResponse{
 			Status:  http.StatusUnauthorized,
@@ -325,7 +328,7 @@ func (s *UserServer) UpdateCompanyStatus(ctx context.Context, req *pbv1.UpdateCo
 }
 
 func (s *UserServer) DeleteCompanies(ctx context.Context, req *pbv1.DeleteCompaniesRequest) (*pbv1.DeleteCompaniesResponse, error) {
-	userId, err := utils.ExtractUserIDFromAccessToken(req.AccessToken)
+	payload, err := utils.ValidateAccessToken(req.AccessToken)
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.DeleteCompaniesResponse{
@@ -334,7 +337,7 @@ func (s *UserServer) DeleteCompanies(ctx context.Context, req *pbv1.DeleteCompan
 		}, nil
 	}
 
-	err = s.UserService.DeleteCompanies(ctx, userId)
+	err = s.UserService.DeleteCompanies(ctx, payload.UserId)
 	if errors.Is(err, domain.ErrNotAuthorized) {
 		return &pbv1.DeleteCompaniesResponse{
 			Status:  http.StatusUnauthorized,
