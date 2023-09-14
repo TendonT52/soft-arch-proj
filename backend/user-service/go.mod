@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/golang/mock v1.4.4
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/memphisdev/memphis.go v1.1.1
 	github.com/redis/go-redis/v9 v9.1.0
 	github.com/spf13/viper v1.16.0
