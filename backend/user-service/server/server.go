@@ -26,6 +26,7 @@ func NewServer(port string, authService port.AuthServicePort, userService port.U
 
 	// Define customfunc to handle panic
 	customFunc = func(p interface{}) (err error) {
+		log.Println("panic triggered: ", p)
 		return status.Errorf(codes.Unknown, "panic triggered: %v", p)
 	}
 
