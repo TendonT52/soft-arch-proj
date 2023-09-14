@@ -129,11 +129,27 @@ func TestCreateStudent(t *testing.T) {
 			},
 			expect: &pbv1.CreateStudentResponse{
 				Status:  400,
-				Message: "Email must be @student.chula.ac.th",
+				Message: "Email must be studentID with @student.chula.ac.th",
+			},
+		},
+		"email length is less than 20": {
+			req: &pbv1.CreateStudentRequest{
+				Name:            "Name Test",
+				Email:           id_student + "@g.com",
+				Password:        "password-test",
+				PasswordConfirm: "password-test",
+				Description:     "I am a student",
+				Faculty:         "Engineering",
+				Major:           "Computer Engineering",
+				Year:            4,
+			},
+			expect: &pbv1.CreateStudentResponse{
+				Status:  400,
+				Message: "Email must be studentID with @student.chula.ac.th",
 			},
 		},
 	}
-	testOrder := []string{"success", "email already exists", "password and password confirm not match", "email is not student.chula.ac.th"}
+	testOrder := []string{"success", "email already exists", "password and password confirm not match", "email is not student.chula.ac.th", "email length is less than 20"}
 
 	for _, testName := range testOrder {
 		tc := tests[testName]
@@ -476,7 +492,6 @@ func TestRefreshToken(t *testing.T) {
 		})
 	}
 }
-
 
 func TestLogOut(t *testing.T) {
 	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
