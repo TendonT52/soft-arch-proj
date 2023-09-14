@@ -33,10 +33,10 @@ func (s *AuthServer) CreateStudent(ctx context.Context, req *pbv1.CreateStudentR
 		}, nil
 	}
 	if errors.Is(err, domain.ErrNotChulaStudentEmail) {
-		log.Printf("Email must be @student.chula.ac.th: %v", err)
+		log.Printf("Email must be studentID with @student.chula.ac.th: %v", err)
 		return &pbv1.CreateStudentResponse{
 			Status:  http.StatusBadRequest,
-			Message: "Email must be @student.chula.ac.th",
+			Message: "Email must be studentID with @student.chula.ac.th",
 		}, nil
 	}
 	if errors.Is(err, domain.ErrDuplicateEmail) {

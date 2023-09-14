@@ -54,6 +54,9 @@ func SendEmail(conn port.MemphisPort, typeMail, url, subject, name, email string
 }
 
 func IsChulaStudentEmail(email string) bool {
+	if len(email) < 20 {
+		return false
+	}
 	return email[len(email)-20:] == "@student.chula.ac.th"
 }
 

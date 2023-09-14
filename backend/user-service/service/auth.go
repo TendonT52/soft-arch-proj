@@ -38,7 +38,7 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 	req.Password = hashedPassword
 
 	if !email.IsChulaStudentEmail(req.Email) {
-		return 0, domain.ErrNotChulaStudentEmail.With("email must be @student.chula.ac.th")
+		return 0, domain.ErrNotChulaStudentEmail.With("Email must be studentID with @student.chula.ac.th")
 	}
 
 	err := s.repo.CheckEmailExist(ctx, req.Email)
