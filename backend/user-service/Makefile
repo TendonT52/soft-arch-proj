@@ -66,8 +66,8 @@ k8s-run-dev:
 	--set metadata.persistence.existingClaim=memphis-metadata-persistent-claim \
 	--wait
 
-	kubectl create secret generic user-service --from-file=app.env
-	helm install user-service ./helm/user-service
+	# kubectl create secret generic user-service --from-file=app.env
+	# helm install user-service ./helm/user-service
 
 	telepresence helm install
 	telepresence connect
