@@ -14,6 +14,9 @@ migrate-force:
 migrate-drop:
 	migrate -database "postgres://postgres:password@user-service-postgresql.default:5432/?sslmode=disable" -path migrations drop
 
+seed:
+	psql postgres://postgres:password@user-service-postgresql.default:5432/?sslmode=disable -a -f ./seed.sql
+
 gen-proto:
 	protoc \
     --proto_path=proto \
