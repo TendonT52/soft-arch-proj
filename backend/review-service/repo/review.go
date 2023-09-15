@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"jindamanee2544/review-service/internal/model"
+	"JinnnDamanee/review-service/internal/model"
 
 	"gorm.io/gorm"
 )

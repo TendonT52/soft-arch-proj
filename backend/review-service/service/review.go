@@ -1,9 +1,9 @@
 package service
 
 import (
+	"JinnnDamanee/review-service/internal/model"
+	"JinnnDamanee/review-service/internal/repo"
 	"fmt"
-	"jindamanee2544/review-service/internal/model"
-	"jindamanee2544/review-service/internal/repo"
 	"net/http"
 	"strconv"
 

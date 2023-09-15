@@ -1,9 +1,8 @@
-module jindamanee2544/review-service
+module JinnnDamanee/review-service
 
 go 1.19
 
 require (
-	github.com/dustinkirkland/golang-petname v0.0.0-20230626224747-e794b9370d49
 	github.com/labstack/echo/v4 v4.11.1
 	github.com/lib/pq v1.10.9
 	gorm.io/driver/postgres v1.5.2

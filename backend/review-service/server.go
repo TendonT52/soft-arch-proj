@@ -1,10 +1,10 @@
 package main
 
 import (
-	"jindamanee2544/review-service/db"
-	"jindamanee2544/review-service/httpServer"
-	"jindamanee2544/review-service/internal/repo"
-	"jindamanee2544/review-service/internal/service"
+	"JinnnDamanee/review-service/db"
+	"JinnnDamanee/review-service/httpServer"
+	"JinnnDamanee/review-service/internal/repo"
+	"JinnnDamanee/review-service/internal/service"
 
 	"log"
 
