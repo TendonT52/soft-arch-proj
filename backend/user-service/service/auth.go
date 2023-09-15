@@ -157,7 +157,6 @@ func (s *authService) SignIn(ctx context.Context, req *pbv1.LoginRequest) (strin
 		return "", "", err
 	}
 
-	fmt.Println("===> ", u.Id)
 	refresh_token, err := utils.CreateRefreshToken(config.RefreshTokenExpiresIn, u.Id)
 	if err != nil {
 		return "", "", err
