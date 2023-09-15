@@ -31,13 +31,13 @@ service AuthService {
       body: "*"
     };
   }
-  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {  // Need to set refresh_token in cookie
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {  // Need to have refresh_token in cookie
     option (google.api.http) = {
       post: "/v1/refresh"
       body: "*"
     };
   }
-  rpc LogOut(LogOutRequest) returns (LogOutResponse) {
+  rpc LogOut(LogOutRequest) returns (LogOutResponse) { // Need to have refresh_token in cookie
     option (google.api.http) = {
       post: "/v1/logout"
       body: "*"
@@ -110,7 +110,7 @@ message LoginRequest {
 message LoginResponse {
   int64 status = 1;
   string message = 2;
-  string access_token = 3;  
+  string access_token = 3;
   string refresh_token = 4;
 }
 
@@ -122,7 +122,7 @@ message RefreshTokenRequest {
 message RefreshTokenResponse {
   int64 status = 1;
   string message = 2;
-  string access_token = 3; 
+  string access_token = 3;
 }
 
 // LogOut

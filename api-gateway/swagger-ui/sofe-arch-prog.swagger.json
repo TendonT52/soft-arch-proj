@@ -71,7 +71,6 @@
         "parameters": [
           {
             "name": "accessToken",
-            "description": "need to set in cookie or authorization header",
             "in": "query",
             "required": false,
             "type": "string"
@@ -102,7 +101,6 @@
         "parameters": [
           {
             "name": "accessToken",
-            "description": "need to set in cookie or authorization header",
             "in": "query",
             "required": false,
             "type": "string"
@@ -201,7 +199,6 @@
         "parameters": [
           {
             "name": "accessToken",
-            "description": "need to set in cookie or authorization header",
             "in": "query",
             "required": false,
             "type": "string"
@@ -271,7 +268,6 @@
           },
           {
             "name": "accessToken",
-            "description": "need to set in cookie or authorization header",
             "in": "query",
             "required": false,
             "type": "string"
@@ -284,7 +280,6 @@
     },
     "/v1/login": {
       "post": {
-        "summary": "Need to set access_token and refresh_token in cookie",
         "operationId": "AuthService_SignIn",
         "responses": {
           "200": {
@@ -317,7 +312,6 @@
     },
     "/v1/logout": {
       "post": {
-        "summary": "Need to clear cookie",
         "operationId": "AuthService_LogOut",
         "responses": {
           "200": {
@@ -350,7 +344,7 @@
     },
     "/v1/refresh": {
       "post": {
-        "summary": "Need to set access_token in cookie and get refresh_token from cookie",
+        "summary": "Need to set refresh_token in cookie",
         "operationId": "AuthService_RefreshToken",
         "responses": {
           "200": {
@@ -463,7 +457,6 @@
         "parameters": [
           {
             "name": "accessToken",
-            "description": "need to set in cookie or authorization header",
             "in": "query",
             "required": false,
             "type": "string"
@@ -501,7 +494,6 @@
           },
           {
             "name": "accessToken",
-            "description": "need to set in cookie or authorization header",
             "in": "query",
             "required": false,
             "type": "string"
@@ -714,8 +706,7 @@
           "type": "string"
         },
         "accessToken": {
-          "type": "string",
-          "title": "need to set in cookie or authorization header"
+          "type": "string"
         },
         "refreshToken": {
           "type": "string"
@@ -742,8 +733,7 @@
           "type": "string"
         },
         "accessToken": {
-          "type": "string",
-          "title": "need to set in cookie or authorization header"
+          "type": "string"
         }
       }
     },
@@ -949,8 +939,7 @@
       "type": "object",
       "properties": {
         "accessToken": {
-          "type": "string",
-          "title": "need to set in cookie or authorization header"
+          "type": "string"
         },
         "company": {
           "$ref": "#/definitions/userCompany"
@@ -974,8 +963,7 @@
       "type": "object",
       "properties": {
         "accessToken": {
-          "type": "string",
-          "title": "need to set in cookie or authorization header"
+          "type": "string"
         },
         "id": {
           "type": "string",
@@ -1003,8 +991,7 @@
       "type": "object",
       "properties": {
         "accessToken": {
-          "type": "string",
-          "title": "need to set in cookie or authorization header"
+          "type": "string"
         },
         "student": {
           "$ref": "#/definitions/userStudent"

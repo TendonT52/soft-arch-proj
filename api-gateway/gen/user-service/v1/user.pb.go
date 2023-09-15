@@ -312,7 +312,7 @@ type GetStudentMeRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"` // need to set in cookie or authorization header
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 }
 
 func (x *GetStudentMeRequest) Reset() {
@@ -361,7 +361,7 @@ type GetStudentRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	Id          int64  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	AccessToken string `protobuf:"bytes,2,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"` // need to set in cookie or authorization header
+	AccessToken string `protobuf:"bytes,2,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 }
 
 func (x *GetStudentRequest) Reset() {
@@ -479,7 +479,7 @@ type UpdateStudentRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AccessToken string   `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"` // need to set in cookie or authorization header
+	AccessToken string   `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 	Student     *Student `protobuf:"bytes,2,opt,name=student,proto3" json:"student,omitempty"`
 }
 
@@ -590,7 +590,7 @@ type GetCompanyMeRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"` // need to set in cookie or authorization header
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 }
 
 func (x *GetCompanyMeRequest) Reset() {
@@ -639,7 +639,7 @@ type GetCompanyRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	Id          int64  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	AccessToken string `protobuf:"bytes,2,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"` // need to set in cookie or authorization header
+	AccessToken string `protobuf:"bytes,2,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 }
 
 func (x *GetCompanyRequest) Reset() {
@@ -757,7 +757,7 @@ type UpdateCompanyRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AccessToken string   `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"` // need to set in cookie or authorization header
+	AccessToken string   `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 	Company     *Company `protobuf:"bytes,2,opt,name=company,proto3" json:"company,omitempty"`
 }
 
@@ -868,7 +868,7 @@ type ListCompaniesRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"` // need to set in cookie or authorization header
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 }
 
 func (x *ListCompaniesRequest) Reset() {
@@ -987,7 +987,7 @@ type ListApprovedCompaniesRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"` // need to set in cookie or authorization header
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 	Search      string `protobuf:"bytes,2,opt,name=search,proto3" json:"search,omitempty"`
 }
 
@@ -1114,7 +1114,7 @@ type UpdateCompanyStatusRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"` // need to set in cookie or authorization header
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 	Id          int64  `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
 	Status      string `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
 }
@@ -1233,7 +1233,7 @@ type DeleteCompaniesRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"` // need to set in cookie or authorization header
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 }
 
 func (x *DeleteCompaniesRequest) Reset() {
