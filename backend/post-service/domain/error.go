@@ -8,11 +8,15 @@ const (
 	_ ErrKind = iota
 	Internal
 	PostNotFound
+	FieldsAreRequired
+	Unauthorized
 )
 
 var (
-	ErrInternal     = BackEndError{Kind: Internal}
-	ErrPostNotFound = BackEndError{Kind: PostNotFound}
+	ErrInternal          = BackEndError{Kind: Internal}
+	ErrPostNotFound      = BackEndError{Kind: PostNotFound}
+	ErrFieldsAreRequired = BackEndError{Kind: FieldsAreRequired}
+	ErrUnauthorized      = BackEndError{Kind: Unauthorized}
 )
 
 type BackEndError struct {
