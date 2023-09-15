@@ -1,50 +1,21 @@
 package main
 
 import (
-	"context"
-	"flag"
-	"fmt"
-	"net/http"
+	"log"
 
-	"github.com/golang/glog"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
-	userService "github.com/tendont52/gen/user-service/v1"
+	"github.com/tendont52/api-gateway/config"
+	"github.com/tendont52/api-gateway/gateway"
 )
-
-var (
-	// command-line options:
-	// gRPC server endpoint
-	grpcServerEndpoint = flag.String("grpc-server-endpoint", "example-app.default:8080", "gRPC server endpoint")
-)
-
-func run() error {
-	fmt.Println("Starting API Gateway...")
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	// Register gRPC server endpoint
-	// Note: Make sure the gRPC server is running properly and accessible
-	mux := runtime.NewServeMux()
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	err := userService.Register(ctx, mux, "localhost:8080", opts)
-	if err != nil {
-		return err
-	}
-
-	// Start HTTP server (and proxy calls to gRPC server endpoint)
-	fmt.Println("API Gateway started successfully!")
-	return http.ListenAndServe(":8082", mux)
-}
 
 func main() {
-	flag.Parse()
-	defer glog.Flush()
-
-	if err := run(); err != nil {
-		glog.Fatal(err)
+	log.Println("Loading config...")
+	conf, err := config.LoadConfig(".")
+	if err != nil {
+		log.Fatalf("cannot load config: %v", err)
+	}
+	log.Println("Config loaded")
+	err = gateway.Serve(conf)
+	if err != nil {
+		log.Fatalf("cannot start gateway: %v", err)
 	}
 }

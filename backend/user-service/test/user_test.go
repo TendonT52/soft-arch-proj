@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
-	"github.com/TikhampornSky/go-auth-verifiedMail/initializers"
 	"github.com/TikhampornSky/go-auth-verifiedMail/server"
 	mock "github.com/TikhampornSky/go-auth-verifiedMail/test/mock_port"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
@@ -14,9 +14,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func createMockToken(t *testing.T, id int64) string {
-	config, _ := initializers.LoadConfig("..")
-	mock_token, err := utils.CreateToken(config.AccessTokenExpiresIn, id, config.AccessTokenPrivateKey)
+func createMockToken(t *testing.T, id int64, role string) string {
+	config, _ := config.LoadConfig("..")
+	mock_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
+		UserId: id,
+		Role:   role,
+	})
 	require.NoError(t, err)
 	return mock_token
 }
@@ -24,7 +27,7 @@ func createMockToken(t *testing.T, id int64) string {
 // Student Zone
 func TestGetStudentMeSuccess(t *testing.T) {
 	req := &pbv1.GetStudentMeRequest{
-		AccessToken: createMockToken(t, 1),
+		AccessToken: createMockToken(t, 1, domain.StudentRole),
 	}
 
 	ctrl := gomock.NewController(t)
@@ -49,7 +52,7 @@ func TestGetStudentMeSuccess(t *testing.T) {
 
 func TestGetStudentSuccess(t *testing.T) {
 	req := &pbv1.GetStudentRequest{
-		AccessToken: createMockToken(t, 2),
+		AccessToken: createMockToken(t, 2, domain.StudentRole),
 		Id:          222,
 	}
 
@@ -75,7 +78,7 @@ func TestGetStudentSuccess(t *testing.T) {
 
 func TestGetStudentIDNotFound(t *testing.T) {
 	req := &pbv1.GetStudentRequest{
-		AccessToken: createMockToken(t, 22),
+		AccessToken: createMockToken(t, 22, domain.StudentRole),
 		Id:          2222,
 	}
 
@@ -93,7 +96,7 @@ func TestGetStudentIDNotFound(t *testing.T) {
 
 func TestUpdateStudentSuccess(t *testing.T) {
 	req := &pbv1.UpdateStudentRequest{
-		AccessToken: createMockToken(t, 3),
+		AccessToken: createMockToken(t, 3, domain.StudentRole),
 		Student: &pbv1.Student{
 			Id:          3,
 			Name:        "mock-student-name-3",
@@ -119,7 +122,7 @@ func TestUpdateStudentSuccess(t *testing.T) {
 
 func TestUpdateStudentUnAuthorized(t *testing.T) {
 	req := &pbv1.UpdateStudentRequest{
-		AccessToken: createMockToken(t, 33),
+		AccessToken: createMockToken(t, 33, domain.StudentRole),
 		Student: &pbv1.Student{
 			Id:          33,
 			Name:        "mock-student-name-33",
@@ -146,7 +149,7 @@ func TestUpdateStudentUnAuthorized(t *testing.T) {
 // Company Zone
 func TestGetCompanyMeSuccess(t *testing.T) {
 	req := &pbv1.GetCompanyMeRequest{
-		AccessToken: createMockToken(t, 4),
+		AccessToken: createMockToken(t, 4, domain.CompanyRole),
 	}
 
 	ctrl := gomock.NewController(t)
@@ -171,7 +174,7 @@ func TestGetCompanyMeSuccess(t *testing.T) {
 
 func TestGetCompanySuccess(t *testing.T) {
 	req := &pbv1.GetCompanyRequest{
-		AccessToken: createMockToken(t, 5),
+		AccessToken: createMockToken(t, 5, domain.CompanyRole),
 		Id:          555,
 	}
 
@@ -197,7 +200,7 @@ func TestGetCompanySuccess(t *testing.T) {
 
 func TestGetCompanyIDNotFound(t *testing.T) {
 	req := &pbv1.GetCompanyRequest{
-		AccessToken: createMockToken(t, 55),
+		AccessToken: createMockToken(t, 55, domain.CompanyRole),
 		Id:          5555,
 	}
 
@@ -215,7 +218,7 @@ func TestGetCompanyIDNotFound(t *testing.T) {
 
 func TestUpdateCompanySuccess(t *testing.T) {
 	req := &pbv1.UpdateCompanyRequest{
-		AccessToken: createMockToken(t, 6),
+		AccessToken: createMockToken(t, 6, domain.CompanyRole),
 		Company: &pbv1.Company{
 			Id:          6,
 			Name:        "mock-company-name-3",
@@ -241,7 +244,7 @@ func TestUpdateCompanySuccess(t *testing.T) {
 
 func TestUpdateCompanyUnAuthorized(t *testing.T) {
 	req := &pbv1.UpdateCompanyRequest{
-		AccessToken: createMockToken(t, 66),
+		AccessToken: createMockToken(t, 66, domain.CompanyRole),
 		Company: &pbv1.Company{
 			Id:          66,
 			Name:        "mock-company-name-33",
@@ -267,7 +270,7 @@ func TestUpdateCompanyUnAuthorized(t *testing.T) {
 
 func TestListCompaniesSuccess(t *testing.T) {
 	req := &pbv1.ListCompaniesRequest{
-		AccessToken: createMockToken(t, 7),
+		AccessToken: createMockToken(t, 7, domain.AdminRole),
 	}
 
 	ctrl := gomock.NewController(t)
@@ -303,7 +306,7 @@ func TestListCompaniesSuccess(t *testing.T) {
 
 func TestListCompaniesNotAuthorized(t *testing.T) {
 	req := &pbv1.ListCompaniesRequest{
-		AccessToken: createMockToken(t, 77),
+		AccessToken: createMockToken(t, 77, domain.AdminRole),
 	}
 
 	ctrl := gomock.NewController(t)
@@ -320,7 +323,7 @@ func TestListCompaniesNotAuthorized(t *testing.T) {
 
 func TestListApprovedCompaniesSuccess(t *testing.T) {
 	req := &pbv1.ListApprovedCompaniesRequest{
-		AccessToken: createMockToken(t, 8),
+		AccessToken: createMockToken(t, 8, domain.AdminRole),
 		Search:      "search",
 	}
 
@@ -357,7 +360,7 @@ func TestListApprovedCompaniesSuccess(t *testing.T) {
 
 func TestApproveCompanySuccess(t *testing.T) {
 	req := &pbv1.UpdateCompanyStatusRequest{
-		AccessToken: createMockToken(t, 9),
+		AccessToken: createMockToken(t, 9, domain.AdminRole),
 		Id:          99,
 		Status:      "Approve",
 	}
@@ -376,7 +379,7 @@ func TestApproveCompanySuccess(t *testing.T) {
 
 func TestRejectCompanySuccess(t *testing.T) {
 	req := &pbv1.UpdateCompanyStatusRequest{
-		AccessToken: createMockToken(t, 9),
+		AccessToken: createMockToken(t, 9, domain.AdminRole),
 		Id:          999,
 		Status:      "Reject",
 	}
@@ -395,7 +398,7 @@ func TestRejectCompanySuccess(t *testing.T) {
 
 func TestUpdateCompanyStatusUnAuthorized(t *testing.T) {
 	req := &pbv1.UpdateCompanyStatusRequest{
-		AccessToken: createMockToken(t, 99),
+		AccessToken: createMockToken(t, 99, domain.StudentRole),
 		Id:          9999,
 		Status:      "Approve",
 	}

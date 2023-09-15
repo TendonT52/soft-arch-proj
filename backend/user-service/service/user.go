@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
@@ -102,7 +101,7 @@ func (s *userService) UpdateStudentMe(ctx context.Context, id int64, req *pbv1.S
 	if err != nil {
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
-	if role != "student" {
+	if role != domain.StudentRole {
 		return domain.ErrNotAuthorized.With("user not student")
 	}
 
@@ -119,7 +118,7 @@ func (s *userService) UpdateCompanyMe(ctx context.Context, id int64, req *pbv1.C
 	if err != nil {
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
-	if role != "company" {
+	if role != domain.CompanyRole {
 		return domain.ErrNotAuthorized.With("user not company")
 	}
 
@@ -146,19 +145,6 @@ func (s *userService) UpdateCompanyStatus(ctx context.Context, userId, id int64,
 		return domain.ErrAlreadyVerified.With("company already approved or rejected")
 	}
 
-	// Send Email
-	emailData := domain.EmailData{
-		Subject: status + " Company",
-		Name:    company.Name,
-		Email:   company.Email,
-	}
-
-	jsonData, err := json.Marshal(emailData)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return err
-	}
-
 	var typeEmail string
 	if status == "Approve" {
 		typeEmail = domain.CompanyApproveEmail
@@ -167,7 +153,8 @@ func (s *userService) UpdateCompanyStatus(ctx context.Context, userId, id int64,
 	} else {
 		return domain.ErrInvalidStatus.With("status must be Approve or Reject")
 	}
-	err = email.SendEmail(s.memphis, typeEmail, jsonData)
+
+	err = email.SendEmail(s.memphis, typeEmail, "", status+" Company", company.Name, company.Email)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return domain.ErrMailNotSent.With("cannot send email")
@@ -186,7 +173,7 @@ func (s *userService) DeleteStudent(ctx context.Context, userId, id int64) error
 	if err != nil {
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
-	if role != "admin" {
+	if role != domain.AdminRole {
 		return domain.ErrNotAuthorized.With("user not admin")
 	}
 
@@ -203,7 +190,7 @@ func (s *userService) DeleteCompany(ctx context.Context, userId, id int64) error
 	if err != nil {
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
-	if role != "admin" {
+	if role != domain.AdminRole {
 		return domain.ErrNotAuthorized.With("user not admin")
 	}
 

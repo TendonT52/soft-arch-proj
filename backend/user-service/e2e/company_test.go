@@ -5,8 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/TikhampornSky/go-auth-verifiedMail/config"
+	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
-	"github.com/TikhampornSky/go-auth-verifiedMail/initializers"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -76,8 +77,11 @@ func TestGetCompanyMe(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := initializers.LoadConfig("..")
-	access_token_wrong, err := utils.CreateToken(config.AccessTokenExpiresIn, 0, config.AccessTokenPrivateKey)
+	config, _ := config.LoadConfig("..")
+	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
+		UserId: 0,
+		Role:   domain.CompanyRole,
+	})
 	require.NoError(t, err)
 
 	tests := map[string]struct {
@@ -210,7 +214,7 @@ func TestGetComapany(t *testing.T) {
 		},
 		"fail: company id not found": {
 			req: &pbv1.GetCompanyRequest{
-				Id: 20000000000000,
+				Id:          20000000000000,
 				AccessToken: res.AccessToken,
 			},
 			expect: &pbv1.GetCompanyResponse{
@@ -316,7 +320,7 @@ func TestUpdateCompany(t *testing.T) {
 		"not authorize": {
 			req: &pbv1.UpdateCompanyRequest{
 				AccessToken: admin_res.AccessToken,
-				Company: &pbv1.Company{},
+				Company:     &pbv1.Company{},
 			},
 			expect: &pbv1.UpdateCompanyResponse{
 				Status:  401,

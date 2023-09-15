@@ -2,16 +2,14 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"math"
 	"strconv"
 
+	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	"github.com/TikhampornSky/go-auth-verifiedMail/email"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
-	"github.com/TikhampornSky/go-auth-verifiedMail/initializers"
 	"github.com/TikhampornSky/go-auth-verifiedMail/port"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 )
@@ -31,6 +29,9 @@ func NewAuthService(repo port.UserRepoPort, m port.MemphisPort, t port.TimeProvi
 }
 
 func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudentRequest) (int64, error) {
+	if req.Year <= 0 {
+		return 0, domain.ErrYearMustBeGreaterThanZero
+	}
 	if req.Password != req.PasswordConfirm {
 		return 0, domain.ErrPasswordNotMatch
 	}
@@ -40,7 +41,7 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 	req.Password = hashedPassword
 
 	if !email.IsChulaStudentEmail(req.Email) {
-		return 0, domain.ErrNotChulaStudentEmail.With("email must be @student.chula.ac.th")
+		return 0, domain.ErrNotChulaStudentEmail.With("Email must be studentID with @student.chula.ac.th")
 	}
 
 	err := s.repo.CheckEmailExist(ctx, req.Email)
@@ -48,26 +49,12 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 		return 0, domain.ErrDuplicateEmail
 	}
 
-	config, _ := initializers.LoadConfig("..")
 	// Generate Verification Code
 	id := email.GetStudentIDFromEmail(req.Email)
 	code := utils.Encode(id, current_time)
 
-	// Send Email
-	emailData := domain.EmailData{
-		URL:     config.ClientOrigin + "/verifyemail/" + id + "/" + code,
-		Subject: "Your account verification code",
-		Name:    req.Name,
-		Email:   req.Email,
-	}
-
-	jsonData, err := json.Marshal(emailData)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return 0, err
-	}
-
-	err = email.SendEmail(s.memphis, domain.StudentConfirmEmail, jsonData)
+	config, _ := config.LoadConfig("..")
+	err = email.SendEmail(s.memphis, domain.StudentConfirmEmail, config.ClientOrigin+"/verifyemail/"+id+"/"+code, "Your account verification code", req.Name, req.Email)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return 0, domain.ErrMailNotSent.With("cannot send email")
@@ -152,22 +139,28 @@ func (s *authService) SignUpAdmin(ctx context.Context, req *pbv1.CreateAdminRequ
 }
 
 func (s *authService) SignIn(ctx context.Context, req *pbv1.LoginRequest) (string, string, error) {
-	id, password, db_time, err := s.repo.GetPassword(ctx, req)
+	u, err := s.repo.GetUser(ctx, req)
 	if err != nil {
 		return "", "", err
 	}
-	if err := utils.VerifyPassword(password, req.Password, db_time); err != nil {
+	if !u.Verified {
+		return "", "", domain.ErrNotVerified.With("user not verified")
+	}
+	if err := utils.VerifyPassword(u.Password, req.Password, u.CreatedAt); err != nil {
 		return "", "", domain.ErrPasswordNotMatch
 	}
 
 	// Generate token
-	config, _ := initializers.LoadConfig("..")
-	access_token, err := utils.CreateToken(config.AccessTokenExpiresIn, id, config.AccessTokenPrivateKey)
+	config, _ := config.LoadConfig("..")
+	access_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
+		UserId: u.Id,
+		Role:   u.Role,
+	})
 	if err != nil {
 		return "", "", err
 	}
 
-	refresh_token, err := utils.CreateToken(config.RefreshTokenExpiresIn, id, config.RefreshTokenPrivateKey)
+	refresh_token, err := utils.CreateRefreshToken(config.RefreshTokenExpiresIn, u.Id)
 	if err != nil {
 		return "", "", err
 	}
@@ -181,22 +174,21 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 		return "", domain.ErrInternal.With("your token has been logged out!")
 	}
 
-	config, _ := initializers.LoadConfig("..")
-	sub, err := utils.ValidateToken(refreshToken, config.RefreshTokenPublicKey)
+	config, _ := config.LoadConfig("..")
+	userId, err := utils.ValidateRefreshToken(refreshToken)
 	if err != nil {
 		return "", err
 	}
 
-	val, ok := sub.(float64)
-	if !ok {
-		return "", domain.ErrInternal.With("cannot convert sub to float64")
-	}
-	_, err = s.repo.CheckUserIDExist(ctx, int64(math.Round(val)))
+	role, err := s.repo.CheckUserIDExist(ctx, userId)
 	if err != nil {
 		return "", domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
 
-	access_token, err := utils.CreateToken(config.AccessTokenExpiresIn, int64(math.Round(val)), config.AccessTokenPrivateKey)
+	access_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
+		UserId: userId,
+		Role:   role,
+	})
 	if err != nil {
 		return "", err
 	}
@@ -205,17 +197,12 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 }
 
 func (s *authService) LogOut(ctx context.Context, refreshToken string) error {
-	config, _ := initializers.LoadConfig("..")
-	sub, err := utils.ValidateToken(refreshToken, config.RefreshTokenPublicKey)
+	userId, err := utils.ValidateRefreshToken(refreshToken)
 	if err != nil {
 		return err
 	}
 
-	val, ok := sub.(float64)
-	if !ok {
-		return domain.ErrInternal.With("cannot convert sub to float64")
-	}
-	_, err = s.repo.CheckUserIDExist(ctx, int64(math.Round(val)))
+	_, err = s.repo.CheckUserIDExist(ctx, userId)
 	if err != nil {
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}

@@ -15,20 +15,21 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
-	"github.com/TikhampornSky/go-auth-verifiedMail/initializers"
 	"github.com/TikhampornSky/go-auth-verifiedMail/repo"
 	"github.com/TikhampornSky/go-auth-verifiedMail/server"
 	"github.com/TikhampornSky/go-auth-verifiedMail/service"
 )
 
 func TestMain(m *testing.M) {
-	config, err := initializers.LoadConfig("..")
+	config, err := config.LoadConfig("..")
 	if err != nil {
 		log.Fatal("? Could not load environment variables", err)
 	}
 
-	db, err := db.NewDatabase(&config)
+	os.Chdir("../")
+	db, err := db.NewDatabase(config)
 	if err != nil {
 		log.Fatalf("Something went wrong. Could not connect to the database. %s", err)
 	}
@@ -128,11 +129,43 @@ func TestCreateStudent(t *testing.T) {
 			},
 			expect: &pbv1.CreateStudentResponse{
 				Status:  400,
-				Message: "Email must be @student.chula.ac.th",
+				Message: "Email must be studentID with @student.chula.ac.th",
+			},
+		},
+		"email length is less than 20": {
+			req: &pbv1.CreateStudentRequest{
+				Name:            "Name Test",
+				Email:           id_student + "@g.com",
+				Password:        "password-test",
+				PasswordConfirm: "password-test",
+				Description:     "I am a student",
+				Faculty:         "Engineering",
+				Major:           "Computer Engineering",
+				Year:            4,
+			},
+			expect: &pbv1.CreateStudentResponse{
+				Status:  400,
+				Message: "Email must be studentID with @student.chula.ac.th",
+			},
+		},
+		"year must be greater than zero": {
+			req: &pbv1.CreateStudentRequest{
+				Name:            "Name Test",
+				Email:           id_student + "@g.com",
+				Password:        "password-test",
+				PasswordConfirm: "password-test",
+				Description:     "I am a student",
+				Faculty:         "Engineering",
+				Major:           "Computer Engineering",
+				Year:            0,
+			},
+			expect: &pbv1.CreateStudentResponse{
+				Status:  400,
+				Message: "Year must be greater than zero",
 			},
 		},
 	}
-	testOrder := []string{"success", "email already exists", "password and password confirm not match", "email is not student.chula.ac.th"}
+	testOrder := []string{"success", "email already exists", "password and password confirm not match", "email is not student.chula.ac.th", "email length is less than 20", "year must be greater than zero"}
 
 	for _, testName := range testOrder {
 		tc := tests[testName]
@@ -406,8 +439,8 @@ func TestRefreshToken(t *testing.T) {
 	})
 
 	// Wrong token (Unknown person)
-	config, _ := initializers.LoadConfig("..")
-	refresh_token_wrong, err := utils.CreateToken(config.RefreshTokenExpiresIn, 0, config.RefreshTokenPrivateKey)
+	config, _ := config.LoadConfig("..")
+	refresh_token_wrong, err := utils.CreateRefreshToken(config.RefreshTokenExpiresIn, 0)
 	require.NoError(t, err)
 
 	// Person 2 Already logged out
@@ -449,6 +482,7 @@ func TestRefreshToken(t *testing.T) {
 				Message: "the user belonging to this token no logger exists",
 			},
 		},
+
 		"already logged out": {
 			req: &pbv1.RefreshTokenRequest{
 				RefreshToken: u.RefreshToken,

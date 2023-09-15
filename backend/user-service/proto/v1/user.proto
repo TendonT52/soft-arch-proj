@@ -3,21 +3,70 @@ syntax = "proto3";
 package user;
 
 option go_package = "github.com/TikhampornSky/go-auth-verifiedMail/gen";
+import "google/api/annotations.proto";
 
 service UserService {
-    rpc GetStudentMe(GetStudentMeRequest) returns (GetStudentResponse);
-    rpc GetStudent(GetStudentRequest) returns (GetStudentResponse);
-    rpc UpdateStudent(UpdateStudentRequest) returns (UpdateStudentResponse);
+    rpc GetStudentMe(GetStudentMeRequest) returns (GetStudentResponse) {
+        option (google.api.http) = {
+            get: "/v1/student-me"
+        };
+    }
+    rpc GetStudent(GetStudentRequest) returns (GetStudentResponse) {
+        option (google.api.http) = {
+            get: "/v1/student/{id}"
+        };
+    }
+    rpc UpdateStudent(UpdateStudentRequest) returns (UpdateStudentResponse) {
+        option (google.api.http) = {
+            put: "/v1/student"
+            body: "*"
+        };
+    }
 
-    rpc GetCompanyMe(GetCompanyMeRequest) returns (GetCompanyResponse);
-    rpc GetCompany(GetCompanyRequest) returns (GetCompanyResponse);
-    rpc UpdateCompany(UpdateCompanyRequest) returns (UpdateCompanyResponse);
-    rpc ListApprovedCompanies(ListApprovedCompaniesRequest) returns (ListApprovedCompaniesResponse);
+    rpc GetCompanyMe(GetCompanyMeRequest) returns (GetCompanyResponse) {
+        option (google.api.http) = {
+            get: "/v1/company-me"
+        };
+    }
+    rpc GetCompany(GetCompanyRequest) returns (GetCompanyResponse) {
+        option (google.api.http) = {
+            get: "/v1/company/{id}"
+        };
+    }
+    rpc UpdateCompany(UpdateCompanyRequest) returns (UpdateCompanyResponse) {
+        option (google.api.http) = {
+            put: "/v1/company"
+            body: "*"
+        };
+    }
+    rpc ListApprovedCompanies(ListApprovedCompaniesRequest) returns (ListApprovedCompaniesResponse) {
+        option (google.api.http) = {
+            get: "/v1/companies/approved"
+        };
+    }
 
-    rpc ListCompanies(ListCompaniesRequest) returns (ListCompaniesResponse);
-    rpc UpdateCompanyStatus(UpdateCompanyStatusRequest) returns (UpdateCompanyStatusResponse);
+    rpc ListCompanies(ListCompaniesRequest) returns (ListCompaniesResponse) {
+        option (google.api.http) = {
+            get: "/v1/companies"
+        };
+    }
+    rpc UpdateCompanyStatus(UpdateCompanyStatusRequest) returns (UpdateCompanyStatusResponse) {
+        option (google.api.http) = {
+            put: "/v1/company/status"
+            body: "*"
+        };
+    }
 
-    rpc DeleteCompanies(DeleteCompaniesRequest) returns (DeleteCompaniesResponse);
+    rpc DeleteCompanies(DeleteCompaniesRequest) returns (DeleteCompaniesResponse) {}
+}
+
+message User {
+    int64 id = 1;
+    string email = 2;
+    string password = 3;
+    string role = 4;
+    bool verified = 5;
+    int64 created_at = 6;
 }
 
 message Student {
@@ -43,13 +92,13 @@ message Company {
 
 // Get Student Me
 message GetStudentMeRequest {
-    string access_token = 1;
+    string access_token = 1;  
 }
 
 // Get Student
 message GetStudentRequest {
     int64 id = 1;
-    string access_token = 2;
+    string access_token = 2;  
 }
 
 message GetStudentResponse {
@@ -60,7 +109,7 @@ message GetStudentResponse {
 
 // Update Student
 message UpdateStudentRequest {
-    string access_token = 1;
+    string access_token = 1;  
     Student student = 2;
 }
 
@@ -71,13 +120,13 @@ message UpdateStudentResponse {
 
 // Get Company Me
 message GetCompanyMeRequest {
-    string access_token = 1;
+    string access_token = 1;  
 }
 
 // Get Company
 message GetCompanyRequest {
     int64 id = 1;
-    string access_token = 2;
+    string access_token = 2;  
 }
 
 message GetCompanyResponse {
@@ -88,7 +137,7 @@ message GetCompanyResponse {
 
 // Update Company
 message UpdateCompanyRequest {
-    string access_token = 1;
+    string access_token = 1;  
     Company company = 2;
 }
 
@@ -99,7 +148,7 @@ message UpdateCompanyResponse {
 
 // List Companies
 message ListCompaniesRequest {
-    string access_token = 1;
+    string access_token = 1;  
 }
 
 message ListCompaniesResponse {
@@ -111,7 +160,7 @@ message ListCompaniesResponse {
 
 // List Approved Companies
 message ListApprovedCompaniesRequest {
-    string access_token = 1;
+    string access_token = 1;   
     string search = 2;
 }
 
@@ -124,7 +173,7 @@ message ListApprovedCompaniesResponse {
 
 // Approve or Reject Company
 message UpdateCompanyStatusRequest {
-    string access_token = 1;
+    string access_token = 1;  
     int64 id = 2;
     string status = 3;
 }
@@ -136,7 +185,7 @@ message UpdateCompanyStatusResponse {
 
 // Delete Company (Internal Purpose)
 message DeleteCompaniesRequest {
-    string access_token = 1;
+    string access_token = 1;  
 }
 
 message DeleteCompaniesResponse {

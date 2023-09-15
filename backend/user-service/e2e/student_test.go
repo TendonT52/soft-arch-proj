@@ -5,9 +5,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/TikhampornSky/go-auth-verifiedMail/config"
+	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	"github.com/TikhampornSky/go-auth-verifiedMail/e2e/mock"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
-	"github.com/TikhampornSky/go-auth-verifiedMail/initializers"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -59,8 +60,11 @@ func TestGetStudentMe(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := initializers.LoadConfig("..")
-	access_token_wrong, err := utils.CreateToken(config.AccessTokenExpiresIn, 0, config.AccessTokenPrivateKey)
+	config, _ := config.LoadConfig("..")
+	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
+		UserId: 0,
+		Role:   domain.StudentRole,
+	})
 	require.NoError(t, err)
 
 	tests := map[string]struct {
@@ -269,8 +273,11 @@ func TestUpdateStudent(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := initializers.LoadConfig("..")
-	access_token_wrong, err := utils.CreateToken(config.AccessTokenExpiresIn, 0, config.AccessTokenPrivateKey)
+	config, _ := config.LoadConfig("..")
+	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
+		UserId: 0,
+		Role:   domain.StudentRole,
+	})
 	require.NoError(t, err)
 
 	tests := map[string]struct {

@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package email;
+
+option go_package = "github.com/TikhampornSky/go-auth-verifiedMail/gen";
+
+message EmailData {
+    string URL = 1;
+    string Subject = 2;
+    string Name = 3;
+    string Email = 4;
+}

@@ -3,18 +3,53 @@ syntax = "proto3";
 package auth;
 
 option go_package = "github.com/TikhampornSky/go-auth-verifiedMail/gen";
-
+import "google/api/annotations.proto";
 
 service AuthService {
-  rpc CreateStudent(CreateStudentRequest) returns (CreateStudentResponse) {}
-  rpc CreateCompany(CreateCompanyRequest) returns (CreateCompanyResponse) {}
-  rpc CreateAdmin(CreateAdminRequest) returns (CreateAdminResponse) {}
+  rpc CreateStudent(CreateStudentRequest) returns (CreateStudentResponse) {
+    option (google.api.http) = {
+      post: "/v1/student"
+      body: "*"
+    };
+  }
+  rpc CreateCompany(CreateCompanyRequest) returns (CreateCompanyResponse) {
+    option (google.api.http) = {
+      post: "/v1/company"
+      body: "*"
+    };
+  }
+  rpc CreateAdmin(CreateAdminRequest) returns (CreateAdminResponse) {
+    option (google.api.http) = {
+      post: "/v1/admin"
+      body: "*"
+    };
+  }
 
-  rpc SignIn(LoginRequest) returns (LoginResponse) {}
-  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {}
-  rpc LogOut(LogOutRequest) returns (LogOutResponse) {}
+  rpc SignIn(LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/v1/login"
+      body: "*"
+    };
+  }
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {  // Need to have refresh_token in cookie
+    option (google.api.http) = {
+      post: "/v1/refresh"
+      body: "*"
+    };
+  }
+  rpc LogOut(LogOutRequest) returns (LogOutResponse) { // Need to have refresh_token in cookie
+    option (google.api.http) = {
+      post: "/v1/logout"
+      body: "*"
+    };
+  }
 
-  rpc VerifyEmailCode(VerifyEmailCodeRequest) returns (VerifyEmailCodeResponse) {}
+  rpc VerifyEmailCode(VerifyEmailCodeRequest) returns (VerifyEmailCodeResponse) {
+    option (google.api.http) = {
+      post: "/v1/verify"
+      body: "*"
+    };
+  }
 }
 
 // Create Student
@@ -77,7 +112,6 @@ message LoginResponse {
   string message = 2;
   string access_token = 3;
   string refresh_token = 4;
-  string logged_in = 5;
 }
 
 // RefreshToken
@@ -89,7 +123,6 @@ message RefreshTokenResponse {
   int64 status = 1;
   string message = 2;
   string access_token = 3;
-  string logged_in = 4;
 }
 
 // LogOut

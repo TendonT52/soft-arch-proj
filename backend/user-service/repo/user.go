@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
-	"github.com/TikhampornSky/go-auth-verifiedMail/initializers"
+	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	"github.com/TikhampornSky/go-auth-verifiedMail/port"
 	"github.com/redis/go-redis/v9"
-	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 )
 
 type DBTX interface {
@@ -42,7 +42,7 @@ func NewUserRepository(db DBTX, redis Redis) port.UserRepoPort {
 func (r *userRepository) CreateAdmin(ctx context.Context, admin *pbv1.CreateAdminRequest, createTime int64) (int64, error) {
 	query := "INSERT INTO users (email, password, role, verified, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
 	var id int64
-	err := r.db.QueryRowContext(ctx, query, admin.Email, admin.Password, "admin", true, createTime, createTime).Scan(&id)
+	err := r.db.QueryRowContext(ctx, query, admin.Email, admin.Password, domain.AdminRole, true, createTime, createTime).Scan(&id)
 	if err != nil {
 		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
@@ -63,21 +63,15 @@ func (r *userRepository) CheckEmailExist(ctx context.Context, email string) erro
 	return nil
 }
 
-func (r *userRepository) GetPassword(ctx context.Context, req *pbv1.LoginRequest) (int64, string, int64, error) {
-	queryVerify := "SELECT id, verified, password, created_at FROM users WHERE email = $1;"
-	var id int64
-	var verified bool
-	var password string
-	var created_at int64
-	err := r.db.QueryRowContext(ctx, queryVerify, req.Email).Scan(&id, &verified, &password, &created_at)
+func (r *userRepository) GetUser(ctx context.Context, req *pbv1.LoginRequest) (*pbv1.User, error) {
+	queryVerify := "SELECT id, verified, password, email, role, created_at FROM users WHERE email = $1;"
+	u := &pbv1.User{}
+	err := r.db.QueryRowContext(ctx, queryVerify, req.Email).Scan(&u.Id, &u.Verified, &u.Password, &u.Email, &u.Role, &u.CreatedAt)
 	if err != nil {
-		return 0, "", 0, domain.ErrInternal.From(err.Error(), err)
-	}
-	if !verified {
-		return 0, "", 0, domain.ErrNotVerified.With("user not verified")
+		return nil, domain.ErrInternal.From(err.Error(), err)
 	}
 
-	return id, password, created_at, nil
+	return u, nil
 }
 
 func (r *userRepository) CheckUserIDExist(ctx context.Context, id int64) (string, error) {
@@ -106,7 +100,7 @@ func (r *userRepository) CheckIfAdmin(ctx context.Context, id int64) error {
 
 // Redis Zone //
 func (r *userRepository) SetValueRedis(ctx context.Context, key string, value string) error {
-	config, _ := initializers.LoadConfig("..")
+	config, _ := config.LoadConfig("..")
 	err := r.redis.Set(ctx, key, value, time.Duration(config.REDISTimeout)*time.Minute).Err()
 	if err != nil {
 		return domain.ErrInternal.From(err.Error(), err)
