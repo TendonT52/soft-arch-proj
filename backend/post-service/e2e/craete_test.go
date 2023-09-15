@@ -32,6 +32,12 @@ func TestCreatePosts(t *testing.T) {
 	})
 	require.NoError(t, err)
 
+	tokenStudent, err := mock.GenerateAccessToken(config.AccessTokenExpiredInTest, &domain.Payload{
+		UserId: 2,
+		Role:   "student",
+	})
+	require.NoError(t, err)
+
 	lex := `{
 		"root": {
 		  "children": [
@@ -85,12 +91,46 @@ func TestCreatePosts(t *testing.T) {
 				Message: "Post created successfully",
 			},
 		},
+		"Some fields are empty": {
+			req: &pbv1.CreatePostRequest{
+				Post: &pbv1.Post{
+					Topic:          "",
+					Description:    lex,
+					Period:         "01/01/2023 - 02/02/2023",
+					HowTo:          lex,
+					OpenPositions:  []string{"OpenPositions Test"},
+					RequiredSkills: []string{"RequiredSkills Test"},
+					Benefits:       []string{"Benefits Test"},
+				},
+				AccessToken: token,
+			},
+			expect: &pbv1.CreatePostResponse{
+				Status:  400,
+				Message: "Please fill all required fields",
+			},
+		},
+		"Unauthorized": {
+			req: &pbv1.CreatePostRequest{
+				Post: &pbv1.Post{
+					Topic:          "Topic Test",
+					Description:    lex,
+					Period:         "01/01/2023 - 02/02/2023",
+					HowTo:          lex,
+					OpenPositions:  []string{"OpenPositions Test"},
+					RequiredSkills: []string{"RequiredSkills Test"},
+					Benefits:       []string{"Benefits Test"},
+				},
+				AccessToken: tokenStudent,
+			},
+			expect: &pbv1.CreatePostResponse{
+				Status:  401,
+				Message: "Unauthorized",
+			},
+		},
 	}
 
-	testOrder := []string{"success"}
-	for _, testName := range testOrder {
-		tc := tests[testName]
-		t.Run(testName, func(t *testing.T) {
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
 			res, err := c.CreatePost(ctx, tc.req)
 			if err != nil {
 				t.Errorf("could not create student: %v", err)
@@ -102,3 +142,4 @@ func TestCreatePosts(t *testing.T) {
 	}
 
 }
+
