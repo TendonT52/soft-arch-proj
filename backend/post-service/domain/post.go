@@ -8,9 +8,9 @@ type Post struct {
 	PostId         int64
 	UserId         int64
 	Topic          string
-	Description    Lexical
+	Description    string
 	Period         string
-	HowTo          Lexical
+	HowTo          string
 	OpenPositions  []string
 	RequiredSkills []string
 	Benefits       []string
@@ -29,9 +29,9 @@ func CheckRequireFields(post *pbv1.Post) bool {
 func NewPost(post *pbv1.Post) *Post {
 	return &Post{
 		Topic:          post.Topic,
-		Description:    CreateLexical(post.Description),
+		Description:    post.Description,
 		Period:         post.Period,
-		HowTo:          CreateLexical(post.HowTo),
+		HowTo:          post.HowTo,
 		OpenPositions:  post.OpenPositions,
 		RequiredSkills: post.RequiredSkills,
 		Benefits:       post.Benefits,

@@ -6,17 +6,20 @@ import (
 	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 	"github.com/TikhampornSky/go-post-service/port"
-	"github.com/TikhampornSky/go-post-service/utils"
 )
 
 const companyRole = "company"
 
 type postService struct {
-	PostRepo port.PostRepoPort
+	PostRepo     port.PostRepoPort
+	TokenService port.TokenServicePort
 }
 
-func NewPostService(postRepo port.PostRepoPort) port.PostServicePort {
-	return &postService{PostRepo: postRepo}
+func NewPostService(postRepo port.PostRepoPort, tokenService port.TokenServicePort) port.PostServicePort {
+	return &postService{
+		PostRepo:     postRepo,
+		TokenService: tokenService,
+	}
 }
 
 func (s *postService) CreatePost(ctx context.Context, token string, post *pbv1.Post) (int64, error) {
@@ -25,11 +28,11 @@ func (s *postService) CreatePost(ctx context.Context, token string, post *pbv1.P
 	}
 
 	p := domain.NewPost(post)
-	payload, err := utils.ValidateAccessToken(token)
+	payload, err := s.TokenService.ValidateAccessToken(token)
 	if payload.Role != companyRole {
 		return 0, domain.ErrUnauthorized
 	}
-	
+
 	postId, err := s.PostRepo.CreatePost(ctx, payload.UserId, p)
 	if err != nil {
 		return 0, err

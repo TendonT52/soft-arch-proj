@@ -8,6 +8,7 @@ import (
 	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 	"github.com/TikhampornSky/go-post-service/port"
+	_ "github.com/lib/pq"
 )
 
 type DBTX interface {
@@ -15,12 +16,7 @@ type DBTX interface {
 	PrepareContext(context.Context, string) (*sql.Stmt, error)
 	QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error)
 	QueryRowContext(context.Context, string, ...interface{}) *sql.Row
-	BeginTx(context.Context, *sql.TxOptions) (*sql.Tx, error)
-}
-
-type TX interface {
-	Commit() error
-	Rollback() error
+	BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error)
 }
 
 type postRepository struct {
@@ -41,7 +37,7 @@ func (r *postRepository) CreatePost(ctx context.Context, userId int64, post *dom
 	}
 
 	// Insert into Table posts
-	query := "INSERT INTO posts (uid, topic, description, period, how_to, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING pid"
+	query := "INSERT INTO posts (uid, topic, description, period, how_to, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING pid"
 	var postId int64
 	err = tx.QueryRowContext(ctx, query, userId, post.Topic, post.Description, post.Period, post.HowTo, current_timestamp, current_timestamp).Scan(&postId)
 	if err != nil {

@@ -1,41 +1,16 @@
 package db
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
+	"log"
+
 	"github.com/TikhampornSky/go-post-service/config"
 	_ "github.com/lib/pq"
-	"log"
 )
 
 type Database struct {
 	db *sql.DB
-}
-
-// BeginTx implements repo.DBTX.
-func (*Database) BeginTx(context.Context, *sql.TxOptions) (*sql.Tx, error) {
-	panic("unimplemented")
-}
-
-// ExecContext implements repo.DBTX.
-func (*Database) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
-	panic("unimplemented")
-}
-
-// PrepareContext implements repo.DBTX.
-func (*Database) PrepareContext(context.Context, string) (*sql.Stmt, error) {
-	panic("unimplemented")
-}
-
-// QueryContext implements repo.DBTX.
-func (*Database) QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error) {
-	panic("unimplemented")
-}
-
-// QueryRowContext implements repo.DBTX.
-func (*Database) QueryRowContext(context.Context, string, ...interface{}) *sql.Row {
-	panic("unimplemented")
 }
 
 func NewDatabase(config *config.Config) (*Database, error) {

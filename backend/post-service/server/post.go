@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/TikhampornSky/go-post-service/domain"
@@ -22,18 +23,21 @@ func NewPostServer(postService port.PostServicePort) *PostServer {
 func (s *PostServer) CreatePost(ctx context.Context, req *pbv1.CreatePostRequest) (*pbv1.CreatePostResponse, error) {
 	postId, err := s.PostService.CreatePost(ctx, req.AccessToken, req.Post)
 	if errors.Is(err, domain.ErrFieldsAreRequired) {
+		log.Println("Create Post: Please fill all required fields")
 		return &pbv1.CreatePostResponse{
 			Status:  http.StatusBadRequest,
 			Message: "Please fill all required fields",
 		}, nil
 	}
 	if errors.Is(err, domain.ErrUnauthorized) {
+		log.Println("Create Post: Unauthorized")
 		return &pbv1.CreatePostResponse{
 			Status:  http.StatusUnauthorized,
 			Message: "Unauthorized",
 		}, nil
 	}
 	if err != nil {
+		log.Println("Create Post: ", err)
 		return &pbv1.CreatePostResponse{
 			Status:  http.StatusInternalServerError,
 			Message: "Internal server error",

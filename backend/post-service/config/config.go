@@ -1,6 +1,8 @@
 package config
 
 import (
+	"time"
+
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 )
@@ -13,6 +15,11 @@ type Config struct {
 	DBPort               string `mapstructure:"POSTGRES_PORT"`
 	ServerPort           string `mapstructure:"PORT"`
 	AccessTokenPublicKey string `mapstructure:"ACCESS_TOKEN_PUBLIC_KEY"`
+
+	AccessTokenPrivateKeyTest string        `mapstructure:"ACCESS_TOKEN_PRIVATE_KEY_TEST"`
+	AccessTokenPublicKeyTest  string        `mapstructure:"ACCESS_TOKEN_PUBLIC_KEY_TEST"`
+	AccessTokenExpiredInTest  time.Duration `mapstructure:"ACCESS_TOKEN_EXPIRED_IN_TEST"`
+	AccessTokenMaxAgeTest     int           `mapstructure:"ACCESS_TOKEN_MAXAGE_TEST"`
 }
 
 func LoadConfig(path string) (config *Config, err error) {

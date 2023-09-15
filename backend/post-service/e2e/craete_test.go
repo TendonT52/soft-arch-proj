@@ -1,0 +1,104 @@
+package e2e
+
+import (
+	"context"
+	"testing"
+	"time"
+
+	"github.com/TikhampornSky/go-post-service/config"
+	"github.com/TikhampornSky/go-post-service/domain"
+	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
+	"github.com/TikhampornSky/go-post-service/mock"
+	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+)
+
+func TestCreatePosts(t *testing.T) {
+	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		t.Errorf("could not connect to grpc server: %v", err)
+	}
+	defer conn.Close()
+
+	c := pbv1.NewPostServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	config, _ := config.LoadConfig("..")
+	token, err := mock.GenerateAccessToken(config.AccessTokenExpiredInTest, &domain.Payload{
+		UserId: 1,
+		Role:   "company",
+	})
+	require.NoError(t, err)
+
+	lex := `{
+		"root": {
+		  "children": [
+			{
+			  "children": [
+				{
+				  "detail": 0,
+				  "format": 0,
+				  "mode": "normal",
+				  "style": "",
+				  "text": "What to expect from here on out",
+				  "type": "text",
+				  "version": 1
+				}
+			  ],
+			  "direction": "ltr",
+			  "format": "start",
+			  "indent": 0,
+			  "type": "paragraph",
+			  "version": 1
+			}
+		  ],
+		  "direction": "ltr",
+		  "format": "",
+		  "indent": 0,
+		  "type": "root",
+		  "version": 1
+		}
+	  }
+	`
+
+	tests := map[string]struct {
+		req    *pbv1.CreatePostRequest
+		expect *pbv1.CreatePostResponse
+	}{
+		"success": {
+			req: &pbv1.CreatePostRequest{
+				Post: &pbv1.Post{
+					Topic:          "Topic Test",
+					Description:    lex,
+					Period:         "01/01/2023 - 02/02/2023",
+					HowTo:          lex,
+					OpenPositions:  []string{"OpenPositions Test"},
+					RequiredSkills: []string{"RequiredSkills Test"},
+					Benefits:       []string{"Benefits Test"},
+				},
+				AccessToken: token,
+			},
+			expect: &pbv1.CreatePostResponse{
+				Status:  201,
+				Message: "Post created successfully",
+			},
+		},
+	}
+
+	testOrder := []string{"success"}
+	for _, testName := range testOrder {
+		tc := tests[testName]
+		t.Run(testName, func(t *testing.T) {
+			res, err := c.CreatePost(ctx, tc.req)
+			if err != nil {
+				t.Errorf("could not create student: %v", err)
+			} else {
+				require.Equal(t, tc.expect.Status, res.Status)
+				require.Equal(t, tc.expect.Message, res.Message)
+			}
+		})
+	}
+
+}
