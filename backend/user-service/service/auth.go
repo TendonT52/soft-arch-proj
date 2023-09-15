@@ -29,6 +29,9 @@ func NewAuthService(repo port.UserRepoPort, m port.MemphisPort, t port.TimeProvi
 }
 
 func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudentRequest) (int64, error) {
+	if req.Year <= 0 {
+		return 0, domain.ErrYearMustBeGreaterThanZero
+	}
 	if req.Password != req.PasswordConfirm {
 		return 0, domain.ErrPasswordNotMatch
 	}

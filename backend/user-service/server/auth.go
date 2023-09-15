@@ -25,6 +25,13 @@ func NewAuthServer(s port.AuthServicePort) *AuthServer {
 
 func (s *AuthServer) CreateStudent(ctx context.Context, req *pbv1.CreateStudentRequest) (*pbv1.CreateStudentResponse, error) {
 	id, err := s.AuthService.SignUpStudent(ctx, req)
+	if errors.Is(err, domain.ErrYearMustBeGreaterThanZero) {
+		log.Printf("Year must be greater than zero: %v", err)
+		return &pbv1.CreateStudentResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Year must be greater than zero",
+		}, nil
+	}
 	if errors.Is(err, domain.ErrPasswordNotMatch) {
 		log.Printf("Passwords do not match: %v", err)
 		return &pbv1.CreateStudentResponse{
