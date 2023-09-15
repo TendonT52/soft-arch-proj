@@ -92,13 +92,13 @@ message Company {
 
 // Get Student Me
 message GetStudentMeRequest {
-    string access_token = 1;  // need to set in cookie or authorization header
+    string access_token = 1;  
 }
 
 // Get Student
 message GetStudentRequest {
     int64 id = 1;
-    string access_token = 2;  // need to set in cookie or authorization header
+    string access_token = 2;  
 }
 
 message GetStudentResponse {
@@ -109,7 +109,7 @@ message GetStudentResponse {
 
 // Update Student
 message UpdateStudentRequest {
-    string access_token = 1;  // need to set in cookie or authorization header
+    string access_token = 1;  
     Student student = 2;
 }
 
@@ -120,13 +120,13 @@ message UpdateStudentResponse {
 
 // Get Company Me
 message GetCompanyMeRequest {
-    string access_token = 1;  // need to set in cookie or authorization header
+    string access_token = 1;  
 }
 
 // Get Company
 message GetCompanyRequest {
     int64 id = 1;
-    string access_token = 2;  // need to set in cookie or authorization header
+    string access_token = 2;  
 }
 
 message GetCompanyResponse {
@@ -137,7 +137,7 @@ message GetCompanyResponse {
 
 // Update Company
 message UpdateCompanyRequest {
-    string access_token = 1;  // need to set in cookie or authorization header
+    string access_token = 1;  
     Company company = 2;
 }
 
@@ -148,7 +148,7 @@ message UpdateCompanyResponse {
 
 // List Companies
 message ListCompaniesRequest {
-    string access_token = 1;  // need to set in cookie or authorization header
+    string access_token = 1;  
 }
 
 message ListCompaniesResponse {
@@ -160,7 +160,7 @@ message ListCompaniesResponse {
 
 // List Approved Companies
 message ListApprovedCompaniesRequest {
-    string access_token = 1;   // need to set in cookie or authorization header
+    string access_token = 1;   
     string search = 2;
 }
 
@@ -173,7 +173,7 @@ message ListApprovedCompaniesResponse {
 
 // Approve or Reject Company
 message UpdateCompanyStatusRequest {
-    string access_token = 1;  // need to set in cookie or authorization header
+    string access_token = 1;  
     int64 id = 2;
     string status = 3;
 }
@@ -185,7 +185,7 @@ message UpdateCompanyStatusResponse {
 
 // Delete Company (Internal Purpose)
 message DeleteCompaniesRequest {
-    string access_token = 1;  // need to set in cookie or authorization header
+    string access_token = 1;  
 }
 
 message DeleteCompaniesResponse {

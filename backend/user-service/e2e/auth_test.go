@@ -148,8 +148,24 @@ func TestCreateStudent(t *testing.T) {
 				Message: "Email must be studentID with @student.chula.ac.th",
 			},
 		},
+		"year must be greater than zero": {
+			req: &pbv1.CreateStudentRequest{
+				Name:            "Name Test",
+				Email:           id_student + "@g.com",
+				Password:        "password-test",
+				PasswordConfirm: "password-test",
+				Description:     "I am a student",
+				Faculty:         "Engineering",
+				Major:           "Computer Engineering",
+				Year:            0,
+			},
+			expect: &pbv1.CreateStudentResponse{
+				Status:  400,
+				Message: "Year must be greater than zero",
+			},
+		},
 	}
-	testOrder := []string{"success", "email already exists", "password and password confirm not match", "email is not student.chula.ac.th", "email length is less than 20"}
+	testOrder := []string{"success", "email already exists", "password and password confirm not match", "email is not student.chula.ac.th", "email length is less than 20", "year must be greater than zero"}
 
 	for _, testName := range testOrder {
 		tc := tests[testName]

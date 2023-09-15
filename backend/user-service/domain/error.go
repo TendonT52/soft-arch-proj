@@ -17,22 +17,24 @@ const (
 	RedisNotFound
 	MailNotSent
 	InvalidStatus
+	YearMustBeGreaterThanZero
 
 	Internal
 )
 
 var (
-	ErrPasswordNotMatch     = BackEndError{Kind: PasswordNotMatch}
-	ErrUserEmailNotFound    = BackEndError{Kind: UserEmailNotFound}
-	ErrUserIDNotFound       = BackEndError{Kind: UserIDNotFound}
-	ErrDuplicateEmail       = BackEndError{Kind: DuplicateEmail}
-	ErrNotChulaStudentEmail = BackEndError{Kind: NotChulaStudentEmail}
-	ErrAlreadyVerified      = BackEndError{Kind: AlreadyVerified}
-	ErrNotVerified          = BackEndError{Kind: NotVerified}
-	ErrNotAuthorized        = BackEndError{Kind: NotAuthorized}
-	ErrRedisNotFound        = BackEndError{Kind: RedisNotFound}
-	ErrMailNotSent          = BackEndError{Kind: MailNotSent}
-	ErrInvalidStatus        = BackEndError{Kind: InvalidStatus}
+	ErrPasswordNotMatch          = BackEndError{Kind: PasswordNotMatch}
+	ErrUserEmailNotFound         = BackEndError{Kind: UserEmailNotFound}
+	ErrUserIDNotFound            = BackEndError{Kind: UserIDNotFound}
+	ErrDuplicateEmail            = BackEndError{Kind: DuplicateEmail}
+	ErrNotChulaStudentEmail      = BackEndError{Kind: NotChulaStudentEmail}
+	ErrAlreadyVerified           = BackEndError{Kind: AlreadyVerified}
+	ErrNotVerified               = BackEndError{Kind: NotVerified}
+	ErrNotAuthorized             = BackEndError{Kind: NotAuthorized}
+	ErrRedisNotFound             = BackEndError{Kind: RedisNotFound}
+	ErrMailNotSent               = BackEndError{Kind: MailNotSent}
+	ErrInvalidStatus             = BackEndError{Kind: InvalidStatus}
+	ErrYearMustBeGreaterThanZero = BackEndError{Kind: YearMustBeGreaterThanZero}
 
 	ErrInternal = BackEndError{Kind: Internal}
 )
