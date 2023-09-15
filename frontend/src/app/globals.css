@@ -34,6 +34,17 @@
     --ring: 215 20.2% 65.1%;
 
     --radius: 0.5rem;
+
+    --code: 210, 23%, 94%;
+    --code-attribute: 200, 70%, 33%;
+    --code-comment: 200, 15%, 50%;
+    --code-foreground: 210, 13%, 17%;
+    --code-function: 344, 65%, 60%;
+    --code-property: 20, 75%, 45%;
+    --code-punctuation: 210, 7%, 60%;
+    --code-selector: 33, 75%, 42%;
+    --code-operator: 35, 50%, 45%;
+    --code-variable: 40, 85%, 50%;
   }
 
   .dark {

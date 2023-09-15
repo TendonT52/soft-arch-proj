@@ -11,7 +11,7 @@ export default function Home() {
         priority
       />
       <p className="text-center">
-        Get <i className="text-muted-foreground italic">started</i> by
+        Get <i className="italic text-muted-foreground">started</i> by
         editing&nbsp;
         <code className="font-mono font-bold">app/page.tsx</code>
       </p>

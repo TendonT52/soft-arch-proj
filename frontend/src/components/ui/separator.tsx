@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import * as React from "react";
+import { cn } from "@/lib/utils";
 
 export interface SeparatorProps extends React.ComponentPropsWithoutRef<"div"> {
   orientation?: "horizontal" | "vertical";
@@ -13,9 +13,7 @@ const Separator = React.forwardRef<HTMLDivElement, SeparatorProps>(
       ref={ref}
       className={cn(
         "bg-border",
-        orientation === "horizontal"
-          ? "h-0 w-auto border-b"
-          : "h-auto w-0 border-l",
+        orientation === "horizontal" ? "h-0 border-b" : "w-0 border-l",
         className
       )}
       {...props}

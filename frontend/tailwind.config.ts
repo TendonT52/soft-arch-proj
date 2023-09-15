@@ -46,6 +46,18 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        code: {
+          DEFAULT: "hsl(var(--code))",
+          attribute: "hsl(var(--code-attribute))",
+          comment: "hsl(var(--code-comment))",
+          foreground: "hsl(var(--code-foreground))",
+          function: "hsl(var(--code-function))",
+          operator: "hsl(var(--code-operator))",
+          property: "hsl(var(--code-property))",
+          punctuation: "hsl(var(--code-punctuation))",
+          selector: "hsl(var(--code-selector))",
+          variable: "hsl(var(--code-variable))",
+        },
       },
       fontFamily: {
         sans: [
