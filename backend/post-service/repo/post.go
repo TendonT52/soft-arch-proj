@@ -60,6 +60,7 @@ func (r *postRepository) CreatePost(ctx context.Context, userId int64, post *dom
 		tx.Rollback()
 		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
+	defer stmt2.Close()
 
 	for _, title := range post.OpenPositions {
 		var openPositionId int64
@@ -83,9 +84,15 @@ func (r *postRepository) CreatePost(ctx context.Context, userId int64, post *dom
 		tx.Rollback()
 		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
+	defer stmt3.Close()
 
 	query4 := "INSERT INTO posts_required_skills (pid, sid, created_at, updated_at) VALUES ($1, $2, $3, $4)"
 	stmt4, err := tx.PrepareContext(ctx, query4)
+	if err != nil {
+		tx.Rollback()
+		return 0, domain.ErrInternal.From(err.Error(), err)
+	}
+	defer stmt4.Close()
 
 	for _, title := range post.RequiredSkills {
 		var requiredSkillId int64
@@ -109,6 +116,7 @@ func (r *postRepository) CreatePost(ctx context.Context, userId int64, post *dom
 		tx.Rollback()
 		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
+	defer stmt5.Close()
 
 	query6 := "INSERT INTO posts_benefits (pid, bid, created_at, updated_at) VALUES ($1, $2, $3, $4)"
 	stmt6, err := tx.PrepareContext(ctx, query6)
@@ -116,6 +124,7 @@ func (r *postRepository) CreatePost(ctx context.Context, userId int64, post *dom
 		tx.Rollback()
 		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
+	defer stmt6.Close()
 
 	for _, title := range post.Benefits {
 		var benefitId int64

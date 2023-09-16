@@ -8,6 +8,9 @@ migrate-up:
 migrate-down:
 	migrate -database "postgres://postgres:password@localhost:5432/?sslmode=disable" -path migrations down
 
+clean-db:
+	psql postgres://postgres:password@localhost:5432/?sslmode=disable -a -f ./cleanup.sql
+
 gen-proto:
 	protoc \
     --proto_path=proto \
@@ -18,4 +21,4 @@ gen-proto:
     --go-grpc_opt=paths=source_relative
 
 test-all:
-	go test ./...
+	go clean -testcache && go test ./...
