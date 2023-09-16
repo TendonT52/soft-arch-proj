@@ -86,5 +86,22 @@ func (s *postService) UpdatePost(ctx context.Context, token string, postId int64
 }
 
 func (s *postService) DeletePost(ctx context.Context, token string, postId int64) error {
+	owner, err := s.PostRepo.GetOwner(ctx, postId)
+	if err != nil {
+		return err
+	}
+	payload, err := s.TokenService.ValidateAccessToken(token)
+	if err != nil {
+		return err
+	}
+	if payload.Role != companyRole || payload.UserId != owner {
+		return domain.ErrUnauthorized
+	}
+
+	err = s.PostRepo.DeletePost(ctx, postId)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -110,6 +110,7 @@ func TestUpdatePost(t *testing.T) {
 		},
 	})
 	require.NoError(t, err)
+	require.Equal(t, int64(201), CreateRes.Status)
 	p := &pbv1.Post{
 		Topic:          updatedTopic,
 		Description:    updatedDescription,

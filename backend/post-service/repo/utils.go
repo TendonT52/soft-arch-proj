@@ -122,3 +122,116 @@ func (r *postRepository) insertIntoBenefits(ctx context.Context, tx *sql.Tx, ben
 
 	return nil
 }
+
+func (r *postRepository) findAndDeleteOpenPositions(ctx context.Context, tx *sql.Tx, postId int64) error {
+	// Find and Delete from table posts_open_positions
+	query1 := "DELETE FROM posts_open_positions WHERE pid = $1 RETURNING oid"
+	var openPositionIds []int64
+	rows, err := tx.QueryContext(ctx, query1, postId)
+	if err != nil {
+		tx.Rollback()
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var openPositionId int64
+		err = rows.Scan(&openPositionId)
+		if err != nil {
+			tx.Rollback()
+			return domain.ErrInternal.From(err.Error(), err)
+		}
+		openPositionIds = append(openPositionIds, openPositionId)
+	}
+
+	// Delete from table open_positions
+	query4 := "DELETE FROM open_positions WHERE oid = $1"
+	stmt1, err := tx.PrepareContext(ctx, query4)
+	if err != nil {
+		tx.Rollback()
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+	defer stmt1.Close()
+	for _, openPositionId := range openPositionIds {
+		_, err = stmt1.ExecContext(ctx, openPositionId)
+		if err != nil {
+			tx.Rollback()
+			return domain.ErrInternal.From(err.Error(), err)
+		}
+	}
+
+	return nil
+}
+
+func (r *postRepository) findAndDeleteRequiredSkills(ctx context.Context, tx *sql.Tx, postId int64) error {
+	// Find and Delete from table posts_required_skills
+	query2 := "DELETE FROM posts_required_skills WHERE pid = $1 RETURNING sid"
+	var requiredSkillIds []int64
+	rows, err := tx.QueryContext(ctx, query2, postId)
+	if err != nil {
+		tx.Rollback()
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var requiredSkillId int64
+		err = rows.Scan(&requiredSkillId)
+		if err != nil {
+			tx.Rollback()
+			return domain.ErrInternal.From(err.Error(), err)
+		}
+		requiredSkillIds = append(requiredSkillIds, requiredSkillId)
+	}
+
+	query5 := "DELETE FROM required_skills WHERE sid = $1"
+	stmt2, err := tx.PrepareContext(ctx, query5)
+	if err != nil {
+		tx.Rollback()
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+	defer stmt2.Close()
+	for _, requiredSkillId := range requiredSkillIds {
+		_, err = stmt2.ExecContext(ctx, requiredSkillId)
+		if err != nil {
+			tx.Rollback()
+			return domain.ErrInternal.From(err.Error(), err)
+		}
+	}
+
+	return nil
+}
+
+func (r *postRepository) findAndDeleteBenefits(ctx context.Context, tx *sql.Tx, postId int64) error {
+	query3 := "DELETE FROM posts_benefits WHERE pid = $1 RETURNING bid"
+	var benefitIds []int64
+	rows, err := tx.QueryContext(ctx, query3, postId)
+	if err != nil {
+		tx.Rollback()
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var benefitId int64
+		err = rows.Scan(&benefitId)
+		if err != nil {
+			tx.Rollback()
+			return domain.ErrInternal.From(err.Error(), err)
+		}
+		benefitIds = append(benefitIds, benefitId)
+	}
+
+	query6 := "DELETE FROM benefits WHERE bid = $1"
+	stmt3, err := tx.PrepareContext(ctx, query6)
+	if err != nil {
+		tx.Rollback()
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+	defer stmt3.Close()
+	for _, benefitId := range benefitIds {
+		_, err = stmt3.ExecContext(ctx, benefitId)
+		if err != nil {
+			tx.Rollback()
+			return domain.ErrInternal.From(err.Error(), err)
+		}
+	}
+	return nil
+}

@@ -108,6 +108,24 @@ func (s *PostServer) UpdatePost(ctx context.Context, req *pbv1.UpdatePostRequest
 	}, nil
 }
 
-func (s *PostServer) DeletePost(context.Context, *pbv1.DeletePostRequest) (*pbv1.DeletePostResponse, error) {
-	return nil, nil
+func (s *PostServer) DeletePost(ctx context.Context, req *pbv1.DeletePostRequest) (*pbv1.DeletePostResponse, error) {
+	err := s.PostService.DeletePost(ctx, req.AccessToken, req.Id)
+	if errors.Is(err, domain.ErrUnauthorized) {
+		log.Println("Delete Post: Unauthorized")
+		return &pbv1.DeletePostResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Unauthorized",
+		}, nil
+	}
+	if err != nil {
+		log.Println("Delete Post: ", err)
+		return &pbv1.DeletePostResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Internal server error",
+		}, nil
+	}
+	return &pbv1.DeletePostResponse{
+		Status:  http.StatusOK,
+		Message: "Post deleted successfully",
+	}, nil
 }
