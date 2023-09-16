@@ -24,7 +24,8 @@ func main() {
 
 	postRepo := repo.NewPostRepository(db.GetPostgresqlDB())
 	tokenService := service.NewTokenService()
-	postService := service.NewPostService(postRepo, tokenService)
+	userClientService := service.NewUserClientService()
+	postService := service.NewPostService(postRepo, tokenService, userClientService)
 
 	server.NewServer(config.ServerPort, postService)
 }

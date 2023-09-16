@@ -15,7 +15,7 @@ import (
 )
 
 func TestGetPost(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial(":8001", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -66,7 +66,7 @@ func TestGetPost(t *testing.T) {
 
 	config, _ := config.LoadConfig("..")
 	token, err := mock.GenerateAccessToken(config.AccessTokenExpiredInTest, &domain.Payload{
-		UserId: 1,
+		UserId: 6,
 		Role:   "company",
 	})
 	require.NoError(t, err)
@@ -85,16 +85,71 @@ func TestGetPost(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	res2, err := c.GetPost(ctx, &pbv1.GetPostRequest{
-		AccessToken: token,
-		Id:      res.Id,
-	})
-	require.NoError(t, err)
-	require.Equal(t, topic, res2.Post.Topic)
-	require.Equal(t, description, res2.Post.Description)
-	require.Equal(t, period, res2.Post.Period)
-	require.Equal(t, howTo, res2.Post.HowTo)
-	require.Equal(t, openPositions, res2.Post.OpenPositions)
-	require.Equal(t, requiredSkills, res2.Post.RequiredSkills)
-	require.Equal(t, benefits, res2.Post.Benefits)
+	tests := map[string]struct {
+		req    *pbv1.GetPostRequest
+		expect *pbv1.GetPostResponse
+	}{
+		"success": {
+			req: &pbv1.GetPostRequest{
+				AccessToken: token,
+				Id:          res.Id,
+			},
+			expect: &pbv1.GetPostResponse{
+				Status:  200,
+				Message: "Post retrieved successfully",
+				Post: &pbv1.Post{
+					Topic:          topic,
+					Description:    description,
+					Period:         period,
+					HowTo:          howTo,
+					OpenPositions:  openPositions,
+					RequiredSkills: requiredSkills,
+					Benefits:       benefits,
+					Owner: &pbv1.PostOwner{
+						Id:   6,
+						Name: "Mock Company Name",
+					},
+				},
+			},
+		},
+		"token wrong": {
+			req: &pbv1.GetPostRequest{
+				AccessToken: "wrong",
+				Id:          res.Id,
+			},
+			expect: &pbv1.GetPostResponse{
+				Status:  500,
+				Message: "Internal server error",
+			},
+		},
+		"post not found": {
+			req: &pbv1.GetPostRequest{
+				AccessToken: token,
+				Id:          999,
+			},
+			expect: &pbv1.GetPostResponse{
+				Status:  404,
+				Message: "Post not found",
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			res, err := c.GetPost(ctx, tc.req)
+			require.NoError(t, err)
+			require.Equal(t, tc.expect.Status, res.Status)
+			require.Equal(t, tc.expect.Message, res.Message)
+			if tc.expect.Post != nil {
+				require.Equal(t, tc.expect.Post.Topic, res.Post.Topic)
+				require.Equal(t, tc.expect.Post.Description, res.Post.Description)
+				require.Equal(t, tc.expect.Post.Period, res.Post.Period)
+				require.Equal(t, tc.expect.Post.HowTo, res.Post.HowTo)
+				require.Equal(t, tc.expect.Post.OpenPositions, res.Post.OpenPositions)
+				require.Equal(t, tc.expect.Post.RequiredSkills, res.Post.RequiredSkills)
+				require.Equal(t, tc.expect.Post.Benefits, res.Post.Benefits)
+				require.Equal(t, tc.expect.Post.Owner.Name, res.Post.Owner.Name)
+			}
+		})
+	}
 }

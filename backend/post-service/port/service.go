@@ -3,6 +3,7 @@ package port
 import (
 	"context"
 
+	pbUser "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 )
@@ -17,4 +18,8 @@ type PostServicePort interface {
 
 type TokenServicePort interface {
 	ValidateAccessToken(token string) (*domain.Payload, error)
+}
+
+type UserClientPort interface {
+	GetCompanyProfile(ctx context.Context, req *pbUser.GetCompanyRequest) (*pbUser.GetCompanyResponse, error)
 }

@@ -25,7 +25,8 @@ func TestMain(m *testing.M) {
 
 	postRepo := repo.NewPostRepository(db.GetPostgresqlDB())
 	tokenService := service.NewTokenTestService()
-	postService := service.NewPostService(postRepo, tokenService)
+	userClientService := service.NewUserClientMockService()
+	postService := service.NewPostService(postRepo, tokenService, userClientService)
 
 	// gRPC Zone
 	go server.NewServer(config.ServerPort, postService)

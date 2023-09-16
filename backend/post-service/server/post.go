@@ -60,6 +60,13 @@ func (s *PostServer) GetPost(ctx context.Context, req *pbv1.GetPostRequest) (*pb
 			Message: "Unauthorized",
 		}, nil
 	}
+	if errors.Is(err, domain.ErrPostNotFound) {
+		log.Println("Get Post: Post not found")
+		return &pbv1.GetPostResponse{
+			Status:  http.StatusNotFound,
+			Message: "Post not found",
+		}, nil
+	}
 	if err != nil {
 		log.Println("Get Post: ", err)
 		return &pbv1.GetPostResponse{
@@ -68,9 +75,9 @@ func (s *PostServer) GetPost(ctx context.Context, req *pbv1.GetPostRequest) (*pb
 		}, nil
 	}
 	return &pbv1.GetPostResponse{
-		Status: http.StatusOK,
-		Message: "Post retrieved successfully",
-		Post:   post,
+		Status:    http.StatusOK,
+		Message:   "Post retrieved successfully",
+		Post:      post,
 	}, nil
 }
 

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	pbUser "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 	"github.com/TikhampornSky/go-post-service/port"
@@ -13,12 +14,14 @@ const companyRole = "company"
 type postService struct {
 	PostRepo     port.PostRepoPort
 	TokenService port.TokenServicePort
+	UserService  port.UserClientPort
 }
 
-func NewPostService(postRepo port.PostRepoPort, tokenService port.TokenServicePort) port.PostServicePort {
+func NewPostService(postRepo port.PostRepoPort, tokenService port.TokenServicePort, userService port.UserClientPort) port.PostServicePort {
 	return &postService{
 		PostRepo:     postRepo,
 		TokenService: tokenService,
+		UserService:  userService,
 	}
 }
 
@@ -43,7 +46,7 @@ func (s *postService) CreatePost(ctx context.Context, token string, post *pbv1.P
 	return postId, nil
 }
 
-func (s *postService) GetPost(ctx context.Context, token string, postId int64) (*pbv1.Post, error) { // Internal use only
+func (s *postService) GetPost(ctx context.Context, token string, postId int64) (*pbv1.Post, error) {
 	_, err := s.TokenService.ValidateAccessToken(token)
 	if err != nil {
 		return nil, err
@@ -52,6 +55,17 @@ func (s *postService) GetPost(ctx context.Context, token string, postId int64) (
 	if err != nil {
 		return nil, err
 	}
+
+	req := &pbUser.GetCompanyRequest{
+		AccessToken: token,
+		Id:          post.Owner.Id,
+	}
+	res, err := s.UserService.GetCompanyProfile(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	post.Owner.Name = res.Company.Name
+
 	return post, nil
 }
 

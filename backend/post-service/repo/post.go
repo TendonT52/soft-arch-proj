@@ -76,10 +76,11 @@ func (r *postRepository) CreatePost(ctx context.Context, userId int64, post *pbv
 	return postId, nil
 }
 
-func (r *postRepository) GetPost(ctx context.Context, postId int64) (*pbv1.Post, error) { // Internal use only
-	query := "SELECT topic, description, period, how_to FROM posts WHERE pid = $1"
+func (r *postRepository) GetPost(ctx context.Context, postId int64) (*pbv1.Post, error) {
+	query := "SELECT topic, description, period, how_to, uid FROM posts WHERE pid = $1"
 	var topic, description, period, howTo string
-	err := r.db.QueryRowContext(ctx, query, postId).Scan(&topic, &description, &period, &howTo)
+	var userId int64
+	err := r.db.QueryRowContext(ctx, query, postId).Scan(&topic, &description, &period, &howTo, &userId)
 	if err == sql.ErrNoRows {
 		return nil, domain.ErrPostNotFound
 	}
@@ -146,6 +147,9 @@ func (r *postRepository) GetPost(ctx context.Context, postId int64) (*pbv1.Post,
 		OpenPositions:  openPositions,
 		RequiredSkills: requiredSkills,
 		Benefits:       benefits,
+		Owner: &pbv1.PostOwner{
+			Id: userId,
+		},
 	}
 
 	return post, nil

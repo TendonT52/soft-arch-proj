@@ -35,6 +35,11 @@ service PostService {
     }
 }
 
+message PostOwner {
+    int64 id = 1;
+    string name = 2;
+}
+
 message Post {
     string topic = 1;
     string description = 2;
@@ -43,6 +48,7 @@ message Post {
     repeated string open_positions = 5;
     repeated string required_skills = 6;
     repeated string benefits = 7;
+    PostOwner owner = 8;
 }
 
 // Create Post
@@ -67,7 +73,6 @@ message GetPostResponse {
     int64 status = 1;
     string message = 2;
     Post post = 3;
-    string owner_name = 4;
 }
 
 // List Posts
