@@ -27,7 +27,6 @@ func (s *postService) CreatePost(ctx context.Context, token string, post *pbv1.P
 		return 0, domain.ErrFieldsAreRequired
 	}
 
-	p := domain.NewPost(post)
 	payload, err := s.TokenService.ValidateAccessToken(token)
 	if err != nil {
 		return 0, err
@@ -36,7 +35,7 @@ func (s *postService) CreatePost(ctx context.Context, token string, post *pbv1.P
 		return 0, domain.ErrUnauthorized
 	}
 
-	postId, err := s.PostRepo.CreatePost(ctx, payload.UserId, p)
+	postId, err := s.PostRepo.CreatePost(ctx, payload.UserId, post)
 	if err != nil {
 		return 0, err
 	}
@@ -65,7 +64,6 @@ func (s *postService) UpdatePost(ctx context.Context, token string, postId int64
 		return domain.ErrFieldsAreRequired
 	}
 
-	p := domain.NewPost(post)
 	owner, err := s.PostRepo.GetOwner(ctx, postId)
 	if err != nil {
 		return err
@@ -78,7 +76,7 @@ func (s *postService) UpdatePost(ctx context.Context, token string, postId int64
 		return domain.ErrUnauthorized
 	}
 
-	err = s.PostRepo.UpdatePost(ctx, postId, p)
+	err = s.PostRepo.UpdatePost(ctx, postId, post)
 	if err != nil {
 		return err
 	}

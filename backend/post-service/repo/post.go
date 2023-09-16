@@ -27,7 +27,7 @@ func NewPostRepository(db DBTX) port.PostRepoPort {
 	return &postRepository{db: db}
 }
 
-func (r *postRepository) CreatePost(ctx context.Context, userId int64, post *domain.Post) (int64, error) {
+func (r *postRepository) CreatePost(ctx context.Context, userId int64, post *pbv1.Post) (int64, error) {
 	current_timestamp := time.Now().Unix()
 
 	// Start a transaction
@@ -168,7 +168,7 @@ func (r *postRepository) GetOwner(ctx context.Context, postId int64) (int64, err
 	return userId, nil
 }
 
-func (r *postRepository) UpdatePost(ctx context.Context, postId int64, post *domain.Post) error {
+func (r *postRepository) UpdatePost(ctx context.Context, postId int64, post *pbv1.Post) error {
 	current_timestamp := time.Now().Unix()
 
 	// Start a transaction
@@ -279,6 +279,6 @@ func (r *postRepository) DeletePost(ctx context.Context, postId int64) error {
 		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
-	
+
 	return nil
 }

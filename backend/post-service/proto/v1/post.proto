@@ -67,6 +67,7 @@ message GetPostResponse {
     int64 status = 1;
     string message = 2;
     Post post = 3;
+    string owner_name = 4;
 }
 
 // List Posts
