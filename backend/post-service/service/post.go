@@ -29,6 +29,9 @@ func (s *postService) CreatePost(ctx context.Context, token string, post *pbv1.P
 
 	p := domain.NewPost(post)
 	payload, err := s.TokenService.ValidateAccessToken(token)
+	if err != nil {
+		return 0, err
+	}
 	if payload.Role != companyRole {
 		return 0, domain.ErrUnauthorized
 	}
@@ -41,8 +44,16 @@ func (s *postService) CreatePost(ctx context.Context, token string, post *pbv1.P
 	return postId, nil
 }
 
-func (s *postService) GetPost(ctx context.Context, token string, postId int64) (*pbv1.Post, error) {
-	return nil, nil
+func (s *postService) GetPost(ctx context.Context, token string, postId int64) (*pbv1.Post, error) { // Internal use only
+	_, err := s.TokenService.ValidateAccessToken(token)
+	if err != nil {
+		return nil, err
+	}
+	post, err := s.PostRepo.GetPost(ctx, postId)
+	if err != nil {
+		return nil, err
+	}
+	return post, nil
 }
 
 func (s *postService) GetPosts(ctx context.Context, token string, search string) ([]*pbv1.Post, error) {
@@ -50,6 +61,27 @@ func (s *postService) GetPosts(ctx context.Context, token string, search string)
 }
 
 func (s *postService) UpdatePost(ctx context.Context, token string, postId int64, post *pbv1.Post) error {
+	if !domain.CheckRequireFields(post) {
+		return domain.ErrFieldsAreRequired
+	}
+
+	p := domain.NewPost(post)
+	owner, err := s.PostRepo.GetOwner(ctx, postId)
+	if err != nil {
+		return err
+	}
+	payload, err := s.TokenService.ValidateAccessToken(token)
+	if err != nil {
+		return err
+	}
+	if payload.Role != companyRole || payload.UserId != owner {
+		return domain.ErrUnauthorized
+	}
+
+	err = s.PostRepo.UpdatePost(ctx, postId, p)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

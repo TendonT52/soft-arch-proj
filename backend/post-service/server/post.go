@@ -51,16 +51,61 @@ func (s *PostServer) CreatePost(ctx context.Context, req *pbv1.CreatePostRequest
 	}, nil
 }
 
-func (s *PostServer) GetPost(context.Context, *pbv1.GetPostRequest) (*pbv1.GetPostResponse, error) {
-	return nil, nil
+func (s *PostServer) GetPost(ctx context.Context, req *pbv1.GetPostRequest) (*pbv1.GetPostResponse, error) {
+	post, err := s.PostService.GetPost(ctx, req.AccessToken, req.Id)
+	if errors.Is(err, domain.ErrUnauthorized) {
+		log.Println("Get Post: Unauthorized")
+		return &pbv1.GetPostResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Unauthorized",
+		}, nil
+	}
+	if err != nil {
+		log.Println("Get Post: ", err)
+		return &pbv1.GetPostResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Internal server error",
+		}, nil
+	}
+	return &pbv1.GetPostResponse{
+		Status: http.StatusOK,
+		Message: "Post retrieved successfully",
+		Post:   post,
+	}, nil
 }
 
 func (s *PostServer) ListPosts(context.Context, *pbv1.ListPostsRequest) (*pbv1.ListPostsResponse, error) {
 	return nil, nil
 }
 
-func (s *PostServer) UpdatePost(context.Context, *pbv1.UpdatePostRequest) (*pbv1.UpdatePostResponse, error) {
-	return nil, nil
+func (s *PostServer) UpdatePost(ctx context.Context, req *pbv1.UpdatePostRequest) (*pbv1.UpdatePostResponse, error) {
+	err := s.PostService.UpdatePost(ctx, req.AccessToken, req.Id, req.Post)
+	if errors.Is(err, domain.ErrFieldsAreRequired) {
+		log.Println("Update Post: Please fill all required fields")
+		return &pbv1.UpdatePostResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Please fill all required fields",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrUnauthorized) {
+		log.Println("Update Post: Unauthorized")
+		return &pbv1.UpdatePostResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Unauthorized",
+		}, nil
+	}
+	if err != nil {
+		log.Println("Update Post: ", err)
+		return &pbv1.UpdatePostResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Internal server error",
+		}, nil
+	}
+
+	return &pbv1.UpdatePostResponse{
+		Status:  http.StatusOK,
+		Message: "Post updated successfully",
+	}, nil
 }
 
 func (s *PostServer) DeletePost(context.Context, *pbv1.DeletePostRequest) (*pbv1.DeletePostResponse, error) {

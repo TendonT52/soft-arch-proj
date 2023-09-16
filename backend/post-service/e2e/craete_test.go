@@ -14,7 +14,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func TestCreatePosts(t *testing.T) {
+func TestCreatePost(t *testing.T) {
 	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
@@ -80,8 +80,8 @@ func TestCreatePosts(t *testing.T) {
 					Description:    lex,
 					Period:         "01/01/2023 - 02/02/2023",
 					HowTo:          lex,
-					OpenPositions:  []string{"OpenPositions Test"},
-					RequiredSkills: []string{"RequiredSkills Test"},
+					OpenPositions:  []string{"OpenPositions Test 1", "OpenPositions Test 2", "OpenPositions Test 3"},
+					RequiredSkills: []string{"RequiredSkills Test 1", "RequiredSkills Test 2"},
 					Benefits:       []string{"Benefits Test"},
 				},
 				AccessToken: token,
@@ -142,4 +142,3 @@ func TestCreatePosts(t *testing.T) {
 	}
 
 }
-
