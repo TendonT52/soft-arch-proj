@@ -96,6 +96,7 @@ message ListPostsResponse {
     int64 status = 1;
     string message = 2;
     repeated Post posts = 3;
+    int64 total = 4;
 }
 
 // Update Post

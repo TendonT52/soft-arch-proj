@@ -175,7 +175,7 @@ func (r *postRepository) GetPosts(ctx context.Context, search *pbv1.SearchOption
 	tqueryR := strings.Join(parts, " | ")
 
 	// // Search in open_positions
-	searchOpenPosition, err := r.searchOpenPositions(ctx, tqueryO, search.SearchOpenPosition, &cids)
+	searchOpenPosition, orders, err := r.searchOpenPositions(ctx, tqueryO, search.SearchOpenPosition, &cids)
 	if err != nil {
 		return nil, domain.ErrInternal.From(err.Error(), err)
 	}
@@ -197,15 +197,17 @@ func (r *postRepository) GetPosts(ctx context.Context, search *pbv1.SearchOption
 
 	// Find posts that apper in all 3 maps
 	var summary []domain.SummarySearchResult
-	for pid := range searchResult.OpenPositions {
-		if _, ok := searchResult.RequiredSkills[pid]; ok {
-			if _, ok := searchResult.Benefits[pid]; ok {
-				summary = append(summary, domain.SummarySearchResult{
-					Pid:           pid,
-					OpenPosition:  searchResult.OpenPositions[pid],
-					RequiredSkill: searchResult.RequiredSkills[pid],
-					Benefits:      searchResult.Benefits[pid],
-				})
+	for _, pid := range *orders {
+		if _, ok := searchResult.OpenPositions[pid]; ok {
+			if _, ok := searchResult.RequiredSkills[pid]; ok {
+				if _, ok := searchResult.Benefits[pid]; ok {
+					summary = append(summary, domain.SummarySearchResult{
+						Pid:           pid,
+						OpenPosition:  searchResult.OpenPositions[pid],
+						RequiredSkill: searchResult.RequiredSkills[pid],
+						Benefits:      searchResult.Benefits[pid],
+					})
+				}
 			}
 		}
 	}

@@ -172,7 +172,17 @@ func TestSearchPosts(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, tc.expect.Status, res.Status)
 			require.Equal(t, tc.expect.Message, res.Message)
+			require.Equal(t, int64(len(tc.expect.Posts)), res.Total)
 			require.Equal(t, len(tc.expect.Posts), len(res.Posts))
+			for i, p := range res.Posts {
+				require.Equal(t, tc.expect.Posts[i].Topic, p.Topic)
+				require.Equal(t, tc.expect.Posts[i].Description, p.Description)
+				require.Equal(t, tc.expect.Posts[i].Period, p.Period)
+				require.Equal(t, tc.expect.Posts[i].HowTo, p.HowTo)
+				require.Equal(t, tc.expect.Posts[i].OpenPositions, p.OpenPositions)
+				require.Equal(t, tc.expect.Posts[i].RequiredSkills, p.RequiredSkills)
+				require.Equal(t, tc.expect.Posts[i].Benefits, p.Benefits)
+			}
 		})
 	}
 }

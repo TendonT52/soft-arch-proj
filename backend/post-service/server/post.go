@@ -75,9 +75,9 @@ func (s *PostServer) GetPost(ctx context.Context, req *pbv1.GetPostRequest) (*pb
 		}, nil
 	}
 	return &pbv1.GetPostResponse{
-		Status:    http.StatusOK,
-		Message:   "Post retrieved successfully",
-		Post:      post,
+		Status:  http.StatusOK,
+		Message: "Post retrieved successfully",
+		Post:    post,
 	}, nil
 }
 
@@ -101,6 +101,7 @@ func (s *PostServer) ListPosts(ctx context.Context, req *pbv1.ListPostsRequest) 
 		Status:  http.StatusOK,
 		Message: "Posts retrieved successfully",
 		Posts:   posts,
+		Total:   int64(len(posts)),
 	}, nil
 }
 

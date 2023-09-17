@@ -8,7 +8,7 @@ import (
 	"github.com/lib/pq"
 )
 
-func (r *postRepository) searchOpenPositions(ctx context.Context, tqueryO, searchOpenPosition string, cids *[]int64) (map[int64](*[]string), error) {
+func (r *postRepository) searchOpenPositions(ctx context.Context, tqueryO, searchOpenPosition string, cids *[]int64) (map[int64](*[]string), *[]int64, error) {
 	var rows *sql.Rows
 	var err error
 	if searchOpenPosition == "" {
@@ -25,7 +25,7 @@ func (r *postRepository) searchOpenPositions(ctx context.Context, tqueryO, searc
 
 		rows, err = r.db.QueryContext(ctx, query_open, pq.Array(*cids))
 		if err != nil {
-			return nil, domain.ErrInternal.From(err.Error(), err)
+			return nil, nil, domain.ErrInternal.From(err.Error(), err)
 		}
 	} else {
 		query_open := `
@@ -46,29 +46,31 @@ func (r *postRepository) searchOpenPositions(ctx context.Context, tqueryO, searc
 
 		rows, err = r.db.QueryContext(ctx, query_open, tqueryO, searchOpenPosition, pq.Array(*cids))
 		if err != nil {
-			return nil, domain.ErrInternal.From(err.Error(), err)
+			return nil, nil, domain.ErrInternal.From(err.Error(), err)
 		}
 	}
 	defer rows.Close()
 
+	var order []int64
 	OpenPosition := make(map[int64](*[]string))
 	for rows.Next() {
 		var pid int64
 		var title string
 		err = rows.Scan(&pid, &title)
 		if err != nil {
-			return nil, domain.ErrInternal.From(err.Error(), err)
+			return nil, nil, domain.ErrInternal.From(err.Error(), err)
 		}
 
 		var sub []string
 		s := OpenPosition[pid]
 		if s == nil {
 			OpenPosition[pid] = &sub
+			order = append(order, pid)
 		}
 		*OpenPosition[pid] = append(*OpenPosition[pid], title)
 	}
 
-	return OpenPosition, nil
+	return OpenPosition, &order, nil
 }
 
 func (r *postRepository) searchRequiredSkills(ctx context.Context, tqueryR, searchRequiredSkill string, cids *[]int64) (map[int64](*[]string), error) {
