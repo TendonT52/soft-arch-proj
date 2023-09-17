@@ -1,8 +1,10 @@
 import { type Metadata } from "next";
 import localFont from "next/font/local";
-import { Indicator } from "@/components/indicator";
 import { cn } from "@/lib/utils";
+import { Indicator } from "@/components/indicator";
 import "./globals.css";
+import { Header } from "@/components/header";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const fontSans = localFont({
   src: [
@@ -26,12 +28,15 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={cn(
-          "bg-background min-h-screen font-sans antialiased",
+          "min-h-screen bg-background font-sans antialiased",
           fontSans.variable
         )}
       >
-        {children}
-        <Indicator />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Header />
+          {children}
+          <Indicator />
+        </ThemeProvider>
       </body>
     </html>
   );

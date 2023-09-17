@@ -1,9 +1,11 @@
 import Image from "next/image";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-24">
+    <main className="relative flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center gap-6 p-24">
       <Image
+        className="select-none dark:invert"
         src="/next.svg"
         alt="Next.js Logo"
         width={180}
@@ -11,10 +13,10 @@ export default function Home() {
         priority
       />
       <p className="text-center">
-        Get <i className="italic text-muted-foreground">started</i> by
-        editing&nbsp;
+        Get <i className="italic text-primary">started</i> by editing&nbsp;
         <code className="font-mono font-bold">app/page.tsx</code>
       </p>
+      <ModeToggle />
     </main>
   );
 }

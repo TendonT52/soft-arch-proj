@@ -1,10 +1,11 @@
-/** @type {import("@trivago/prettier-plugin-sort-imports").PrettierConfig} */
+/** @type {import("@ianvs/prettier-plugin-sort-imports").PrettierConfig} */
 module.exports = {
   endOfLine: "lf",
   semi: true,
   singleQuote: false,
   tabWidth: 2,
   trailingComma: "es5",
+  tailwindFunctions: ["cva", "cn"],
   plugins: [
     "@ianvs/prettier-plugin-sort-imports",
     "prettier-plugin-tailwindcss",
