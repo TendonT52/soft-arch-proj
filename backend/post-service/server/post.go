@@ -83,6 +83,13 @@ func (s *PostServer) GetPost(ctx context.Context, req *pbv1.GetPostRequest) (*pb
 
 func (s *PostServer) ListPosts(ctx context.Context, req *pbv1.ListPostsRequest) (*pbv1.ListPostsResponse, error) {
 	posts, err := s.PostService.GetPosts(ctx, req.AccessToken, req.SearchOptions)
+	if errors.Is(err, domain.ErrPostNotFound) {
+		log.Println("List Posts: Posts not found")
+		return &pbv1.ListPostsResponse{
+			Status:  http.StatusNotFound,
+			Message: "Posts not found",
+		}, nil
+	}
 	if err != nil {
 		log.Println("List Posts: ", err)
 		return &pbv1.ListPostsResponse{

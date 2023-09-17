@@ -85,6 +85,9 @@ func (s *postService) GetPosts(ctx context.Context, token string, search *pbv1.S
 	
 	companyInfo := domain.NewCompanyInfo(u.Companies)
 	posts, err := s.PostRepo.GetPosts(ctx, search, companyInfo)
+	if posts == nil {
+		return nil, domain.ErrPostNotFound
+	}
 	if err != nil {
 		return nil, err
 	}

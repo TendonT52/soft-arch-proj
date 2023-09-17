@@ -149,6 +149,21 @@ func TestSearchPosts(t *testing.T) {
 				},
 			},
 		},
+		"not found": {
+			req: &pbv1.ListPostsRequest{
+				AccessToken: token,
+				SearchOptions: &pbv1.SearchOptions{
+					SearchCompany:       "mock-search-company",
+					SearchOpenPosition:  "mock-search-open-position",
+					SearchRequiredSkill: "mock-search-required-skill",
+					SearchBenefit:       "mock-search-benefit",
+				},
+			},
+			expect: &pbv1.ListPostsResponse{
+				Status:  404,
+				Message: "Posts not found",
+			},
+		},
 	}
 
 	for name, tc := range tests {
