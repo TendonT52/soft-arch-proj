@@ -152,7 +152,7 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	}
 }
 
-func createMockComapny(t *testing.T, name, email, description, location, phone, category string) *pbv1.CreateCompanyResponse {
+func createMockComapny(t *testing.T, name, email, description, location, phone, category string) *pbv1.Company {
 	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
@@ -178,7 +178,16 @@ func createMockComapny(t *testing.T, name, email, description, location, phone, 
 	require.Equal(t, int64(201), com.Status)
 	require.NoError(t, err)
 
-	return com
+	return &pbv1.Company{
+		Id:          com.Id,
+		Name:        name,
+		Email:       email,
+		Description: description,
+		Location:    location,
+		Phone:       phone,
+		Category:    category,
+		Status:      "Pending",
+	}
 }
 
 func TestListCompanies(t *testing.T) {
@@ -242,26 +251,8 @@ func TestListCompanies(t *testing.T) {
 				Status:  200,
 				Message: "success",
 				Companies: []*pbv1.Company{
-					{
-						Id:          c1.Id,
-						Name:        "Mock Company 1",
-						Email:       mail1,
-						Description: "Company1 desc",
-						Location:    "Bangkok",
-						Phone:       "0123456789",
-						Category:    "Technology",
-						Status:      "Pending",
-					},
-					{
-						Id:          c2.Id,
-						Name:        "Mock Company 2",
-						Email:       mail2,
-						Description: "Company2 desc",
-						Location:    "Bangkok",
-						Phone:       "0123456789",
-						Category:    "Technical Finanace",
-						Status:      "Pending",
-					},
+					c1,
+					c2,
 				},
 			},
 		},
