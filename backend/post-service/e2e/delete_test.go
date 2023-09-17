@@ -38,36 +38,13 @@ func TestDeletePost(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	lex := `{
-		"root": {
-		  "children": [
-			{
-			  "children": [
-				{
-				  "detail": 0,
-				  "format": 0,
-				  "mode": "normal",
-				  "style": "",
-				  "text": "What to expect from here on out",
-				  "type": "text",
-				  "version": 1
-				}
-			  ],
-			  "direction": "ltr",
-			  "format": "start",
-			  "indent": 0,
-			  "type": "paragraph",
-			  "version": 1
-			}
-		  ],
-		  "direction": "ltr",
-		  "format": "",
-		  "indent": 0,
-		  "type": "root",
-		  "version": 1
-		}
-	  }
-	`
+	res, err := c.DeletePosts(ctx, &pbv1.DeletePostsRequest{
+		AccessToken: token,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), res.Status)
+
+	lex := `{ "root": {} }`
 
 	CreateRes, err := c.CreatePost(ctx, &pbv1.CreatePostRequest{
 		AccessToken: token,
@@ -99,6 +76,21 @@ func TestDeletePost(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, int64(201), CreateRes2.Status)
 
+	CreateRes3, err := c.CreatePost(ctx, &pbv1.CreatePostRequest{
+		AccessToken: token,
+		Post: &pbv1.Post{
+			Topic:          "Topic for delete 2",
+			Description:    lex,
+			Period:         "05/05/2023 - 05/05/2024",
+			HowTo:          lex,
+			OpenPositions:  []string{"open position 1"},
+			RequiredSkills: []string{"skill 1", "skill 3"},
+			Benefits:       []string{"benefit 1", "benefit 222", "benefit 3"},
+		},
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(201), CreateRes3.Status)
+
 	tests := map[string]struct {
 		req    *pbv1.DeletePostRequest
 		expect *pbv1.DeletePostResponse
@@ -121,6 +113,16 @@ func TestDeletePost(t *testing.T) {
 			expect: &pbv1.DeletePostResponse{
 				Status:  401,
 				Message: "Unauthorized",
+			},
+		},
+		"delete when some value still in use": {
+			req: &pbv1.DeletePostRequest{
+				AccessToken: token,
+				Id:          CreateRes3.Id,
+			},
+			expect: &pbv1.DeletePostResponse{
+				Status:  200,
+				Message: "Post deleted successfully",
 			},
 		},
 	}

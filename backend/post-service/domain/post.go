@@ -19,10 +19,18 @@ type SummarySearchResult struct {
 }
 
 func CheckRequireFields(post *pbv1.Post) bool {
-	if post.Topic == "" || post.Description == "" || post.Period == "" || post.HowTo == "" {
+	return checkFields(post.Topic, post.Description, post.Period, post.HowTo, len(post.OpenPositions), len(post.RequiredSkills), len(post.Benefits))
+}
+
+func CheckUpdatedFields(post *pbv1.UpdatedPost) bool {
+	return checkFields(post.Topic, post.Description, post.Period, post.HowTo, len(post.OpenPositions), len(post.RequiredSkills), len(post.Benefits))
+}
+
+func checkFields(topic, description, period, howTo string, lenOpenPositions, lenRequiredSkills, lenBenefits int) bool {
+	if topic == "" || description == "" || period == "" || howTo == "" {
 		return false
 	}
-	if len(post.OpenPositions) == 0 || len(post.RequiredSkills) == 0 || len(post.Benefits) == 0 {
+	if lenOpenPositions == 0 || lenRequiredSkills == 0 || lenBenefits == 0 {
 		return false
 	}
 	return true

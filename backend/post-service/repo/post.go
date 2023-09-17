@@ -47,21 +47,21 @@ func (r *postRepository) CreatePost(ctx context.Context, userId int64, post *pbv
 	}
 
 	// Insert into open_positions and posts_open_positions
-	err = r.insertIntoOpenPositions(ctx, tx, post.OpenPositions, postId)
+	err = r.insertIntoOpenPositions(ctx, tx, &post.OpenPositions, postId)
 	if err != nil {
 		tx.Rollback()
 		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Insert into required_skills and posts_required_skills
-	err = r.insertIntoRequiredSkills(ctx, tx, post.RequiredSkills, postId)
+	err = r.insertIntoRequiredSkills(ctx, tx, &post.RequiredSkills, postId)
 	if err != nil {
 		tx.Rollback()
 		return 0, domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Insert into benefits and posts_benefits
-	err = r.insertIntoBenefits(ctx, tx, post.Benefits, postId)
+	err = r.insertIntoBenefits(ctx, tx, &post.Benefits, postId)
 	if err != nil {
 		tx.Rollback()
 		return 0, domain.ErrInternal.From(err.Error(), err)
@@ -261,9 +261,8 @@ func (r *postRepository) GetOwner(ctx context.Context, postId int64) (int64, err
 	return userId, nil
 }
 
-func (r *postRepository) UpdatePost(ctx context.Context, postId int64, post *pbv1.Post) error {
+func (r *postRepository) UpdatePost(ctx context.Context, postId int64, post *pbv1.UpdatedPost) error {
 	current_timestamp := time.Now().Unix()
-
 	// Start a transaction
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -278,43 +277,19 @@ func (r *postRepository) UpdatePost(ctx context.Context, postId int64, post *pbv
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 
-	// Find and Delete from table `posts_open_positions` and table `open_positions`
-	err = r.findAndDeleteOpenPositions(ctx, tx, postId)
+	err = r.updateOpenPosition(ctx, tx, post.OpenPositions, postId)
 	if err != nil {
 		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 
-	// Find and Delete from table `posts_required_skills` and table `required_skills`
-	err = r.findAndDeleteRequiredSkills(ctx, tx, postId)
+	err = r.updateRequiredSkill(ctx, tx, post.RequiredSkills, postId)
 	if err != nil {
 		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 
-	// Find and Delete from table `posts_benefits` and table `benefits`
-	err = r.findAndDeleteBenefits(ctx, tx, postId)
-	if err != nil {
-		tx.Rollback()
-		return domain.ErrInternal.From(err.Error(), err)
-	}
-
-	// Insert into open_positions and posts_open_positions
-	err = r.insertIntoOpenPositions(ctx, tx, post.OpenPositions, postId)
-	if err != nil {
-		tx.Rollback()
-		return domain.ErrInternal.From(err.Error(), err)
-	}
-
-	// Insert into required_skills and posts_required_skills
-	err = r.insertIntoRequiredSkills(ctx, tx, post.RequiredSkills, postId)
-	if err != nil {
-		tx.Rollback()
-		return domain.ErrInternal.From(err.Error(), err)
-	}
-
-	// Insert into benefits and posts_benefits
-	err = r.insertIntoBenefits(ctx, tx, post.Benefits, postId)
+	err = r.updateBenefit(ctx, tx, post.Benefits, postId)
 	if err != nil {
 		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
@@ -337,29 +312,85 @@ func (r *postRepository) DeletePost(ctx context.Context, postId int64) error {
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 
+	// Select open_positions, required_skills, benefits
+	query := "SELECT title FROM open_positions WHERE oid IN (SELECT oid FROM posts_open_positions WHERE pid = $1)"
+	rows, err := tx.QueryContext(ctx, query, postId)
+	if err != nil {
+		tx.Rollback()
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+	defer rows.Close()
+	var openPositions []string
+	for rows.Next() {
+		var title string
+		err = rows.Scan(&title)
+		if err != nil {
+			tx.Rollback()
+			return domain.ErrInternal.From(err.Error(), err)
+		}
+		openPositions = append(openPositions, title)
+	}
+
+	query = "SELECT title FROM required_skills WHERE sid IN (SELECT sid FROM posts_required_skills WHERE pid = $1)"
+	rows, err = tx.QueryContext(ctx, query, postId)
+	if err != nil {
+		tx.Rollback()
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+	defer rows.Close()
+	var requiredSkills []string
+	for rows.Next() {
+		var title string
+		err = rows.Scan(&title)
+		if err != nil {
+			tx.Rollback()
+			return domain.ErrInternal.From(err.Error(), err)
+		}
+		requiredSkills = append(requiredSkills, title)
+	}
+
+	query = "SELECT title FROM benefits WHERE bid IN (SELECT bid FROM posts_benefits WHERE pid = $1)"
+	rows, err = tx.QueryContext(ctx, query, postId)
+	if err != nil {
+		tx.Rollback()
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+	defer rows.Close()
+
+	var benefits []string
+	for rows.Next() {
+		var title string
+		err = rows.Scan(&title)
+		if err != nil {
+			tx.Rollback()
+			return domain.ErrInternal.From(err.Error(), err)
+		}
+		benefits = append(benefits, title)
+	}
+
 	// Find and Delete from table `posts_open_positions` and table `open_positions`
-	err = r.findAndDeleteOpenPositions(ctx, tx, postId)
+	err = r.deleteOpenPositions(ctx, tx, &openPositions, postId)
 	if err != nil {
 		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Find and Delete from table `posts_required_skills` and table `required_skills`
-	err = r.findAndDeleteRequiredSkills(ctx, tx, postId)
+	err = r.deleteRequiredSkills(ctx, tx, &requiredSkills, postId)
 	if err != nil {
 		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Find and Delete from table `posts_benefits` and table `benefits`
-	err = r.findAndDeleteBenefits(ctx, tx, postId)
+	err = r.deleteBenefits(ctx, tx, &benefits, postId)
 	if err != nil {
 		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 
 	// Delete from table posts
-	query := "DELETE FROM posts WHERE pid = $1"
+	query = "DELETE FROM posts WHERE pid = $1"
 	_, err = tx.ExecContext(ctx, query, postId)
 	if err != nil {
 		tx.Rollback()

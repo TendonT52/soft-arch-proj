@@ -71,6 +71,12 @@ func TestGetPost(t *testing.T) {
 	})
 	require.NoError(t, err)
 
+	resDelete, err := c.DeletePosts(ctx, &pbv1.DeletePostsRequest{
+		AccessToken: token,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), resDelete.Status)
+
 	res, err := c.CreatePost(ctx, &pbv1.CreatePostRequest{
 		AccessToken: token,
 		Post: &pbv1.Post{

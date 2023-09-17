@@ -38,6 +38,13 @@ func TestCreatePost(t *testing.T) {
 	})
 	require.NoError(t, err)
 
+	// Clear all posts
+	res, err := c.DeletePosts(ctx, &pbv1.DeletePostsRequest{
+		AccessToken: token,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), res.Status)
+
 	lex := `{
 		"root": {
 		  "children": [
@@ -77,6 +84,24 @@ func TestCreatePost(t *testing.T) {
 			req: &pbv1.CreatePostRequest{
 				Post: &pbv1.Post{
 					Topic:          "Topic Test",
+					Description:    lex,
+					Period:         "01/01/2023 - 02/02/2023",
+					HowTo:          lex,
+					OpenPositions:  []string{"OpenPositions Test 1", "OpenPositions Test 2", "OpenPositions Test 3"},
+					RequiredSkills: []string{"RequiredSkills Test 1", "RequiredSkills Test 2"},
+					Benefits:       []string{"Benefits Test"},
+				},
+				AccessToken: token,
+			},
+			expect: &pbv1.CreatePostResponse{
+				Status:  201,
+				Message: "Post created successfully",
+			},
+		},
+		"success with same title": {
+			req: &pbv1.CreatePostRequest{
+				Post: &pbv1.Post{
+					Topic:          "Topic Test 2",
 					Description:    lex,
 					Period:         "01/01/2023 - 02/02/2023",
 					HowTo:          lex,

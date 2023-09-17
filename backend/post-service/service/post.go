@@ -95,8 +95,8 @@ func (s *postService) GetPosts(ctx context.Context, token string, search *pbv1.S
 	return posts, nil
 }
 
-func (s *postService) UpdatePost(ctx context.Context, token string, postId int64, post *pbv1.Post) error {
-	if !domain.CheckRequireFields(post) {
+func (s *postService) UpdatePost(ctx context.Context, token string, postId int64, post *pbv1.UpdatedPost) error {
+	if !domain.CheckUpdatedFields(post) {
 		return domain.ErrFieldsAreRequired
 	}
 
