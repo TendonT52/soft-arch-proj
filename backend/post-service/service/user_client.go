@@ -36,3 +36,23 @@ func (u *userClientService) GetCompanyProfile(ctx context.Context, req *pbUser.G
 
 	return res, nil
 }
+
+func (u *userClientService) ListApprovedCompanies(ctx context.Context, req *pbUser.ListApprovedCompaniesRequest) (*pbUser.ListApprovedCompaniesResponse, error) {
+	config, err := config.LoadConfig("../")
+	if err != nil {
+		return nil, err
+	}
+	conn, err := grpc.Dial(fmt.Sprintf(":%s", config.UserServicePort), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := pbUser.NewUserServiceClient(conn)
+	res, err := client.ListApprovedCompanies(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}

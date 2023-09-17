@@ -76,9 +76,16 @@ message GetPostResponse {
 }
 
 // List Posts
+message SearchOptions {
+    string search_company = 1;
+    string search_open_position = 2;
+    string search_required_skill = 3;
+    string search_benefit = 4;
+}
+
 message ListPostsRequest {
     string access_token = 1;
-    string search = 2;
+    SearchOptions search_options = 2;
 }
 
 message ListPostsResponse {

@@ -3,11 +3,13 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"strings"
 	"time"
 
 	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 	"github.com/TikhampornSky/go-post-service/port"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 )
 
@@ -155,7 +157,144 @@ func (r *postRepository) GetPost(ctx context.Context, postId int64) (*pbv1.Post,
 	return post, nil
 }
 
-func (r *postRepository) GetPosts(ctx context.Context, search string) ([]*pbv1.Post, error) { // Search !!!!
+func (r *postRepository) GetPosts(ctx context.Context, search *pbv1.SearchOptions, cids []*int64) ([]*pbv1.Post, error) {
+	var searchResult *domain.IndividualSearchResult = &domain.IndividualSearchResult{
+		OpenPosition:  make(map[int64](*[]domain.SubSearch)),
+		RequiredSkill: make(map[int64](*[]domain.SubSearch)),
+		Benefits:      make(map[int64](*[]domain.SubSearch)),
+	}
+
+	// Create
+	parts := strings.Fields(search.SearchBenefit)
+	tqueryB := strings.Join(parts, " | ")
+
+	parts = strings.Fields(search.SearchOpenPosition)
+	tqueryO := strings.Join(parts, " | ")
+
+	parts = strings.Fields(search.SearchRequiredSkill)
+	tqueryR := strings.Join(parts, " | ")
+
+	// Search in open_positions
+	query_open := `
+		SELECT 	posts.pid, open_positions.oid, open_positions.title
+		FROM posts
+
+		INNER JOIN posts_open_positions ON posts.pid = posts_open_positions.pid
+		INNER JOIN open_positions ON posts_open_positions.oid = open_positions.oid
+
+		WHERE
+			(to_tsquery($1) @@ to_tsvector(open_positions.title)
+			OR SIMILARITY($2, open_positions.title) > 0 )
+			AND posts.uid = ANY($3)
+		ORDER BY
+			NULLIF(ts_rank(to_tsvector(open_positions.title), to_tsquery($1)), 0) DESC,
+			SIMILARITY($2, open_positions.title) DESC NULLS LAST
+	`
+	rows, err := r.db.QueryContext(ctx, query_open, tqueryO, search.SearchOpenPosition, pq.Array(cids))
+	if err != nil {
+		return nil, domain.ErrInternal.From(err.Error(), err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var pid, oid int64
+		var title string
+		err = rows.Scan(&pid, &oid, &title)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+
+		a := &[]domain.SubSearch{}
+		searchResult.OpenPosition[pid] = searchResult.OpenPosition[pid].Append(a, domain.SubSearch{
+			Id:    oid,
+			Title: title,
+		})
+	}
+
+	// Search in required_skills
+	query_required := `
+		SELECT 	posts.pid, required_skills.sid, required_skills.title
+		FROM posts
+
+		INNER JOIN posts_required_skills ON posts.pid = posts_required_skills.pid
+		INNER JOIN required_skills ON posts_required_skills.sid = required_skills.sid
+
+		WHERE
+			(to_tsquery($1) @@ to_tsvector(required_skills.title)
+			OR SIMILARITY($2, required_skills.title) > 0 )
+			AND posts.uid = ANY($3)
+		ORDER BY
+			NULLIF(ts_rank(to_tsvector(required_skills.title), to_tsquery($1)), 0) DESC,
+			SIMILARITY($2, required_skills.title) DESC NULLS LAST
+	`
+
+	rows, err = r.db.QueryContext(ctx, query_required, tqueryR, search.SearchRequiredSkill, pq.Array(cids))
+	if err != nil {
+		return nil, domain.ErrInternal.From(err.Error(), err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var pid, sid int64
+		var title string
+		err = rows.Scan(&pid, &sid, &title)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+
+		searchResult.RequiredSkill[pid] = domain.SubSearch{
+			Id:    sid,
+			Title: title,
+		}
+	}
+
+	// Search in benefits
+	query_benefit := `
+		SELECT 	posts.pid, benefits.bid, benefits.title
+		FROM posts
+
+		INNER JOIN posts_benefits ON posts.pid = posts_benefits.pid
+		INNER JOIN benefits ON posts_benefits.bid = benefits.bid
+
+		WHERE
+			(to_tsquery($1) @@ to_tsvector(benefits.title)
+			OR SIMILARITY($2, benefits.title) > 0 )
+			AND posts.uid = ANY($3)
+		ORDER BY
+			NULLIF(ts_rank(to_tsvector(benefits.title), to_tsquery($1)), 0) DESC,
+			SIMILARITY($2, benefits.title) DESC NULLS LAST
+	`
+
+	rows, err = r.db.QueryContext(ctx, query_benefit, tqueryB, search.SearchBenefit, pq.Array(cids))
+	if err != nil {
+		return nil, domain.ErrInternal.From(err.Error(), err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var pid, bid int64
+		var title string
+		err = rows.Scan(&pid, &bid, &title)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+
+		searchResult.Benefits[pid] = domain.SubSearch{
+			Id:    bid,
+			Title: title,
+		}
+	}
+
+	// Find posts that apper in all 3 maps
+	var postIds []int64
+	for pid, _ := range searchResult.OpenPosition {
+		if _, ok := searchResult.RequiredSkill[pid]; ok {
+			if _, ok := searchResult.Benefits[pid]; ok {
+				postIds = append(postIds, pid)
+			}
+		}
+	}
+
 	return nil, nil
 }
 

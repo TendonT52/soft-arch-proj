@@ -69,7 +69,7 @@ func (s *postService) GetPost(ctx context.Context, token string, postId int64) (
 	return post, nil
 }
 
-func (s *postService) GetPosts(ctx context.Context, token string, search string) ([]*pbv1.Post, error) {
+func (s *postService) GetPosts(ctx context.Context, token string, search *pbv1.SearchOptions) ([]*pbv1.Post, error) {
 	return nil, nil
 }
 
