@@ -42,8 +42,14 @@ message PostOwner {
     string name = 2;
 }
 
+enum ElementStatus {
+    SAME = 0;
+    ADD = 1;
+    REMOVE = 2;
+}
+
 message Element {
-    bool isAdd = 1;
+    ElementStatus action = 1;
     string value = 2;
 }
 
