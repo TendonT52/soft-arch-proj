@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "github.com/TikhampornSky/go-post-service/gen";
+import "google/api/annotations.proto";
+
+service PostService {
+    rpc CreatePost(CreatePostRequest) returns (CreatePostResponse) {
+        option (google.api.http) = {
+            post: "/v1/posts"
+            body: "*"
+        };
+    }
+    rpc GetPost(GetPostRequest) returns (GetPostResponse) {
+        option (google.api.http) = {
+            get: "/v1/posts/{id}"
+        };
+    }
+    rpc ListPosts(ListPostsRequest) returns (ListPostsResponse) {
+        option (google.api.http) = {
+            get: "/v1/posts"
+        };
+    }
+    rpc UpdatePost(UpdatePostRequest) returns (UpdatePostResponse) {
+        option (google.api.http) = {
+            put: "/v1/posts/{id}"
+            body: "*"
+        };
+    }
+    rpc DeletePost(DeletePostRequest) returns (DeletePostResponse) {
+        option (google.api.http) = {
+            delete: "/v1/posts/{id}"
+        };
+    }
+}
+
+message Post {
+    string topic = 1;
+    string description = 2;
+    string period = 3;
+    string how_to = 4;
+    repeated string open_positions = 5;
+    repeated string required_skills = 6;
+    repeated string benefits = 7;
+}
+
+// Create Post
+message CreatePostRequest {
+    Post post = 1;
+    string access_token = 2;
+}
+
+message CreatePostResponse {
+    int64 status = 1;
+    string message = 2;
+    int64 id = 3;
+}
+
+// Get Post
+message GetPostRequest {
+    int64 id = 1;
+    string access_token = 2;
+}
+
+message GetPostResponse {
+    int64 status = 1;
+    string message = 2;
+    Post post = 3;
+}
+
+// List Posts
+message ListPostsRequest {
+    string access_token = 1;
+    string search = 2;
+}
+
+message ListPostsResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated Post posts = 3;
+}
+
+// Update Post
+message UpdatePostRequest {
+    int64 id = 1;
+    Post post = 2;
+    string access_token = 3;
+}
+
+message UpdatePostResponse {
+    int64 status = 1;
+    string message = 2;
+}
+
+// Delete Post
+message DeletePostRequest {
+    int64 id = 1;
+    string access_token = 2;
+}
+
+message DeletePostResponse {
+    int64 status = 1;
+    string message = 2;
+}
