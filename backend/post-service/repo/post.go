@@ -9,7 +9,6 @@ import (
 	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 	"github.com/TikhampornSky/go-post-service/port"
-	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 )
 
@@ -157,11 +156,12 @@ func (r *postRepository) GetPost(ctx context.Context, postId int64) (*pbv1.Post,
 	return post, nil
 }
 
-func (r *postRepository) GetPosts(ctx context.Context, search *pbv1.SearchOptions, cids []*int64) ([]*pbv1.Post, error) {
+func (r *postRepository) GetPosts(ctx context.Context, search *pbv1.SearchOptions, data *domain.CompanyInfo) ([]*pbv1.Post, error) {
+	cids := *data.Ids
 	var searchResult *domain.IndividualSearchResult = &domain.IndividualSearchResult{
-		OpenPosition:  make(map[int64](*[]domain.SubSearch)),
-		RequiredSkill: make(map[int64](*[]domain.SubSearch)),
-		Benefits:      make(map[int64](*[]domain.SubSearch)),
+		OpenPositions:  make(map[int64](*[]string)),
+		RequiredSkills: make(map[int64](*[]string)),
+		Benefits:       make(map[int64](*[]string)),
 	}
 
 	// Create
@@ -174,128 +174,76 @@ func (r *postRepository) GetPosts(ctx context.Context, search *pbv1.SearchOption
 	parts = strings.Fields(search.SearchRequiredSkill)
 	tqueryR := strings.Join(parts, " | ")
 
-	// Search in open_positions
-	query_open := `
-		SELECT 	posts.pid, open_positions.oid, open_positions.title
-		FROM posts
-
-		INNER JOIN posts_open_positions ON posts.pid = posts_open_positions.pid
-		INNER JOIN open_positions ON posts_open_positions.oid = open_positions.oid
-
-		WHERE
-			(to_tsquery($1) @@ to_tsvector(open_positions.title)
-			OR SIMILARITY($2, open_positions.title) > 0 )
-			AND posts.uid = ANY($3)
-		ORDER BY
-			NULLIF(ts_rank(to_tsvector(open_positions.title), to_tsquery($1)), 0) DESC,
-			SIMILARITY($2, open_positions.title) DESC NULLS LAST
-	`
-	rows, err := r.db.QueryContext(ctx, query_open, tqueryO, search.SearchOpenPosition, pq.Array(cids))
+	// // Search in open_positions
+	searchOpenPosition, err := r.searchOpenPositions(ctx, tqueryO, search.SearchOpenPosition, &cids)
 	if err != nil {
 		return nil, domain.ErrInternal.From(err.Error(), err)
 	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var pid, oid int64
-		var title string
-		err = rows.Scan(&pid, &oid, &title)
-		if err != nil {
-			return nil, domain.ErrInternal.From(err.Error(), err)
-		}
-
-		a := &[]domain.SubSearch{}
-		searchResult.OpenPosition[pid] = searchResult.OpenPosition[pid].Append(a, domain.SubSearch{
-			Id:    oid,
-			Title: title,
-		})
-	}
+	searchResult.OpenPositions = searchOpenPosition
 
 	// Search in required_skills
-	query_required := `
-		SELECT 	posts.pid, required_skills.sid, required_skills.title
-		FROM posts
-
-		INNER JOIN posts_required_skills ON posts.pid = posts_required_skills.pid
-		INNER JOIN required_skills ON posts_required_skills.sid = required_skills.sid
-
-		WHERE
-			(to_tsquery($1) @@ to_tsvector(required_skills.title)
-			OR SIMILARITY($2, required_skills.title) > 0 )
-			AND posts.uid = ANY($3)
-		ORDER BY
-			NULLIF(ts_rank(to_tsvector(required_skills.title), to_tsquery($1)), 0) DESC,
-			SIMILARITY($2, required_skills.title) DESC NULLS LAST
-	`
-
-	rows, err = r.db.QueryContext(ctx, query_required, tqueryR, search.SearchRequiredSkill, pq.Array(cids))
+	searchRequiredSkill, err := r.searchRequiredSkills(ctx, tqueryR, search.SearchRequiredSkill, &cids)
 	if err != nil {
 		return nil, domain.ErrInternal.From(err.Error(), err)
 	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var pid, sid int64
-		var title string
-		err = rows.Scan(&pid, &sid, &title)
-		if err != nil {
-			return nil, domain.ErrInternal.From(err.Error(), err)
-		}
-
-		searchResult.RequiredSkill[pid] = domain.SubSearch{
-			Id:    sid,
-			Title: title,
-		}
-	}
+	searchResult.RequiredSkills = searchRequiredSkill
 
 	// Search in benefits
-	query_benefit := `
-		SELECT 	posts.pid, benefits.bid, benefits.title
-		FROM posts
-
-		INNER JOIN posts_benefits ON posts.pid = posts_benefits.pid
-		INNER JOIN benefits ON posts_benefits.bid = benefits.bid
-
-		WHERE
-			(to_tsquery($1) @@ to_tsvector(benefits.title)
-			OR SIMILARITY($2, benefits.title) > 0 )
-			AND posts.uid = ANY($3)
-		ORDER BY
-			NULLIF(ts_rank(to_tsvector(benefits.title), to_tsquery($1)), 0) DESC,
-			SIMILARITY($2, benefits.title) DESC NULLS LAST
-	`
-
-	rows, err = r.db.QueryContext(ctx, query_benefit, tqueryB, search.SearchBenefit, pq.Array(cids))
+	searchBenefit, err := r.searchBenefits(ctx, tqueryB, search.SearchBenefit, &cids)
 	if err != nil {
 		return nil, domain.ErrInternal.From(err.Error(), err)
 	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var pid, bid int64
-		var title string
-		err = rows.Scan(&pid, &bid, &title)
-		if err != nil {
-			return nil, domain.ErrInternal.From(err.Error(), err)
-		}
-
-		searchResult.Benefits[pid] = domain.SubSearch{
-			Id:    bid,
-			Title: title,
-		}
-	}
+	searchResult.Benefits = searchBenefit
 
 	// Find posts that apper in all 3 maps
-	var postIds []int64
-	for pid, _ := range searchResult.OpenPosition {
-		if _, ok := searchResult.RequiredSkill[pid]; ok {
+	var summary []domain.SummarySearchResult
+	for pid := range searchResult.OpenPositions {
+		if _, ok := searchResult.RequiredSkills[pid]; ok {
 			if _, ok := searchResult.Benefits[pid]; ok {
-				postIds = append(postIds, pid)
+				summary = append(summary, domain.SummarySearchResult{
+					Pid:           pid,
+					OpenPosition:  searchResult.OpenPositions[pid],
+					RequiredSkill: searchResult.RequiredSkills[pid],
+					Benefits:      searchResult.Benefits[pid],
+				})
 			}
 		}
 	}
 
-	return nil, nil
+	// Find selected posts detail
+	var posts []*pbv1.Post
+	query := "SELECT pid, uid, topic, description, period, how_to, updated_at FROM posts WHERE pid = $1"
+	stmt, err := r.db.PrepareContext(ctx, query)
+	if err != nil {
+		return nil, domain.ErrInternal.From(err.Error(), err)
+	}
+	defer stmt.Close()
+
+	for _, s := range summary {
+		var pid, ownerId, updated_at int64
+		var topic, description, period, howTo string
+		err = stmt.QueryRowContext(ctx, s.Pid).Scan(&pid, &ownerId, &topic, &description, &period, &howTo, &updated_at)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+		posts = append(posts, &pbv1.Post{
+			PostId:      pid,
+			Topic:       topic,
+			Description: description,
+			Period:      period,
+			HowTo:       howTo,
+			Owner: &pbv1.PostOwner{
+				Id:   ownerId,
+				Name: data.Profiles[ownerId].Name,
+			},
+			OpenPositions:  *s.OpenPosition,
+			RequiredSkills: *s.RequiredSkill,
+			Benefits:       *s.Benefits,
+			UpdatedAt:      updated_at,
+		})
+	}
+
+	return posts, nil
 }
 
 func (r *postRepository) GetOwner(ctx context.Context, postId int64) (int64, error) {
@@ -423,5 +371,46 @@ func (r *postRepository) DeletePost(ctx context.Context, postId int64) error {
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 
+	return nil
+}
+
+func (r *postRepository) DeleteAllPosts(ctx context.Context) error {
+	query := "DELETE FROM posts_open_positions"
+	_, err := r.db.ExecContext(ctx, query)
+	if err != nil {
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+	query = "DELETE FROM posts_required_skills"
+	_, err = r.db.ExecContext(ctx, query)
+	if err != nil {
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+	query = "DELETE FROM posts_benefits"
+	_, err = r.db.ExecContext(ctx, query)
+	if err != nil {
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+
+	query = "DELETE FROM open_positions"
+	_, err = r.db.ExecContext(ctx, query)
+	if err != nil {
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+	query = "DELETE FROM required_skills"
+	_, err = r.db.ExecContext(ctx, query)
+	if err != nil {
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+	query = "DELETE FROM benefits"
+	_, err = r.db.ExecContext(ctx, query)
+	if err != nil {
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+
+	query = "DELETE FROM posts"
+	_, err = r.db.ExecContext(ctx, query)
+	if err != nil {
+		return domain.ErrInternal.From(err.Error(), err)
+	}
 	return nil
 }

@@ -14,6 +14,7 @@ type PostServicePort interface {
 	GetPosts(ctx context.Context, token string, search *pbv1.SearchOptions) ([]*pbv1.Post, error)
 	UpdatePost(ctx context.Context, token string, postId int64, post *pbv1.Post) error
 	DeletePost(ctx context.Context, token string, postId int64) error
+	DeleteAllPosts(ctx context.Context, token string) error // for testing
 }
 
 type TokenServicePort interface {
@@ -22,4 +23,5 @@ type TokenServicePort interface {
 
 type UserClientPort interface {
 	GetCompanyProfile(ctx context.Context, req *pbUser.GetCompanyRequest) (*pbUser.GetCompanyResponse, error)
+	ListApprovedCompanies(ctx context.Context, req *pbUser.ListApprovedCompaniesRequest) (*pbUser.ListApprovedCompaniesResponse, error)
 }

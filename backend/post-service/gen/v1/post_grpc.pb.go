@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	PostService_CreatePost_FullMethodName = "/user.PostService/CreatePost"
-	PostService_GetPost_FullMethodName    = "/user.PostService/GetPost"
-	PostService_ListPosts_FullMethodName  = "/user.PostService/ListPosts"
-	PostService_UpdatePost_FullMethodName = "/user.PostService/UpdatePost"
-	PostService_DeletePost_FullMethodName = "/user.PostService/DeletePost"
+	PostService_CreatePost_FullMethodName  = "/user.PostService/CreatePost"
+	PostService_GetPost_FullMethodName     = "/user.PostService/GetPost"
+	PostService_ListPosts_FullMethodName   = "/user.PostService/ListPosts"
+	PostService_UpdatePost_FullMethodName  = "/user.PostService/UpdatePost"
+	PostService_DeletePost_FullMethodName  = "/user.PostService/DeletePost"
+	PostService_DeletePosts_FullMethodName = "/user.PostService/DeletePosts"
 )
 
 // PostServiceClient is the client API for PostService service.
@@ -35,6 +36,7 @@ type PostServiceClient interface {
 	ListPosts(ctx context.Context, in *ListPostsRequest, opts ...grpc.CallOption) (*ListPostsResponse, error)
 	UpdatePost(ctx context.Context, in *UpdatePostRequest, opts ...grpc.CallOption) (*UpdatePostResponse, error)
 	DeletePost(ctx context.Context, in *DeletePostRequest, opts ...grpc.CallOption) (*DeletePostResponse, error)
+	DeletePosts(ctx context.Context, in *DeletePostsRequest, opts ...grpc.CallOption) (*DeletePostsResponse, error)
 }
 
 type postServiceClient struct {
@@ -90,6 +92,15 @@ func (c *postServiceClient) DeletePost(ctx context.Context, in *DeletePostReques
 	return out, nil
 }
 
+func (c *postServiceClient) DeletePosts(ctx context.Context, in *DeletePostsRequest, opts ...grpc.CallOption) (*DeletePostsResponse, error) {
+	out := new(DeletePostsResponse)
+	err := c.cc.Invoke(ctx, PostService_DeletePosts_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostServiceServer is the server API for PostService service.
 // All implementations must embed UnimplementedPostServiceServer
 // for forward compatibility
@@ -99,6 +110,7 @@ type PostServiceServer interface {
 	ListPosts(context.Context, *ListPostsRequest) (*ListPostsResponse, error)
 	UpdatePost(context.Context, *UpdatePostRequest) (*UpdatePostResponse, error)
 	DeletePost(context.Context, *DeletePostRequest) (*DeletePostResponse, error)
+	DeletePosts(context.Context, *DeletePostsRequest) (*DeletePostsResponse, error)
 	mustEmbedUnimplementedPostServiceServer()
 }
 
@@ -120,6 +132,9 @@ func (UnimplementedPostServiceServer) UpdatePost(context.Context, *UpdatePostReq
 }
 func (UnimplementedPostServiceServer) DeletePost(context.Context, *DeletePostRequest) (*DeletePostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePost not implemented")
+}
+func (UnimplementedPostServiceServer) DeletePosts(context.Context, *DeletePostsRequest) (*DeletePostsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePosts not implemented")
 }
 func (UnimplementedPostServiceServer) mustEmbedUnimplementedPostServiceServer() {}
 
@@ -224,6 +239,24 @@ func _PostService_DeletePost_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_DeletePosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePostsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).DeletePosts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_DeletePosts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).DeletePosts(ctx, req.(*DeletePostsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostService_ServiceDesc is the grpc.ServiceDesc for PostService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -250,6 +283,10 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeletePost",
 			Handler:    _PostService_DeletePost_Handler,
+		},
+		{
+			MethodName: "DeletePosts",
+			Handler:    _PostService_DeletePosts_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

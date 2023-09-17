@@ -33,6 +33,8 @@ service PostService {
             delete: "/v1/posts/{id}"
         };
     }
+
+    rpc DeletePosts(DeletePostsRequest) returns (DeletePostsResponse) {} // Internal use only!
 }
 
 message PostOwner {
@@ -49,6 +51,8 @@ message Post {
     repeated string required_skills = 6;
     repeated string benefits = 7;
     PostOwner owner = 8;
+    int64 post_id = 9;
+    int64 updated_at = 10;
 }
 
 // Create Post
@@ -113,6 +117,16 @@ message DeletePostRequest {
 }
 
 message DeletePostResponse {
+    int64 status = 1;
+    string message = 2;
+}
+
+// Delete Posts
+message DeletePostsRequest {
+    string access_token = 1;
+}
+
+message DeletePostsResponse {
     int64 status = 1;
     string message = 2;
 }

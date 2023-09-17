@@ -81,8 +81,20 @@ func (s *PostServer) GetPost(ctx context.Context, req *pbv1.GetPostRequest) (*pb
 	}, nil
 }
 
-func (s *PostServer) ListPosts(context.Context, *pbv1.ListPostsRequest) (*pbv1.ListPostsResponse, error) {
-	return nil, nil
+func (s *PostServer) ListPosts(ctx context.Context, req *pbv1.ListPostsRequest) (*pbv1.ListPostsResponse, error) {
+	posts, err := s.PostService.GetPosts(ctx, req.AccessToken, req.SearchOptions)
+	if err != nil {
+		log.Println("List Posts: ", err)
+		return &pbv1.ListPostsResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Internal server error",
+		}, nil
+	}
+	return &pbv1.ListPostsResponse{
+		Status:  http.StatusOK,
+		Message: "Posts retrieved successfully",
+		Posts:   posts,
+	}, nil
 }
 
 func (s *PostServer) UpdatePost(ctx context.Context, req *pbv1.UpdatePostRequest) (*pbv1.UpdatePostResponse, error) {
@@ -134,5 +146,21 @@ func (s *PostServer) DeletePost(ctx context.Context, req *pbv1.DeletePostRequest
 	return &pbv1.DeletePostResponse{
 		Status:  http.StatusOK,
 		Message: "Post deleted successfully",
+	}, nil
+}
+
+func (s *PostServer) DeletePosts(ctx context.Context, req *pbv1.DeletePostsRequest) (*pbv1.DeletePostsResponse, error) {
+	err := s.PostService.DeleteAllPosts(ctx, req.AccessToken)
+	if err != nil {
+		log.Println("Delete Posts: ", err)
+		return &pbv1.DeletePostsResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Internal server error",
+		}, nil
+	}
+
+	return &pbv1.DeletePostsResponse{
+		Status:  http.StatusOK,
+		Message: "Posts deleted successfully",
 	}, nil
 }

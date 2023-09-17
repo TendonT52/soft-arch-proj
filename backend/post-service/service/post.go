@@ -70,7 +70,26 @@ func (s *postService) GetPost(ctx context.Context, token string, postId int64) (
 }
 
 func (s *postService) GetPosts(ctx context.Context, token string, search *pbv1.SearchOptions) ([]*pbv1.Post, error) {
-	return nil, nil
+	_, err := s.TokenService.ValidateAccessToken(token)
+	if err != nil {
+		return nil, err
+	}
+
+	u, err := s.UserService.ListApprovedCompanies(ctx, &pbUser.ListApprovedCompaniesRequest{
+		AccessToken: token,
+		Search:      search.SearchCompany,
+	})
+	if err != nil {
+		return nil, err
+	}
+	
+	companyInfo := domain.NewCompanyInfo(u.Companies)
+	posts, err := s.PostRepo.GetPosts(ctx, search, companyInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	return posts, nil
 }
 
 func (s *postService) UpdatePost(ctx context.Context, token string, postId int64, post *pbv1.Post) error {
@@ -115,5 +134,18 @@ func (s *postService) DeletePost(ctx context.Context, token string, postId int64
 		return err
 	}
 
+	return nil
+}
+
+func (s *postService) DeleteAllPosts(ctx context.Context, token string) error {
+	_, err := s.TokenService.ValidateAccessToken(token)
+	if err != nil {
+		return err
+	}
+
+	err = s.PostRepo.DeleteAllPosts(ctx)
+	if err != nil {
+		return err
+	}
 	return nil
 }

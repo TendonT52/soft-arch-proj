@@ -28,3 +28,14 @@ func (u *userClientMockService) GetCompanyProfile(ctx context.Context, req *pbUs
 		Message: "Success",
 	}, nil
 }
+
+func (u *userClientMockService) ListApprovedCompanies(ctx context.Context, req *pbUser.ListApprovedCompaniesRequest) (*pbUser.ListApprovedCompaniesResponse, error) {
+	return &pbUser.ListApprovedCompaniesResponse{
+		Companies: []*pbUser.Company{
+			{
+				Id:   1,
+				Name: "Mock Company Name",
+			},
+		},
+	}, nil
+}
