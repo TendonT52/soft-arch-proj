@@ -110,11 +110,11 @@ func TestSearchPosts(t *testing.T) {
 				},
 			},
 		},
-		"success with ALL empty search options": {
+		"success with empty search options": {
 			req: &pbv1.ListPostsRequest{
 				AccessToken: token,
 				SearchOptions: &pbv1.SearchOptions{
-					SearchCompany:       "",
+					SearchCompany:       "mock-search-company",
 					SearchOpenPosition:  "",
 					SearchRequiredSkill: "",
 					SearchBenefit:       "",
@@ -123,27 +123,32 @@ func TestSearchPosts(t *testing.T) {
 			expect: &pbv1.ListPostsResponse{
 				Status:  200,
 				Message: "Posts retrieved successfully",
-				Posts: []*pbv1.Post{},
+				Posts: []*pbv1.Post{
+					post2,
+					post3,
+					post4,
+				},
 			},
 		},
-		// "success with SOME empty search options": {
-		// 	req: &pbv1.ListPostsRequest{
-		// 		AccessToken: token,
-		// 		SearchOptions: &pbv1.SearchOptions{
-		// 			SearchCompany:       "mock-search-company",
-		// 			SearchOpenPosition:  "Scientist",
-		// 			SearchRequiredSkill: "",
-		// 			SearchBenefit:       "",
-		// 		},
-		// 	},
-		// 	expect: &pbv1.ListPostsResponse{
-		// 		Status:  200,
-		// 		Message: "Posts retrieved successfully",
-		// 		Posts: []*pbv1.Post{
-		// 			post3,
-		// 		},
-		// 	},
-		// },
+		"success with some search options": {
+			req: &pbv1.ListPostsRequest{
+				AccessToken: token,
+				SearchOptions: &pbv1.SearchOptions{
+					SearchCompany:       "mock-search-company",
+					SearchOpenPosition:  "",
+					SearchRequiredSkill: "Golang Javascript",
+					SearchBenefit:       "",
+				},
+			},
+			expect: &pbv1.ListPostsResponse{
+				Status:  200,
+				Message: "Posts retrieved successfully",
+				Posts: []*pbv1.Post{
+					post3,
+					post4,
+				},
+			},
+		},
 	}
 
 	for name, tc := range tests {

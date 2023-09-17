@@ -375,42 +375,61 @@ func (r *postRepository) DeletePost(ctx context.Context, postId int64) error {
 }
 
 func (r *postRepository) DeleteAllPosts(ctx context.Context) error {
-	query := "DELETE FROM posts_open_positions"
-	_, err := r.db.ExecContext(ctx, query)
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+
+	query := "DELETE FROM posts_open_positions"
+	_, err = tx.ExecContext(ctx, query)
+	if err != nil {
+		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 	query = "DELETE FROM posts_required_skills"
-	_, err = r.db.ExecContext(ctx, query)
+	_, err = tx.ExecContext(ctx, query)
 	if err != nil {
+		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 	query = "DELETE FROM posts_benefits"
-	_, err = r.db.ExecContext(ctx, query)
+	_, err = tx.ExecContext(ctx, query)
 	if err != nil {
+		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 
 	query = "DELETE FROM open_positions"
-	_, err = r.db.ExecContext(ctx, query)
+	_, err = tx.ExecContext(ctx, query)
 	if err != nil {
+		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 	query = "DELETE FROM required_skills"
-	_, err = r.db.ExecContext(ctx, query)
+	_, err = tx.ExecContext(ctx, query)
 	if err != nil {
+		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 	query = "DELETE FROM benefits"
-	_, err = r.db.ExecContext(ctx, query)
+	_, err = tx.ExecContext(ctx, query)
 	if err != nil {
+		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
 
 	query = "DELETE FROM posts"
-	_, err = r.db.ExecContext(ctx, query)
+	_, err = tx.ExecContext(ctx, query)
 	if err != nil {
+		tx.Rollback()
 		return domain.ErrInternal.From(err.Error(), err)
 	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return domain.ErrInternal.From(err.Error(), err)
+	}
+
 	return nil
 }
