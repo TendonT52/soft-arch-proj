@@ -337,4 +337,19 @@ func TestUpdateCompany(t *testing.T) {
 			require.Equal(t, tc.expect.Message, res.Message)
 		})
 	}
+
+	// Get Company
+	get_res, err := u.GetCompany(ctx, &pbv1.GetCompanyRequest{
+		Id:          r.Id,
+		AccessToken: res.AccessToken,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), get_res.Status)
+	require.Equal(t, "Mock Company New Name", get_res.Company.Name)
+	require.Equal(t, "I am a company New", get_res.Company.Description)
+	require.Equal(t, "Bangkok New", get_res.Company.Location)
+	require.Equal(t, "0123456780", get_res.Company.Phone)
+	require.Equal(t, "IT New", get_res.Company.Category)
+	require.Equal(t, "Approve", get_res.Company.Status)
+	require.Equal(t, int64(200), get_res.Status)
 }
