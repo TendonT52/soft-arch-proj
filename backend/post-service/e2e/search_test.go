@@ -61,7 +61,7 @@ func TestSearchPosts(t *testing.T) {
 	config, _ := config.LoadConfig("..")
 	token, err := mock.GenerateAccessToken(config.AccessTokenExpiredInTest, &domain.Payload{
 		UserId: 1,
-		Role:   "student",
+		Role:   "admin",
 	})
 	require.NoError(t, err)
 

@@ -174,7 +174,14 @@ func (s *PostServer) DeletePosts(ctx context.Context, req *pbv1.DeletePostsReque
 }
 
 func (s *PostServer) GetOpenPositions(ctx context.Context, req *pbv1.GetOpenPositionsRequest) (*pbv1.GetOpenPositionsResponse, error) {
-	openPositions, err := s.PostService.GetOpenPositions(ctx, req.AccessToken)
+	openPositions, err := s.PostService.GetOpenPositions(ctx, req.AccessToken, req.Search)
+	if errors.Is(err, domain.ErrUnauthorized) {
+		log.Println("Get Open Positions: Unauthorized")
+		return &pbv1.GetOpenPositionsResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Unauthorized",
+		}, nil
+	}
 	if err != nil {
 		log.Println("Get Open Positions: ", err)
 		return &pbv1.GetOpenPositionsResponse{
@@ -191,7 +198,14 @@ func (s *PostServer) GetOpenPositions(ctx context.Context, req *pbv1.GetOpenPosi
 }
 
 func (s *PostServer) GetRequiredSkills(ctx context.Context, req *pbv1.GetRequiredSkillsRequest) (*pbv1.GetRequiredSkillsResponse, error) {
-	requiredSkills, err := s.PostService.GetRequiredSkills(ctx, req.AccessToken)
+	requiredSkills, err := s.PostService.GetRequiredSkills(ctx, req.AccessToken, req.Search)
+	if errors.Is(err, domain.ErrUnauthorized) {
+		log.Println("Get Required Skills: Unauthorized")
+		return &pbv1.GetRequiredSkillsResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Unauthorized",
+		}, nil
+	}
 	if err != nil {
 		log.Println("Get Required Skills: ", err)
 		return &pbv1.GetRequiredSkillsResponse{
@@ -208,7 +222,14 @@ func (s *PostServer) GetRequiredSkills(ctx context.Context, req *pbv1.GetRequire
 }
 
 func (s *PostServer) GetBenefits(ctx context.Context, req *pbv1.GetBenefitsRequest) (*pbv1.GetBenefitsResponse, error) {
-	benefits, err := s.PostService.GetBenefits(ctx, req.AccessToken)
+	benefits, err := s.PostService.GetBenefits(ctx, req.AccessToken, req.Search)
+	if errors.Is(err, domain.ErrUnauthorized) {
+		log.Println("Get Benefits: Unauthorized")
+		return &pbv1.GetBenefitsResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Unauthorized",
+		}, nil
+	}
 	if err != nil {
 		log.Println("Get Benefits: ", err)
 		return &pbv1.GetBenefitsResponse{

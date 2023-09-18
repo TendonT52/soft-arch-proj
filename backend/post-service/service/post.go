@@ -153,13 +153,16 @@ func (s *postService) DeleteAllPosts(ctx context.Context, token string) error {
 	return nil
 }
 
-func (s *postService) GetOpenPositions(ctx context.Context, token string) ([]string, error) {
-	_, err := s.TokenService.ValidateAccessToken(token)
+func (s *postService) GetOpenPositions(ctx context.Context, token, search string) ([]string, error) {
+	payload, err := s.TokenService.ValidateAccessToken(token)
+	if payload.Role != companyRole {
+		return nil, domain.ErrUnauthorized
+	}
 	if err != nil {
 		return nil, err
 	}
 
-	openPositions, err := s.PostRepo.GetOpenPositions(ctx)
+	openPositions, err := s.PostRepo.GetOpenPositions(ctx, search)
 	if err != nil {
 		return nil, err
 	}
@@ -167,13 +170,16 @@ func (s *postService) GetOpenPositions(ctx context.Context, token string) ([]str
 	return openPositions, nil
 }
 
-func (s *postService) GetRequiredSkills(ctx context.Context, token string) ([]string, error) {
-	_, err := s.TokenService.ValidateAccessToken(token)
+func (s *postService) GetRequiredSkills(ctx context.Context, token, search string) ([]string, error) {
+	payload, err := s.TokenService.ValidateAccessToken(token)
+	if payload.Role != companyRole {
+		return nil, domain.ErrUnauthorized
+	}
 	if err != nil {
 		return nil, err
 	}
 
-	requiredSkills, err := s.PostRepo.GetRequiredSkills(ctx)
+	requiredSkills, err := s.PostRepo.GetRequiredSkills(ctx, search)
 	if err != nil {
 		return nil, err
 	}
@@ -181,13 +187,16 @@ func (s *postService) GetRequiredSkills(ctx context.Context, token string) ([]st
 	return requiredSkills, nil
 }
 
-func (s *postService) GetBenefits(ctx context.Context, token string) ([]string, error) {
-	_, err := s.TokenService.ValidateAccessToken(token)
+func (s *postService) GetBenefits(ctx context.Context, token, search string) ([]string, error) {
+	payload, err := s.TokenService.ValidateAccessToken(token)
+	if payload.Role != companyRole {
+		return nil, domain.ErrUnauthorized
+	}
 	if err != nil {
 		return nil, err
 	}
 
-	benefits, err := s.PostRepo.GetBenefits(ctx)
+	benefits, err := s.PostRepo.GetBenefits(ctx, search)
 	if err != nil {
 		return nil, err
 	}

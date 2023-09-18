@@ -475,13 +475,43 @@ func (r *postRepository) DeleteAllPosts(ctx context.Context) error {
 	return nil
 }
 
-func (r *postRepository) GetOpenPositions(ctx context.Context) ([]string, error) {
-	query := "SELECT title FROM open_positions"
-	rows, err := r.db.QueryContext(ctx, query)
-	if err != nil {
-		return nil, domain.ErrInternal.From(err.Error(), err)
+func (r *postRepository) GetOpenPositions(ctx context.Context, search string) ([]string, error) {
+	parts := strings.Fields(search)
+	tquery := strings.Join(parts, " | ")
+
+	var rows *sql.Rows
+	var err error
+	if search == "" {
+		query := "SELECT title FROM open_positions"
+		rows, err = r.db.QueryContext(ctx, query)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+	} else {
+		query :=
+			`
+		SELECT
+			title
+		FROM
+			open_positions,
+			to_tsvector(title) document,
+			to_tsquery($1) query,
+			NULLIF(ts_rank(to_tsvector(title), query), 0) rank,
+			SIMILARITY ($2, title) similarity
+		WHERE
+			query @@ document
+			OR similarity > 0
+		ORDER BY
+			rank DESC NULLS LAST,
+			similarity DESC NULLS LAST
+		`
+		rows, err = r.db.QueryContext(ctx, query, tquery, search)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
 	}
 	defer rows.Close()
+
 	var openPositions []string
 	for rows.Next() {
 		var title string
@@ -494,13 +524,43 @@ func (r *postRepository) GetOpenPositions(ctx context.Context) ([]string, error)
 	return openPositions, nil
 }
 
-func (r *postRepository) GetRequiredSkills(ctx context.Context) ([]string, error) {
-	query := "SELECT title FROM required_skills"
-	rows, err := r.db.QueryContext(ctx, query)
-	if err != nil {
-		return nil, domain.ErrInternal.From(err.Error(), err)
+func (r *postRepository) GetRequiredSkills(ctx context.Context, search string) ([]string, error) {
+	parts := strings.Fields(search)
+	tquery := strings.Join(parts, " | ")
+
+	var rows *sql.Rows
+	var err error
+	if search == "" {
+		query := "SELECT title FROM required_skills"
+		rows, err = r.db.QueryContext(ctx, query)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+	} else {
+		query :=
+			`
+		SELECT
+			title
+		FROM
+			required_skills,
+			to_tsvector(title) document,
+			to_tsquery($1) query,
+			NULLIF(ts_rank(to_tsvector(title), query), 0) rank,
+			SIMILARITY ($2, title) similarity
+		WHERE
+			query @@ document
+			OR similarity > 0
+		ORDER BY
+			rank DESC NULLS LAST,
+			similarity DESC NULLS LAST
+		`
+		rows, err = r.db.QueryContext(ctx, query, tquery, search)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
 	}
 	defer rows.Close()
+
 	var requiredSkills []string
 	for rows.Next() {
 		var title string
@@ -513,13 +573,43 @@ func (r *postRepository) GetRequiredSkills(ctx context.Context) ([]string, error
 	return requiredSkills, nil
 }
 
-func (r *postRepository) GetBenefits(ctx context.Context) ([]string, error) {
-	query := "SELECT title FROM benefits"
-	rows, err := r.db.QueryContext(ctx, query)
-	if err != nil {
-		return nil, domain.ErrInternal.From(err.Error(), err)
+func (r *postRepository) GetBenefits(ctx context.Context, search string) ([]string, error) {
+	parts := strings.Fields(search)
+	tquery := strings.Join(parts, " | ")
+
+	var rows *sql.Rows
+	var err error
+	if search == "" {
+		query := "SELECT title FROM benefits"
+		rows, err = r.db.QueryContext(ctx, query)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+	} else {
+		query :=
+			`
+		SELECT
+			title
+		FROM
+			benefits,
+			to_tsvector(title) document,
+			to_tsquery($1) query,
+			NULLIF(ts_rank(to_tsvector(title), query), 0) rank,
+			SIMILARITY ($2, title) similarity
+		WHERE
+			query @@ document
+			OR similarity > 0
+		ORDER BY
+			rank DESC NULLS LAST,
+			similarity DESC NULLS LAST
+		`
+		rows, err = r.db.QueryContext(ctx, query, tquery, search)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
 	}
 	defer rows.Close()
+
 	var benefits []string
 	for rows.Next() {
 		var title string

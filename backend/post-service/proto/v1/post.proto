@@ -35,9 +35,21 @@ service PostService {
     }
 
     rpc DeletePosts(DeletePostsRequest) returns (DeletePostsResponse) {} // Internal use only!
-    rpc GetOpenPositions(GetOpenPositionsRequest) returns (GetOpenPositionsResponse) {} // Internal use only!
-    rpc GetRequiredSkills(GetRequiredSkillsRequest) returns (GetRequiredSkillsResponse) {} // Internal use only!
-    rpc GetBenefits(GetBenefitsRequest) returns (GetBenefitsResponse) {} // Internal use only!
+    rpc GetOpenPositions(GetOpenPositionsRequest) returns (GetOpenPositionsResponse) {
+        option (google.api.http) = {
+            get: "/v1/open_positions"
+        };
+    }
+    rpc GetRequiredSkills(GetRequiredSkillsRequest) returns (GetRequiredSkillsResponse) {
+        option (google.api.http) = {
+            get: "/v1/required_skills"
+        };
+    }
+    rpc GetBenefits(GetBenefitsRequest) returns (GetBenefitsResponse) {
+        option (google.api.http) = {
+            get: "/v1/benefits"
+        };
+    }
 }
 
 message PostOwner {
@@ -162,6 +174,7 @@ message DeletePostsResponse {
 // Get Open Positions
 message GetOpenPositionsRequest {
     string access_token = 1;
+    string search = 2;
 }
 
 message GetOpenPositionsResponse {
@@ -173,6 +186,7 @@ message GetOpenPositionsResponse {
 // Get Required Skills
 message GetRequiredSkillsRequest {
     string access_token = 1;
+    string search = 2;
 }
 
 message GetRequiredSkillsResponse {
@@ -184,6 +198,7 @@ message GetRequiredSkillsResponse {
 // Get Benefits
 message GetBenefitsRequest {
     string access_token = 1;
+    string search = 2;
 }
 
 message GetBenefitsResponse {

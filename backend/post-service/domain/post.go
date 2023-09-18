@@ -5,19 +5,6 @@ import (
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 )
 
-type IndividualSearchResult struct {
-	OpenPositions  map[int64](*[]string)
-	RequiredSkills map[int64](*[]string)
-	Benefits       map[int64](*[]string)
-}
-
-type SummarySearchResult struct {
-	Pid           int64
-	OpenPosition  *[]string
-	RequiredSkill *[]string
-	Benefits      *[]string
-}
-
 func CheckRequireFields(post *pbv1.Post) bool {
 	return checkFields(post.Topic, post.Description, post.Period, post.HowTo, len(post.OpenPositions), len(post.RequiredSkills), len(post.Benefits))
 }
