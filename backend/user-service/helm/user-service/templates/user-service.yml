@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
       - name: user-service
-        image: tendont52/user-service:{{ .Values.BUILD_VERSION }}
+        image: ghcr.io/tendont52/soft-arch-proj-backend-user-service:{{ .Values.BUILD_VERSION }}
         imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 8080

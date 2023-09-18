@@ -38,11 +38,14 @@ k8s-get:
 gomock:
 	mockgen -source=port/service.go -destination=test/mock_port/mock_service.go -package=mock
 
-k8s-run-dev:
+DATA_PATH=$(shell pwd)/data
+k8s-init :
+	@echo "Persistent data will be stored in ${DATA_PATH}"
+
 	helm install user-service-postgresql ./helm/postgresql  \
 	--set global.postgresql.auth.postgresPassword=password \
 	--set master.persistence.size=10Gi \
-	--set master.persistence.path="${PWD}/data/postgresql" \
+	--set master.persistence.path="${DATA_PATH}/postgresql" \
 	--set primary.persistence.existingClaim=user-service-postgresql-persistent-claim \
 	--set volumePermissions.enabled=true
 
@@ -51,7 +54,7 @@ k8s-run-dev:
 	--set auth.password=password \
 	--set architecture=standalone \
 	--set master.persistence.size=10Gi \
-	--set master.persistence.path="${PWD}/data/redis" \
+	--set master.persistence.path="${DATA_PATH}/redis" \
 	--set master.persistence.existingClaim=user-service-redis-persistent-claim \
 	--set volumePermissions.enabled=true
 
@@ -59,28 +62,20 @@ k8s-run-dev:
 	--set memphis.creds.rootPwd=password \
 	--set cluster.replicas=1 \
 	--set master.persistence.size=10Gi \
-	--set master.persistence.path="${PWD}/data/memphis" \
+	--set master.persistence.path="${DATA_PATH}/memphis" \
 	--set memphis.storageEngine.fileStorage.existingClaim=memphis-persistent-claim \
 	--set master.metadata.persistence.size=10Gi \
-	--set master.metadata.persistence.path="${PWD}/data/memphis-meta" \
+	--set master.metadata.persistence.path="${DATA_PATH}/memphis-meta" \
 	--set metadata.persistence.existingClaim=memphis-metadata-persistent-claim \
 	--wait
 
+k8s-run-dev:
 	telepresence helm install
 	telepresence connect
+	make k8s-init
 	make migrate-up
 	make seed
 
-	# kubectl create secret generic user-service --from-file=app.env
-	# helm install user-service ./helm/user-service
-
-
-k8s-reset:
-	helm uninstall user-service
-	helm uninstall memphis
-	helm uninstall user-service-redis
-	helm uninstall user-service-postgresql
-	kubectl delete secret user-service
-	telepresence quit
-	telepresence helm uninstall
-	rm -rf data/*
+k8s-run-service:
+	kubectl create secret generic user-service --from-file=app.env
+	helm install user-service ./helm/user-service
