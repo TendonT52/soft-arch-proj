@@ -8,12 +8,12 @@ import (
 	"github.com/lib/pq"
 )
 
-func (r *postRepository) searchOpenPositions(ctx context.Context, tqueryO, searchOpenPosition string, cids *[]int64) (map[int64](*[]string), *[]int64, error) {
+func (r *postRepository) searchOpenPositions(ctx context.Context, tqueryO, searchOpenPosition string, cids *[]int64) (*[]int64, error) {
 	var rows *sql.Rows
 	var err error
 	if searchOpenPosition == "" {
 		query_open := `
-			SELECT 	posts.pid, open_positions.title
+			SELECT 	posts.pid
 			FROM posts
 
 			INNER JOIN posts_open_positions ON posts.pid = posts_open_positions.pid
@@ -25,11 +25,11 @@ func (r *postRepository) searchOpenPositions(ctx context.Context, tqueryO, searc
 
 		rows, err = r.db.QueryContext(ctx, query_open, pq.Array(*cids))
 		if err != nil {
-			return nil, nil, domain.ErrInternal.From(err.Error(), err)
+			return nil, domain.ErrInternal.From(err.Error(), err)
 		}
 	} else {
 		query_open := `
-			SELECT 	posts.pid, open_positions.title
+			SELECT 	posts.pid
 			FROM posts
 
 			INNER JOIN posts_open_positions ON posts.pid = posts_open_positions.pid
@@ -40,13 +40,13 @@ func (r *postRepository) searchOpenPositions(ctx context.Context, tqueryO, searc
 				OR SIMILARITY($2, open_positions.title) > 0 )
 				AND posts.uid = ANY($3)
 			ORDER BY
-				NULLIF(ts_rank(to_tsvector(open_positions.title), to_tsquery($1)), 0) DESC,
+				NULLIF(ts_rank(to_tsvector(open_positions.title), to_tsquery($1)), 0) DESC NULLS LAST,
 				SIMILARITY($2, open_positions.title) DESC NULLS LAST
 		`
 
 		rows, err = r.db.QueryContext(ctx, query_open, tqueryO, searchOpenPosition, pq.Array(*cids))
 		if err != nil {
-			return nil, nil, domain.ErrInternal.From(err.Error(), err)
+			return nil, domain.ErrInternal.From(err.Error(), err)
 		}
 	}
 	defer rows.Close()
@@ -55,10 +55,9 @@ func (r *postRepository) searchOpenPositions(ctx context.Context, tqueryO, searc
 	OpenPosition := make(map[int64](*[]string))
 	for rows.Next() {
 		var pid int64
-		var title string
-		err = rows.Scan(&pid, &title)
+		err = rows.Scan(&pid)
 		if err != nil {
-			return nil, nil, domain.ErrInternal.From(err.Error(), err)
+			return nil, domain.ErrInternal.From(err.Error(), err)
 		}
 
 		var sub []string
@@ -67,18 +66,17 @@ func (r *postRepository) searchOpenPositions(ctx context.Context, tqueryO, searc
 			OpenPosition[pid] = &sub
 			order = append(order, pid)
 		}
-		*OpenPosition[pid] = append(*OpenPosition[pid], title)
 	}
 
-	return OpenPosition, &order, nil
+	return &order, nil
 }
 
-func (r *postRepository) searchRequiredSkills(ctx context.Context, tqueryR, searchRequiredSkill string, cids *[]int64) (map[int64](*[]string), error) {
+func (r *postRepository) searchRequiredSkills(ctx context.Context, tqueryR, searchRequiredSkill string, cids *[]int64) (*[]int64, error) {
 	var rows *sql.Rows
 	var err error
 	if searchRequiredSkill == "" {
 		query_required := `
-		SELECT 	posts.pid, required_skills.title
+		SELECT 	posts.pid
 		FROM posts
 
 		INNER JOIN posts_required_skills ON posts.pid = posts_required_skills.pid
@@ -94,7 +92,7 @@ func (r *postRepository) searchRequiredSkills(ctx context.Context, tqueryR, sear
 		}
 	} else {
 		query_required := `
-		SELECT 	posts.pid, required_skills.title
+		SELECT 	posts.pid
 		FROM posts
 
 		INNER JOIN posts_required_skills ON posts.pid = posts_required_skills.pid
@@ -105,7 +103,7 @@ func (r *postRepository) searchRequiredSkills(ctx context.Context, tqueryR, sear
 			OR SIMILARITY($2, required_skills.title) > 0 )
 			AND posts.uid = ANY($3)
 		ORDER BY
-			NULLIF(ts_rank(to_tsvector(required_skills.title), to_tsquery($1)), 0) DESC,
+			NULLIF(ts_rank(to_tsvector(required_skills.title), to_tsquery($1)), 0) DESC NULLS LAST,
 			SIMILARITY($2, required_skills.title) DESC NULLS LAST
 	`
 
@@ -116,11 +114,11 @@ func (r *postRepository) searchRequiredSkills(ctx context.Context, tqueryR, sear
 	}
 	defer rows.Close()
 
+	var order []int64 
 	RequiredSkills := make(map[int64](*[]string))
 	for rows.Next() {
 		var pid int64
-		var title string
-		err = rows.Scan(&pid, &title)
+		err = rows.Scan(&pid)
 		if err != nil {
 			return nil, domain.ErrInternal.From(err.Error(), err)
 		}
@@ -129,19 +127,19 @@ func (r *postRepository) searchRequiredSkills(ctx context.Context, tqueryR, sear
 		s := RequiredSkills[pid]
 		if s == nil {
 			RequiredSkills[pid] = &sub
+			order = append(order, pid)
 		}
-		*RequiredSkills[pid] = append(*RequiredSkills[pid], title)
 	}
 
-	return RequiredSkills, nil
+	return &order, nil
 }
 
-func (r *postRepository) searchBenefits(ctx context.Context, tqueryB, searchBenefit string, cids *[]int64) (map[int64](*[]string), error) {
+func (r *postRepository) searchBenefits(ctx context.Context, tqueryB, searchBenefit string, cids *[]int64) (*[]int64, error) {
 	var rows *sql.Rows
 	var err error
 	if searchBenefit == "" {
 		query_benefit := `
-		SELECT 	posts.pid, benefits.title
+		SELECT 	posts.pid
 		FROM posts
 
 		INNER JOIN posts_benefits ON posts.pid = posts_benefits.pid
@@ -157,7 +155,7 @@ func (r *postRepository) searchBenefits(ctx context.Context, tqueryB, searchBene
 		}
 	} else {
 		query_benefit := `
-		SELECT 	posts.pid, benefits.title
+		SELECT 	posts.pid
 		FROM posts
 
 		INNER JOIN posts_benefits ON posts.pid = posts_benefits.pid
@@ -168,7 +166,7 @@ func (r *postRepository) searchBenefits(ctx context.Context, tqueryB, searchBene
 			OR SIMILARITY($2, benefits.title) > 0 )
 			AND posts.uid = ANY($3)
 		ORDER BY
-			NULLIF(ts_rank(to_tsvector(benefits.title), to_tsquery($1)), 0) DESC,
+			NULLIF(ts_rank(to_tsvector(benefits.title), to_tsquery($1)), 0) DESC NULLS LAST,
 			SIMILARITY($2, benefits.title) DESC NULLS LAST
 	`
 
@@ -179,11 +177,11 @@ func (r *postRepository) searchBenefits(ctx context.Context, tqueryB, searchBene
 	}
 	defer rows.Close()
 
+	var order []int64
 	Benefits := make(map[int64](*[]string))
 	for rows.Next() {
 		var pid int64
-		var title string
-		err = rows.Scan(&pid, &title)
+		err = rows.Scan(&pid)
 		if err != nil {
 			return nil, domain.ErrInternal.From(err.Error(), err)
 		}
@@ -192,9 +190,9 @@ func (r *postRepository) searchBenefits(ctx context.Context, tqueryB, searchBene
 		s := Benefits[pid]
 		if s == nil {
 			Benefits[pid] = &sub
+			order = append(order, pid)
 		}
-		*Benefits[pid] = append(*Benefits[pid], title)
 	}
 
-	return Benefits, nil
+	return &order, nil
 }

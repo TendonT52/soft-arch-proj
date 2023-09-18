@@ -9,6 +9,8 @@ import (
 	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 	"github.com/TikhampornSky/go-post-service/port"
+	"github.com/TikhampornSky/go-post-service/utils"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 )
 
@@ -158,12 +160,6 @@ func (r *postRepository) GetPost(ctx context.Context, postId int64) (*pbv1.Post,
 
 func (r *postRepository) GetPosts(ctx context.Context, search *pbv1.SearchOptions, data *domain.CompanyInfo) ([]*pbv1.Post, error) {
 	cids := *data.Ids
-	var searchResult *domain.IndividualSearchResult = &domain.IndividualSearchResult{
-		OpenPositions:  make(map[int64](*[]string)),
-		RequiredSkills: make(map[int64](*[]string)),
-		Benefits:       make(map[int64](*[]string)),
-	}
-
 	// Create
 	parts := strings.Fields(search.SearchBenefit)
 	tqueryB := strings.Join(parts, " | ")
@@ -175,56 +171,68 @@ func (r *postRepository) GetPosts(ctx context.Context, search *pbv1.SearchOption
 	tqueryR := strings.Join(parts, " | ")
 
 	// // Search in open_positions
-	searchOpenPosition, orders, err := r.searchOpenPositions(ctx, tqueryO, search.SearchOpenPosition, &cids)
+	searchOpenPosition, err := r.searchOpenPositions(ctx, tqueryO, search.SearchOpenPosition, &cids)
 	if err != nil {
 		return nil, domain.ErrInternal.From(err.Error(), err)
 	}
-	searchResult.OpenPositions = searchOpenPosition
 
 	// Search in required_skills
 	searchRequiredSkill, err := r.searchRequiredSkills(ctx, tqueryR, search.SearchRequiredSkill, &cids)
 	if err != nil {
 		return nil, domain.ErrInternal.From(err.Error(), err)
 	}
-	searchResult.RequiredSkills = searchRequiredSkill
 
 	// Search in benefits
 	searchBenefit, err := r.searchBenefits(ctx, tqueryB, search.SearchBenefit, &cids)
 	if err != nil {
 		return nil, domain.ErrInternal.From(err.Error(), err)
 	}
-	searchResult.Benefits = searchBenefit
 
 	// Find posts that apper in all 3 maps
-	var summary []domain.SummarySearchResult
-	for _, pid := range *orders {
-		if _, ok := searchResult.OpenPositions[pid]; ok {
-			if _, ok := searchResult.RequiredSkills[pid]; ok {
-				if _, ok := searchResult.Benefits[pid]; ok {
-					summary = append(summary, domain.SummarySearchResult{
-						Pid:           pid,
-						OpenPosition:  searchResult.OpenPositions[pid],
-						RequiredSkill: searchResult.RequiredSkills[pid],
-						Benefits:      searchResult.Benefits[pid],
-					})
-				}
-			}
+	var postIds []int64
+	for _, pid := range *searchOpenPosition {
+		if utils.IsItemInArray(pid, searchRequiredSkill) && utils.IsItemInArray(pid, searchBenefit) {
+			postIds = append(postIds, pid)
 		}
 	}
 
 	// Find selected posts detail
 	var posts []*pbv1.Post
-	query := "SELECT pid, uid, topic, description, period, how_to, updated_at FROM posts WHERE pid = $1"
+	query := `
+			SELECT
+			posts.pid,
+			uid,
+			topic,
+			description,
+			period,
+			how_to,
+			posts.updated_at,
+			ARRAY_AGG(DISTINCT open_positions.title) AS openPositions,
+			ARRAY_AGG(DISTINCT required_skills.title) AS requiredSkills,
+			ARRAY_AGG(DISTINCT benefits.title) AS benefits
+		FROM
+			posts
+			INNER JOIN posts_open_positions ON posts.pid = posts_open_positions.pid
+			INNER JOIN open_positions ON posts_open_positions.oid = open_positions.oid
+			INNER JOIN posts_required_skills ON posts.pid = posts_required_skills.pid
+			INNER JOIN required_skills ON posts_required_skills.sid = required_skills.sid
+			INNER JOIN posts_benefits ON posts.pid = posts_benefits.pid
+			INNER JOIN benefits ON posts_benefits.bid = benefits.bid
+		WHERE
+			posts.pid = $1
+		GROUP BY posts.pid;
+	`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return nil, domain.ErrInternal.From(err.Error(), err)
 	}
 	defer stmt.Close()
 
-	for _, s := range summary {
+	for _, postId := range postIds {
 		var pid, ownerId, updated_at int64
 		var topic, description, period, howTo string
-		err = stmt.QueryRowContext(ctx, s.Pid).Scan(&pid, &ownerId, &topic, &description, &period, &howTo, &updated_at)
+		var openPositions, requiredSkills, benefits []string
+		err = stmt.QueryRowContext(ctx, postId).Scan(&pid, &ownerId, &topic, &description, &period, &howTo, &updated_at, pq.Array(&openPositions), pq.Array(&requiredSkills), pq.Array(&benefits))
 		if err != nil {
 			return nil, domain.ErrInternal.From(err.Error(), err)
 		}
@@ -238,9 +246,9 @@ func (r *postRepository) GetPosts(ctx context.Context, search *pbv1.SearchOption
 				Id:   ownerId,
 				Name: data.Profiles[ownerId].Name,
 			},
-			OpenPositions:  *s.OpenPosition,
-			RequiredSkills: *s.RequiredSkill,
-			Benefits:       *s.Benefits,
+			OpenPositions:  openPositions,
+			RequiredSkills: requiredSkills,
+			Benefits:       benefits,
 			UpdatedAt:      updated_at,
 		})
 	}

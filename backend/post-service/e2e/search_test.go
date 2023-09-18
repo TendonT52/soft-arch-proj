@@ -9,6 +9,7 @@ import (
 	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 	"github.com/TikhampornSky/go-post-service/mock"
+	"github.com/TikhampornSky/go-post-service/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -105,8 +106,8 @@ func TestSearchPosts(t *testing.T) {
 				Status:  200,
 				Message: "Posts retrieved successfully",
 				Posts: []*pbv1.Post{
-					post2,
 					post4,
+					post2,
 				},
 			},
 		},
@@ -130,7 +131,7 @@ func TestSearchPosts(t *testing.T) {
 				},
 			},
 		},
-		"success with some search options": {
+		"success with only require_skills search options": {
 			req: &pbv1.ListPostsRequest{
 				AccessToken: token,
 				SearchOptions: &pbv1.SearchOptions{
@@ -149,6 +150,47 @@ func TestSearchPosts(t *testing.T) {
 				},
 			},
 		},
+		"success with only open_positions search options": {
+			req: &pbv1.ListPostsRequest{
+				AccessToken: token,
+				SearchOptions: &pbv1.SearchOptions{
+					SearchCompany:       "mock-search-company",
+					SearchOpenPosition:  "Data Analyst",
+					SearchRequiredSkill: "",
+					SearchBenefit:       "",
+				},
+			},
+			expect: &pbv1.ListPostsResponse{
+				Status:  200,
+				Message: "Posts retrieved successfully",
+				Posts: []*pbv1.Post{
+					post4,
+					post2,
+					post3,
+				},
+			},
+		},
+		"success with only benefits search options": {
+			req: &pbv1.ListPostsRequest{
+				AccessToken: token,
+				SearchOptions: &pbv1.SearchOptions{
+					SearchCompany:       "mock-search-company",
+					SearchOpenPosition:  "",
+					SearchRequiredSkill: "",
+					SearchBenefit:       "Macbook Pro",
+				},
+			},
+			expect: &pbv1.ListPostsResponse{
+				Status:  200,
+				Message: "Posts retrieved successfully",
+				Posts: []*pbv1.Post{
+					post2,
+					post3,
+					post4,
+				},
+			},
+		},
+
 		"not found": {
 			req: &pbv1.ListPostsRequest{
 				AccessToken: token,
@@ -179,9 +221,9 @@ func TestSearchPosts(t *testing.T) {
 				require.Equal(t, tc.expect.Posts[i].Description, p.Description)
 				require.Equal(t, tc.expect.Posts[i].Period, p.Period)
 				require.Equal(t, tc.expect.Posts[i].HowTo, p.HowTo)
-				require.Equal(t, tc.expect.Posts[i].OpenPositions, p.OpenPositions)
-				require.Equal(t, tc.expect.Posts[i].RequiredSkills, p.RequiredSkills)
-				require.Equal(t, tc.expect.Posts[i].Benefits, p.Benefits)
+				require.Equal(t, true, utils.CheckArrayEqual(&tc.expect.Posts[i].OpenPositions, &p.OpenPositions))
+				require.Equal(t, true, utils.CheckArrayEqual(&tc.expect.Posts[i].RequiredSkills, &p.RequiredSkills))
+				require.Equal(t, true, utils.CheckArrayEqual(&tc.expect.Posts[i].Benefits, &p.Benefits))
 			}
 		})
 	}
