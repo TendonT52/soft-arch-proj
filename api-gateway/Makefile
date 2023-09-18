@@ -1,12 +1,45 @@
 gen-swagger:
+	make -C .. gen-gateway
 	statik -src=./swagger-ui/
 
+IMAGE=api-gateway
+deploy:
+	docker build -t ${IMAGE} .
+	kubectl create secret generic api-gateway --from-file=app.env
+	IMAGE=${IMAGE} make -C ./helm api-gateway
 
+DATA_PATH=$(shell pwd)/data
 k8s-run-dev:
-	telepresence helm install
-	telepresence connect
+	 make -C .. k8s-clear
 
-	make -C ../backend/user-service/ k8s-init DATA_PATH=$(shell pwd)/data
-	make -C ../backend/user-service/ migrate-up
-	make -C ../backend/user-service/ seed
-	make -C ../backend/user-service/ k8s-run-service
+	@echo "Persistent data will be stored in ${DATA_PATH}"
+	parallel ::: \
+		"telepresence helm install" \
+		"DATA_PATH=${DATA_PATH}/user-service make -C ./backend/user-service user-service-postgresql" \
+		"DATA_PATH=${DATA_PATH}/user-service make -C ./backend/user-service user-service-redis" \
+		"DATA_PATH=${DATA_PATH} make -C ../helm memphis"
+	telepresence connect
+	make -C ./backend/user-service migrate-up
+	make -C ./backend/user-service seed
+	make -C ./backend/user-service mode=main make deploy
+
+	kubectl wait --for=condition=Ready pods --all --all-namespaces
+
+k8s-run-prod:
+	make -C .. k8s-clear
+	make docker-build
+
+	@echo "Persistent data will be stored in ${DATA_PATH}"
+	parallel ::: \
+		"telepresence helm install" \
+		"DATA_PATH=${DATA_PATH} make -C ./helm user-service-postgresql  " \
+		"DATA_PATH=${DATA_PATH} make -C ./helm user-service-redis" \
+		"DATA_PATH=${DATA_PATH} make -C ../../helm memphis"
+	kubectl create secret generic user-service --from-file=app.env
+	IMAGE=${IMAGE} make -C ./helm user-service
+
+	telepresence connect
+	kubectl wait --for=condition=Ready pods --all --all-namespaces
+
+	make migrate-up
+	make seed

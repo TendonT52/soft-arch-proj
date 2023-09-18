@@ -1,0 +1,8 @@
+{
+    "target": "pod/bear-pod",
+    "feature": {
+      "env": true,
+      "fs": "read",
+      "network": true
+    }
+  }
