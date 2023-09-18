@@ -8,6 +8,9 @@ migrate-up:
 seed:
 	psql postgres://postgres:password@user-service-postgresql.default:5432/?sslmode=disable -a -f ./seed.sql
 
+clean-db:
+	psql postgres://postgres:password@user-service-postgresql.default:5432/?sslmode=disable -a -f ./cleanup.sql
+
 gen-proto:
 	protoc \
     --proto_path=proto \
