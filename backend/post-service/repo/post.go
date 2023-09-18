@@ -482,7 +482,7 @@ func (r *postRepository) GetOpenPositions(ctx context.Context, search string) ([
 	var rows *sql.Rows
 	var err error
 	if search == "" {
-		query := "SELECT title FROM open_positions"
+		query := "SELECT title FROM open_positions ORDER BY title ASC"
 		rows, err = r.db.QueryContext(ctx, query)
 		if err != nil {
 			return nil, domain.ErrInternal.From(err.Error(), err)
@@ -531,7 +531,7 @@ func (r *postRepository) GetRequiredSkills(ctx context.Context, search string) (
 	var rows *sql.Rows
 	var err error
 	if search == "" {
-		query := "SELECT title FROM required_skills"
+		query := "SELECT title FROM required_skills ORDER BY title ASC"
 		rows, err = r.db.QueryContext(ctx, query)
 		if err != nil {
 			return nil, domain.ErrInternal.From(err.Error(), err)
@@ -580,7 +580,7 @@ func (r *postRepository) GetBenefits(ctx context.Context, search string) ([]stri
 	var rows *sql.Rows
 	var err error
 	if search == "" {
-		query := "SELECT title FROM benefits"
+		query := "SELECT title FROM benefits ORDER BY title ASC"
 		rows, err = r.db.QueryContext(ctx, query)
 		if err != nil {
 			return nil, domain.ErrInternal.From(err.Error(), err)

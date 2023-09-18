@@ -21,6 +21,8 @@ func (r *postRepository) searchOpenPositions(ctx context.Context, tqueryO, searc
 
 			WHERE
 				posts.uid = ANY($1)
+			
+			ORDER BY posts.pid ASC
 		`
 
 		rows, err = r.db.QueryContext(ctx, query_open, pq.Array(*cids))
@@ -84,6 +86,8 @@ func (r *postRepository) searchRequiredSkills(ctx context.Context, tqueryR, sear
 
 		WHERE
 			posts.uid = ANY($1)
+			
+		ORDER BY posts.pid ASC
 	`
 
 		rows, err = r.db.QueryContext(ctx, query_required, pq.Array(cids))
@@ -147,6 +151,7 @@ func (r *postRepository) searchBenefits(ctx context.Context, tqueryB, searchBene
 
 		WHERE
 			posts.uid = ANY($1)
+		ORDER BY posts.pid ASC
 	`
 
 		rows, err = r.db.QueryContext(ctx, query_benefit, pq.Array(cids))

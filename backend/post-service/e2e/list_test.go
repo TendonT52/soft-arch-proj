@@ -82,7 +82,7 @@ func TestGetOpenPositions(t *testing.T) {
 			expect: &pbv1.GetOpenPositionsResponse{
 				Status: 200,
 				Message: "Open positions retrieved successfully",
-				OpenPositions: []string{"Software Engineer", "Data Scientist", "Data Analysts", "Full-Stack Developer", "Backend Developer", "Frontend Developer", "Data Analyst"},
+				OpenPositions: []string{"Backend Developer", "Data Analyst", "Data Analysts", "Data Scientist", "Frontend Developer", "Full-Stack Developer", "Software Engineer"},
 			},
 		},
 		"not foind any match": {
@@ -187,7 +187,7 @@ func TestGetRequiredSkills(t *testing.T) {
 			expect: &pbv1.GetRequiredSkillsResponse{
 				Status: 200,
 				Message: "Required skills retrieved successfully",
-				RequiredSkills: []string{"Golang", "Python", "HTML", "CSS", "Javascript"},
+				RequiredSkills: []string{"CSS", "Golang", "HTML", "Javascript", "Python"},
 			},
 		},
 		"not foind any match": {
@@ -292,7 +292,7 @@ func TestGetBenefits(t *testing.T) {
 			expect: &pbv1.GetBenefitsResponse{
 				Status: 200,
 				Message: "Benefits retrieved successfully",
-				Benefits: []string{"Free lunch", "Free dinner", "Macbook Pro", "Macbook M1"},
+				Benefits: []string{"Free dinner", "Free lunch", "Macbook M1", "Macbook Pro"},
 			},
 		},
 		"not foind any match": {
