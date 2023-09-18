@@ -19,12 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	PostService_CreatePost_FullMethodName  = "/user.PostService/CreatePost"
-	PostService_GetPost_FullMethodName     = "/user.PostService/GetPost"
-	PostService_ListPosts_FullMethodName   = "/user.PostService/ListPosts"
-	PostService_UpdatePost_FullMethodName  = "/user.PostService/UpdatePost"
-	PostService_DeletePost_FullMethodName  = "/user.PostService/DeletePost"
-	PostService_DeletePosts_FullMethodName = "/user.PostService/DeletePosts"
+	PostService_CreatePost_FullMethodName        = "/user.PostService/CreatePost"
+	PostService_GetPost_FullMethodName           = "/user.PostService/GetPost"
+	PostService_ListPosts_FullMethodName         = "/user.PostService/ListPosts"
+	PostService_UpdatePost_FullMethodName        = "/user.PostService/UpdatePost"
+	PostService_DeletePost_FullMethodName        = "/user.PostService/DeletePost"
+	PostService_DeletePosts_FullMethodName       = "/user.PostService/DeletePosts"
+	PostService_GetOpenPositions_FullMethodName  = "/user.PostService/GetOpenPositions"
+	PostService_GetRequiredSkills_FullMethodName = "/user.PostService/GetRequiredSkills"
+	PostService_GetBenefits_FullMethodName       = "/user.PostService/GetBenefits"
 )
 
 // PostServiceClient is the client API for PostService service.
@@ -37,6 +40,9 @@ type PostServiceClient interface {
 	UpdatePost(ctx context.Context, in *UpdatePostRequest, opts ...grpc.CallOption) (*UpdatePostResponse, error)
 	DeletePost(ctx context.Context, in *DeletePostRequest, opts ...grpc.CallOption) (*DeletePostResponse, error)
 	DeletePosts(ctx context.Context, in *DeletePostsRequest, opts ...grpc.CallOption) (*DeletePostsResponse, error)
+	GetOpenPositions(ctx context.Context, in *GetOpenPositionsRequest, opts ...grpc.CallOption) (*GetOpenPositionsResponse, error)
+	GetRequiredSkills(ctx context.Context, in *GetRequiredSkillsRequest, opts ...grpc.CallOption) (*GetRequiredSkillsResponse, error)
+	GetBenefits(ctx context.Context, in *GetBenefitsRequest, opts ...grpc.CallOption) (*GetBenefitsResponse, error)
 }
 
 type postServiceClient struct {
@@ -101,6 +107,33 @@ func (c *postServiceClient) DeletePosts(ctx context.Context, in *DeletePostsRequ
 	return out, nil
 }
 
+func (c *postServiceClient) GetOpenPositions(ctx context.Context, in *GetOpenPositionsRequest, opts ...grpc.CallOption) (*GetOpenPositionsResponse, error) {
+	out := new(GetOpenPositionsResponse)
+	err := c.cc.Invoke(ctx, PostService_GetOpenPositions_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postServiceClient) GetRequiredSkills(ctx context.Context, in *GetRequiredSkillsRequest, opts ...grpc.CallOption) (*GetRequiredSkillsResponse, error) {
+	out := new(GetRequiredSkillsResponse)
+	err := c.cc.Invoke(ctx, PostService_GetRequiredSkills_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postServiceClient) GetBenefits(ctx context.Context, in *GetBenefitsRequest, opts ...grpc.CallOption) (*GetBenefitsResponse, error) {
+	out := new(GetBenefitsResponse)
+	err := c.cc.Invoke(ctx, PostService_GetBenefits_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostServiceServer is the server API for PostService service.
 // All implementations must embed UnimplementedPostServiceServer
 // for forward compatibility
@@ -111,6 +144,9 @@ type PostServiceServer interface {
 	UpdatePost(context.Context, *UpdatePostRequest) (*UpdatePostResponse, error)
 	DeletePost(context.Context, *DeletePostRequest) (*DeletePostResponse, error)
 	DeletePosts(context.Context, *DeletePostsRequest) (*DeletePostsResponse, error)
+	GetOpenPositions(context.Context, *GetOpenPositionsRequest) (*GetOpenPositionsResponse, error)
+	GetRequiredSkills(context.Context, *GetRequiredSkillsRequest) (*GetRequiredSkillsResponse, error)
+	GetBenefits(context.Context, *GetBenefitsRequest) (*GetBenefitsResponse, error)
 	mustEmbedUnimplementedPostServiceServer()
 }
 
@@ -135,6 +171,15 @@ func (UnimplementedPostServiceServer) DeletePost(context.Context, *DeletePostReq
 }
 func (UnimplementedPostServiceServer) DeletePosts(context.Context, *DeletePostsRequest) (*DeletePostsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePosts not implemented")
+}
+func (UnimplementedPostServiceServer) GetOpenPositions(context.Context, *GetOpenPositionsRequest) (*GetOpenPositionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOpenPositions not implemented")
+}
+func (UnimplementedPostServiceServer) GetRequiredSkills(context.Context, *GetRequiredSkillsRequest) (*GetRequiredSkillsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRequiredSkills not implemented")
+}
+func (UnimplementedPostServiceServer) GetBenefits(context.Context, *GetBenefitsRequest) (*GetBenefitsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBenefits not implemented")
 }
 func (UnimplementedPostServiceServer) mustEmbedUnimplementedPostServiceServer() {}
 
@@ -257,6 +302,60 @@ func _PostService_DeletePosts_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_GetOpenPositions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOpenPositionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).GetOpenPositions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_GetOpenPositions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).GetOpenPositions(ctx, req.(*GetOpenPositionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostService_GetRequiredSkills_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequiredSkillsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).GetRequiredSkills(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_GetRequiredSkills_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).GetRequiredSkills(ctx, req.(*GetRequiredSkillsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostService_GetBenefits_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBenefitsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).GetBenefits(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_GetBenefits_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).GetBenefits(ctx, req.(*GetBenefitsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostService_ServiceDesc is the grpc.ServiceDesc for PostService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -287,6 +386,18 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeletePosts",
 			Handler:    _PostService_DeletePosts_Handler,
+		},
+		{
+			MethodName: "GetOpenPositions",
+			Handler:    _PostService_GetOpenPositions_Handler,
+		},
+		{
+			MethodName: "GetRequiredSkills",
+			Handler:    _PostService_GetRequiredSkills_Handler,
+		},
+		{
+			MethodName: "GetBenefits",
+			Handler:    _PostService_GetBenefits_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -15,6 +15,9 @@ type PostServicePort interface {
 	UpdatePost(ctx context.Context, token string, postId int64, post *pbv1.UpdatedPost) error
 	DeletePost(ctx context.Context, token string, postId int64) error
 	DeleteAllPosts(ctx context.Context, token string) error // for testing
+	GetOpenPositions(ctx context.Context, token string) ([]string, error)
+	GetRequiredSkills(ctx context.Context, token string) ([]string, error)
+	GetBenefits(ctx context.Context, token string) ([]string, error)
 }
 
 type TokenServicePort interface {

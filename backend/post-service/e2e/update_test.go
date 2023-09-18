@@ -9,6 +9,7 @@ import (
 	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 	"github.com/TikhampornSky/go-post-service/mock"
+	"github.com/TikhampornSky/go-post-service/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -66,20 +67,20 @@ func TestUpdatePost(t *testing.T) {
 	updatedPeriod := "NEW 1 month"
 	updatedHowTo := updatedLex
 	updatedOpenPositions := []*pbv1.Element{
-		{ Value: "NEW Software Engineer", Action: pbv1.ElementStatus_ADD, },
-		{ Value: "NEW Data Scientist", Action: pbv1.ElementStatus_ADD, },
-		{ Value: "Software Engineer", Action: pbv1.ElementStatus_REMOVE, },
-		{ Value: "Data Scientist", Action: pbv1.ElementStatus_REMOVE, },
+		{Value: "NEW Software Engineer", Action: pbv1.ElementStatus_ADD},
+		{Value: "NEW Data Scientist", Action: pbv1.ElementStatus_ADD},
+		{Value: "Software Engineer", Action: pbv1.ElementStatus_REMOVE},
+		{Value: "Data Scientist", Action: pbv1.ElementStatus_REMOVE},
 	}
 	updatedRequiredSkills := []*pbv1.Element{
-		{ Value: "Golang", Action: pbv1.ElementStatus_REMOVE, },
-		{ Value: "Python", Action: pbv1.ElementStatus_SAME, },
-		{ Value: "NEW Java", Action: pbv1.ElementStatus_ADD, },
+		{Value: "Golang", Action: pbv1.ElementStatus_REMOVE},
+		{Value: "Python", Action: pbv1.ElementStatus_SAME},
+		{Value: "NEW Java", Action: pbv1.ElementStatus_ADD},
 	}
 	updatedBenefits := []*pbv1.Element{
-		{ Value: "NEW Free lunch", Action: pbv1.ElementStatus_ADD, },
-		{ Value: "Free lunch", Action: pbv1.ElementStatus_REMOVE, },
-		{ Value: "Free dinner", Action: pbv1.ElementStatus_REMOVE, },
+		{Value: "NEW Free lunch", Action: pbv1.ElementStatus_ADD},
+		{Value: "Free lunch", Action: pbv1.ElementStatus_REMOVE},
+		{Value: "Free dinner", Action: pbv1.ElementStatus_REMOVE},
 	}
 
 	CreateRes, err := c.CreatePost(ctx, &pbv1.CreatePostRequest{
@@ -202,4 +203,28 @@ func TestUpdatePost(t *testing.T) {
 			}
 		})
 	}
+
+	// Check open positions
+	resOpenPositions, err := c.GetOpenPositions(ctx, &pbv1.GetOpenPositionsRequest{
+		AccessToken: token,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), resOpenPositions.Status)
+	require.Equal(t, true, utils.CheckArrayEqual(&[]string{"NEW Software Engineer", "NEW Data Scientist"}, &resOpenPositions.OpenPositions))
+
+	// Check required skills
+	resRequiredSkills, err := c.GetRequiredSkills(ctx, &pbv1.GetRequiredSkillsRequest{
+		AccessToken: token,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), resRequiredSkills.Status)
+	require.Equal(t, true, utils.CheckArrayEqual(&[]string{"Python", "NEW Java"}, &resRequiredSkills.RequiredSkills))
+
+	// Check benefits
+	resBenefits, err := c.GetBenefits(ctx, &pbv1.GetBenefitsRequest{
+		AccessToken: token,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), resBenefits.Status)
+	require.Equal(t, true, utils.CheckArrayEqual(&[]string{"NEW Free lunch"}, &resBenefits.Benefits))
 }

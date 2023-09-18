@@ -35,6 +35,9 @@ service PostService {
     }
 
     rpc DeletePosts(DeletePostsRequest) returns (DeletePostsResponse) {} // Internal use only!
+    rpc GetOpenPositions(GetOpenPositionsRequest) returns (GetOpenPositionsResponse) {} // Internal use only!
+    rpc GetRequiredSkills(GetRequiredSkillsRequest) returns (GetRequiredSkillsResponse) {} // Internal use only!
+    rpc GetBenefits(GetBenefitsRequest) returns (GetBenefitsResponse) {} // Internal use only!
 }
 
 message PostOwner {
@@ -154,4 +157,37 @@ message DeletePostsRequest {
 message DeletePostsResponse {
     int64 status = 1;
     string message = 2;
+}
+
+// Get Open Positions
+message GetOpenPositionsRequest {
+    string access_token = 1;
+}
+
+message GetOpenPositionsResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated string open_positions = 3;
+}
+
+// Get Required Skills
+message GetRequiredSkillsRequest {
+    string access_token = 1;
+}
+
+message GetRequiredSkillsResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated string required_skills = 3;
+}
+
+// Get Benefits
+message GetBenefitsRequest {
+    string access_token = 1;
+}
+
+message GetBenefitsResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated string benefits = 3;
 }

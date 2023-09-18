@@ -9,6 +9,7 @@ import (
 	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 	"github.com/TikhampornSky/go-post-service/mock"
+	"github.com/TikhampornSky/go-post-service/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -142,4 +143,28 @@ func TestDeletePost(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.Nil(t, g.Post)
+
+	// Check open positions
+	resOpenPositions, err := c.GetOpenPositions(ctx, &pbv1.GetOpenPositionsRequest{
+		AccessToken: token,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), resOpenPositions.Status)
+	require.Equal(t, true, utils.CheckArrayEqual(&[]string{"open position 1"}, &resOpenPositions.OpenPositions))
+
+	// Check required skills
+	resRequiredSkills, err := c.GetRequiredSkills(ctx, &pbv1.GetRequiredSkillsRequest{
+		AccessToken: token,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), resRequiredSkills.Status)
+	require.Equal(t, true, utils.CheckArrayEqual(&[]string{"skill 1", "skill 2"}, &resRequiredSkills.RequiredSkills))
+
+	// Check benefits
+	resBenefits, err := c.GetBenefits(ctx, &pbv1.GetBenefitsRequest{
+		AccessToken: token,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), resBenefits.Status)
+	require.Equal(t, true, utils.CheckArrayEqual(&[]string{"benefit 1", "benefit 2", "benefit 3"}, &resBenefits.Benefits))
 }

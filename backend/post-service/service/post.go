@@ -152,3 +152,45 @@ func (s *postService) DeleteAllPosts(ctx context.Context, token string) error {
 	}
 	return nil
 }
+
+func (s *postService) GetOpenPositions(ctx context.Context, token string) ([]string, error) {
+	_, err := s.TokenService.ValidateAccessToken(token)
+	if err != nil {
+		return nil, err
+	}
+
+	openPositions, err := s.PostRepo.GetOpenPositions(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return openPositions, nil
+}
+
+func (s *postService) GetRequiredSkills(ctx context.Context, token string) ([]string, error) {
+	_, err := s.TokenService.ValidateAccessToken(token)
+	if err != nil {
+		return nil, err
+	}
+
+	requiredSkills, err := s.PostRepo.GetRequiredSkills(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return requiredSkills, nil
+}
+
+func (s *postService) GetBenefits(ctx context.Context, token string) ([]string, error) {
+	_, err := s.TokenService.ValidateAccessToken(token)
+	if err != nil {
+		return nil, err
+	}
+
+	benefits, err := s.PostRepo.GetBenefits(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return benefits, nil
+}

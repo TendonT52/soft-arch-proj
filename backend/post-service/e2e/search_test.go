@@ -74,7 +74,7 @@ func TestSearchPosts(t *testing.T) {
 	post1 := createMockPost(t, ctx, c, 2, "Post 1", lex, "1 month", lex,
 		[]string{"Software Engineer", "Data Scientist"}, []string{"Golang", "Python"}, []string{"Free lunch", "Free dinner"})
 	post2 := createMockPost(t, ctx, c, 1, "Post 2", lex, "2 month", lex,
-		[]string{"Data Analyst", "Full-Stack Developer"}, []string{"Python", "HTML", "CSS"}, []string{"Free lunch", "Macbook Pro"})
+		[]string{"Data Analysts", "Full-Stack Developer"}, []string{"Python", "HTML", "CSS"}, []string{"Free lunch", "Macbook Pro"})
 	post3 := createMockPost(t, ctx, c, 1, "Post 3", lex, "3 month", lex,
 		[]string{"Backend Developer", "Data Scientist"}, []string{"Golang", "Python"}, []string{"Free dinner", "Macbook M1"})
 	post4 := createMockPost(t, ctx, c, 1, "Post 4", lex, "4 month", lex,

@@ -474,3 +474,60 @@ func (r *postRepository) DeleteAllPosts(ctx context.Context) error {
 
 	return nil
 }
+
+func (r *postRepository) GetOpenPositions(ctx context.Context) ([]string, error) {
+	query := "SELECT title FROM open_positions"
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, domain.ErrInternal.From(err.Error(), err)
+	}
+	defer rows.Close()
+	var openPositions []string
+	for rows.Next() {
+		var title string
+		err = rows.Scan(&title)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+		openPositions = append(openPositions, title)
+	}
+	return openPositions, nil
+}
+
+func (r *postRepository) GetRequiredSkills(ctx context.Context) ([]string, error) {
+	query := "SELECT title FROM required_skills"
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, domain.ErrInternal.From(err.Error(), err)
+	}
+	defer rows.Close()
+	var requiredSkills []string
+	for rows.Next() {
+		var title string
+		err = rows.Scan(&title)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+		requiredSkills = append(requiredSkills, title)
+	}
+	return requiredSkills, nil
+}
+
+func (r *postRepository) GetBenefits(ctx context.Context) ([]string, error) {
+	query := "SELECT title FROM benefits"
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, domain.ErrInternal.From(err.Error(), err)
+	}
+	defer rows.Close()
+	var benefits []string
+	for rows.Next() {
+		var title string
+		err = rows.Scan(&title)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+		benefits = append(benefits, title)
+	}
+	return benefits, nil
+}

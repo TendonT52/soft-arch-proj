@@ -172,3 +172,54 @@ func (s *PostServer) DeletePosts(ctx context.Context, req *pbv1.DeletePostsReque
 		Message: "Posts deleted successfully",
 	}, nil
 }
+
+func (s *PostServer) GetOpenPositions(ctx context.Context, req *pbv1.GetOpenPositionsRequest) (*pbv1.GetOpenPositionsResponse, error) {
+	openPositions, err := s.PostService.GetOpenPositions(ctx, req.AccessToken)
+	if err != nil {
+		log.Println("Get Open Positions: ", err)
+		return &pbv1.GetOpenPositionsResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Internal server error",
+		}, nil
+	}
+
+	return &pbv1.GetOpenPositionsResponse{
+		Status:  http.StatusOK,
+		Message: "Open positions retrieved successfully",
+		OpenPositions: openPositions,
+	}, nil
+}
+
+func (s *PostServer) GetRequiredSkills(ctx context.Context, req *pbv1.GetRequiredSkillsRequest) (*pbv1.GetRequiredSkillsResponse, error) {
+	requiredSkills, err := s.PostService.GetRequiredSkills(ctx, req.AccessToken)
+	if err != nil {
+		log.Println("Get Required Skills: ", err)
+		return &pbv1.GetRequiredSkillsResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Internal server error",
+		}, nil
+	}
+
+	return &pbv1.GetRequiredSkillsResponse{
+		Status:  http.StatusOK,
+		Message: "Required skills retrieved successfully",
+		RequiredSkills: requiredSkills,
+	}, nil
+}
+
+func (s *PostServer) GetBenefits(ctx context.Context, req *pbv1.GetBenefitsRequest) (*pbv1.GetBenefitsResponse, error) {
+	benefits, err := s.PostService.GetBenefits(ctx, req.AccessToken)
+	if err != nil {
+		log.Println("Get Benefits: ", err)
+		return &pbv1.GetBenefitsResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Internal server error",
+		}, nil
+	}
+
+	return &pbv1.GetBenefitsResponse{
+		Status:  http.StatusOK,
+		Message: "Benefits retrieved successfully",
+		Benefits: benefits,
+	}, nil
+}

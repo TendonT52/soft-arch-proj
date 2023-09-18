@@ -9,6 +9,7 @@ import (
 	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 	"github.com/TikhampornSky/go-post-service/mock"
+	"github.com/TikhampornSky/go-post-service/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -89,7 +90,7 @@ func TestCreatePost(t *testing.T) {
 					HowTo:          lex,
 					OpenPositions:  []string{"OpenPositions Test 1", "OpenPositions Test 2", "OpenPositions Test 3"},
 					RequiredSkills: []string{"RequiredSkills Test 1", "RequiredSkills Test 2"},
-					Benefits:       []string{"Benefits Test"},
+					Benefits:       []string{"Benefits Test 1"},
 				},
 				AccessToken: token,
 			},
@@ -107,7 +108,7 @@ func TestCreatePost(t *testing.T) {
 					HowTo:          lex,
 					OpenPositions:  []string{"OpenPositions Test 1", "OpenPositions Test 2", "OpenPositions Test 3"},
 					RequiredSkills: []string{"RequiredSkills Test 1", "RequiredSkills Test 2"},
-					Benefits:       []string{"Benefits Test"},
+					Benefits:       []string{"Benefits Test 2"},
 				},
 				AccessToken: token,
 			},
@@ -166,4 +167,27 @@ func TestCreatePost(t *testing.T) {
 		})
 	}
 
+	// Check open positions
+	resOpenPositions, err := c.GetOpenPositions(ctx, &pbv1.GetOpenPositionsRequest{
+		AccessToken: token,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), resOpenPositions.Status)
+	require.Equal(t, true, utils.CheckArrayEqual(&[]string{"OpenPositions Test 1", "OpenPositions Test 2", "OpenPositions Test 3"}, &resOpenPositions.OpenPositions))
+
+	// Check required skills
+	resRequiredSkills, err := c.GetRequiredSkills(ctx, &pbv1.GetRequiredSkillsRequest{
+		AccessToken: token,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), resRequiredSkills.Status)
+	require.Equal(t, true, utils.CheckArrayEqual(&[]string{"RequiredSkills Test 1", "RequiredSkills Test 2"}, &resRequiredSkills.RequiredSkills))
+
+	// Check benefits
+	resBenefits, err := c.GetBenefits(ctx, &pbv1.GetBenefitsRequest{
+		AccessToken: token,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), resBenefits.Status)
+	require.Equal(t, true, utils.CheckArrayEqual(&[]string{"Benefits Test 1", "Benefits Test 2"}, &resBenefits.Benefits))
 }
