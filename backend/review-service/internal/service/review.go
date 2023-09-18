@@ -1,13 +1,9 @@
 package service
 
 import (
+	"JinnnDamanee/review-service/internal/domain"
 	"JinnnDamanee/review-service/internal/model"
 	"JinnnDamanee/review-service/internal/repo"
-	"fmt"
-	"net/http"
-	"strconv"
-
-	"github.com/labstack/echo/v4"
 )
 
 type ReviewService struct {
@@ -18,104 +14,55 @@ func NewReviewService(repo *repo.ReviewRepository) *ReviewService {
 	return &ReviewService{Repo: repo}
 }
 
-func (s *ReviewService) CreateReview(c echo.Context) error {
-	req := model.ReviewCreateRequest{}
-	if err := c.Bind(&req); err != nil {
-		c.JSON(http.StatusBadRequest, err)
-		return err
-	}
-	review := model.Review{
-		ReviewerID:   req.ReviewerID,
-		ReviewTitle:  req.ReviewTitle,
-		ReviewDetail: req.ReviewDetail,
-	}
-
-	r, err := s.Repo.Create(&review)
+func (s *ReviewService) CreateReview(review *model.Review) (*model.Review, error) {
+	r, err := s.Repo.Create(review)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-		return err
+		return nil, err
 	}
-	c.JSON(http.StatusOK, r)
-	return nil
+	return r, nil
 }
 
-func (s *ReviewService) GetAllReviews(c echo.Context) error {
+func (s *ReviewService) GetAllReviews() ([]*model.Review, error) {
 	reviews, err := s.Repo.FindAll()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-		return err
+		return nil, err
 	}
-	c.JSON(http.StatusOK, reviews)
-	return nil
+	return reviews, nil
 }
 
-func (s *ReviewService) GetReviewByID(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
-		return err
-	}
+func (s *ReviewService) GetReviewByID(id int) (*model.Review, error) {
 	review, err := s.Repo.FindByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, fmt.Sprintf("Review with id %d not found", id))
-		return err
+		return nil, domain.ErrReviewIDNotFound
 	}
-	c.JSON(http.StatusOK, review)
-	return nil
+	return review, nil
 }
 
-func (s *ReviewService) UpdateReviewByID(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
+func (s *ReviewService) UpdateReviewByID(id int, newReview *model.Review) (*model.Review, error) {
+	review, err := s.Repo.FindByID(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
-		return err
-	}
-	req := model.ReviewUpdateRequest{}
-
-	if err := c.Bind(&req); err != nil {
-		c.JSON(http.StatusBadRequest, err)
-		return err
+		return nil, domain.ErrReviewIDNotFound
 	}
 
-	_, err = s.Repo.FindByID(id)
+	review.ReviewerID = newReview.ReviewerID
+	review.ReviewTitle = newReview.ReviewTitle
+	review.ReviewDetail = newReview.ReviewDetail
+
+	r, err := s.Repo.Update(review)
 	if err != nil {
-		c.JSON(http.StatusNotFound, fmt.Sprintf("Review with id %d not found", id))
-		return err
+		return nil, err
 	}
-
-	r := model.Review{
-		ReviewerID:   req.ReviewerID,
-		ReviewTitle:  req.ReviewTitle,
-		ReviewDetail: req.ReviewDetail,
-	}
-	r.ID = uint(id)
-	updatedReview, err := s.Repo.Update(&r)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-		return err
-	}
-	c.JSON(http.StatusOK, updatedReview)
-	return nil
+	return r, nil
 }
 
-func (s *ReviewService) DeleteReviewByID(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
-		return err
-	}
-
+func (s *ReviewService) DeleteReviewByID(id int) error {
 	r, err := s.Repo.FindByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, fmt.Sprintf("Review with id %d not found", id))
-		return err
+		return domain.ErrReviewIDNotFound
 	}
 
 	if err = s.Repo.Delete(r); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
 		return err
 	}
-	c.JSON(http.StatusOK, "Deleted")
 	return nil
 }

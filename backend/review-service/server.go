@@ -1,8 +1,10 @@
 package main
 
 import (
+	"JinnnDamanee/review-service/config"
 	"JinnnDamanee/review-service/db"
 	"JinnnDamanee/review-service/httpServer"
+	"JinnnDamanee/review-service/internal/handler"
 	"JinnnDamanee/review-service/internal/repo"
 	"JinnnDamanee/review-service/internal/service"
 
@@ -24,14 +26,20 @@ type Review struct {
 }
 
 func main() {
-	db, err := db.NewDatabase()
+	config, err := config.LoadConfig(".")
+	if err != nil {
+		log.Fatal("Could not load config: ", err)
+	}
+
+	db, err := db.NewDatabase(config)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	reviewRepo := repo.NewReviewRepository(db.Gorm)
 	reviewService := service.NewReviewService(reviewRepo)
-	s := httpServer.NewHTTPServer(reviewService)
+	reviewHandler := handler.NewReviewHandler(reviewService)
+	s := httpServer.NewHTTPServer(reviewService, reviewHandler)
 	s.InitRouter()
 
 	if err != nil {

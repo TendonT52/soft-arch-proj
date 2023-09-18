@@ -1,6 +1,7 @@
 package db
 
 import (
+	"JinnnDamanee/review-service/config"
 	"database/sql"
 	"fmt"
 	"log"
@@ -14,10 +15,9 @@ type Database struct {
 	Gorm *gorm.DB
 }
 
-func NewDatabase() (*Database, error) {
-
+func NewDatabase(config *config.Config) (*Database, error) {
 	connFormat := "user=%s password=%s dbname=%s host=%s port=%s sslmode=disable"
-	conn := fmt.Sprintf(connFormat, "root", "password", "review", "localhost", "5432")
+	conn := fmt.Sprintf(connFormat, config.DBUsername, config.DBPassword, config.DBName, config.DBHost, config.DBPort)
 
 	// sqlDB, err := sql.Open("pgx", conn)
 	// if err != nil {

@@ -1,1 +1,4 @@
 postgres-data
+app.env
+
+.DS_Store

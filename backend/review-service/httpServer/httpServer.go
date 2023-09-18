@@ -1,6 +1,7 @@
 package httpServer
 
 import (
+	"JinnnDamanee/review-service/internal/handler"
 	"JinnnDamanee/review-service/internal/service"
 	"context"
 	"log"
@@ -15,12 +16,14 @@ import (
 type httpServer struct {
 	Server  *echo.Echo
 	Service *service.ReviewService
+	Handler *handler.ReviewHandler
 }
 
-func NewHTTPServer(s *service.ReviewService) *httpServer {
+func NewHTTPServer(s *service.ReviewService, h *handler.ReviewHandler) *httpServer {
 	return &httpServer{
 		Server:  echo.New(),
 		Service: s,
+		Handler: h,
 	}
 }
 
@@ -56,9 +59,9 @@ func (s *httpServer) Shutdown() {
 }
 
 func (s *httpServer) InitRouter() {
-	s.Server.GET("/review", s.Service.GetAllReviews)
-	s.Server.GET("/review/:id", s.Service.GetReviewByID)
-	s.Server.POST("/review", s.Service.CreateReview)
-	s.Server.PUT("/review/:id", s.Service.UpdateReviewByID)
-	s.Server.DELETE("/review/:id", s.Service.DeleteReviewByID)
+	s.Server.GET("/review", s.Handler.GetAllReview)
+	s.Server.GET("/review/:id", s.Handler.GetReviewByID)
+	s.Server.POST("/review", s.Handler.CreateReview)
+	s.Server.PUT("/review/:id", s.Handler.UpdateReviewByID)
+	s.Server.DELETE("/review/:id", s.Handler.DeleteReviewByID)
 }
