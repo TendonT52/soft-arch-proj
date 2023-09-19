@@ -3,7 +3,7 @@ import { ModeToggle } from "@/components/mode-toggle";
 
 export default function Home() {
   return (
-    <main className="relative flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center gap-6 p-24">
+    <main className="relative flex flex-1 flex-col items-center justify-center gap-6 p-24">
       <Image
         className="select-none dark:invert"
         src="/next.svg"

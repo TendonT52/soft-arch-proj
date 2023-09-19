@@ -1,4 +1,4 @@
-export function Indicator() {
+const Indicator = () => {
   if (process.env.NODE_ENV === "production") return <></>;
 
   return (
@@ -13,4 +13,6 @@ export function Indicator() {
       <div className="hidden 2xl:block">2xl</div>
     </div>
   );
-}
+};
+
+export { Indicator };

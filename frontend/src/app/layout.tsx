@@ -3,7 +3,6 @@ import localFont from "next/font/local";
 import { cn } from "@/lib/utils";
 import { Indicator } from "@/components/indicator";
 import "./globals.css";
-import { Header } from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 
 const fontSans = localFont({
@@ -19,11 +18,11 @@ export const metadata: Metadata = {
   title: "Create Next App",
 };
 
-export default function RootLayout({
-  children,
-}: {
+type RootLayoutProps = {
   children: React.ReactNode;
-}) {
+};
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body
@@ -33,7 +32,6 @@ export default function RootLayout({
         )}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Header />
           {children}
           <Indicator />
         </ThemeProvider>
