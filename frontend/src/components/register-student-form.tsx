@@ -40,8 +40,10 @@ const RegisterStudentForm = () => {
           <h1 className="text-center text-2xl font-semibold tracking-tight">
             Create a student account
           </h1>
-          <p className="text-center tracking-tight text-muted-foreground">
-            Enter your personal information to continue
+          <p className="text-center text-muted-foreground">
+            {page === 0
+              ? "Enter your personal information to continue"
+              : "Enter your credentials to create your account"}
           </p>
         </div>
         {page === 0 ? (

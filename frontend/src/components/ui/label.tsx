@@ -5,8 +5,6 @@ import * as LabelPrimitive from "@radix-ui/react-label";
 import { cva, type VariantProps } from "cva";
 import { cn } from "@/lib/utils";
 
-/* eslint-disable */
-
 const labelVariants = cva(
   "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 );

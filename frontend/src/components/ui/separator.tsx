@@ -12,7 +12,6 @@ const Separator = React.forwardRef<HTMLDivElement, SeparatorProps>(
     <div
       ref={ref}
       className={cn(
-        "bg-border",
         orientation === "horizontal" ? "h-0 border-b" : "w-0 border-l",
         className
       )}

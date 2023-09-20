@@ -6,8 +6,8 @@ export default function Page() {
     <div className="flex min-h-screen">
       <div className="hidden flex-1 items-center justify-center bg-primary lg:flex">
         <Image
-          className="aspect-[1293/1063] w-1/2"
-          src="/images/register-student.png"
+          className="aspect-[646/531] w-1/2"
+          src="/images/register.png"
           alt="Register Student"
           width={646}
           height={531}
