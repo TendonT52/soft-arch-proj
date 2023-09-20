@@ -9,8 +9,8 @@ export default function Page() {
           className="aspect-[646/531] w-1/2"
           src="/images/register.png"
           alt="Register Student"
-          width={646}
           height={531}
+          width={646}
         />
       </div>
       <RegisterStudentForm />
