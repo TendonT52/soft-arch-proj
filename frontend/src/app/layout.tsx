@@ -2,8 +2,8 @@ import { type Metadata } from "next";
 import localFont from "next/font/local";
 import { cn } from "@/lib/utils";
 import { Indicator } from "@/components/indicator";
-import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import "./globals.css";
 
 const fontSans = localFont({
   src: [

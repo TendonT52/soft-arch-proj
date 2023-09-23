@@ -5,12 +5,14 @@ import {
   KeyIcon,
   SearchIcon,
   StarIcon,
-  User2Icon,
+  UserIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ModeToggle } from "@/components/mode-toggle";
 import { SignUpOptionMenu } from "@/components/sign-up-option-menu";
 
+/* DUMMY */
 type Feature = {
   icon: JSX.Element;
   title: string;
@@ -24,7 +26,7 @@ const features: Feature[] = [
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
   },
   {
-    icon: <User2Icon className="h-12 w-12" />,
+    icon: <UserIcon className="h-12 w-12" />,
     title: "Profile",
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
   },
@@ -49,6 +51,7 @@ const features: Feature[] = [
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
   },
 ];
+/* DUMMY */
 
 export default function Home() {
   return (
@@ -87,21 +90,24 @@ export default function Home() {
           />
         </div>
       </section>
-      <section className="mx-auto flex w-full max-w-[64rem] flex-col items-center gap-8 pb-24 pt-12 sm:px-8">
+      <section className="mx-auto flex w-full max-w-[64rem] flex-col items-center gap-8 py-12 sm:px-8">
         <h2 className="text-center text-3xl font-semibold leading-none tracking-tight lg:text-4xl xl:text-5xl">
           Features
         </h2>
-        <div className="grid w-full auto-cols-fr grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid w-full auto-cols-fr grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {features.map(({ icon, title, description }) => (
-            <Card key={title}>
-              <CardContent className="flex flex-col gap-3 p-6">
+            <Card className="shadow-sm" key={title}>
+              <CardContent className="flex flex-col gap-2 p-6">
                 {icon}
-                <p className="text-base font-medium">{title}</p>
+                <p className="font-semibold">{title}</p>
                 <p className="text-sm text-muted-foreground">{description}</p>
               </CardContent>
             </Card>
           ))}
         </div>
+      </section>
+      <section className="flex items-center justify-end gap-8 py-12 sm:px-8">
+        <ModeToggle />
       </section>
     </main>
   );

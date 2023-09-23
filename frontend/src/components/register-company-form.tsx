@@ -27,12 +27,16 @@ import { Separator } from "./ui/separator";
 import { Textarea } from "./ui/textarea";
 
 /* DUMMY */
-const faculties = ["Engineering", "Science", "Arts", "Business"];
-const majors = ["Computer", "Mathematics", "Physics", "Chemistry"];
-const years = ["1", "2", "3", "4"];
+const categories = [
+  "E-commerce",
+  "Financial Services",
+  "Energy and Utilities",
+  "Manufacturing and Heavy Industry",
+  "Entertainment and Media",
+];
 /* DUMMY */
 
-const RegisterStudentForm = () => {
+const RegisterCompanyForm = () => {
   const [page, setPage] = useState(0);
 
   return (
@@ -41,11 +45,11 @@ const RegisterStudentForm = () => {
         <div className="mb-6 flex w-full flex-col items-center gap-6">
           <Logo />
           <h1 className="max-w-[85%] text-center text-2xl font-semibold leading-none tracking-tight sm:max-w-none">
-            Create a student account
+            Create a company account
           </h1>
           <p className="max-w-[85%] text-center text-muted-foreground sm:max-w-none">
             {page === 0
-              ? "Enter your personal information to continue"
+              ? "Enter your company information to continue"
               : "Enter your credentials to create your account"}
           </p>
         </div>
@@ -55,52 +59,29 @@ const RegisterStudentForm = () => {
             className="flex w-full flex-col items-center gap-4"
           >
             <div className="flex w-full gap-4">
-              <Input className="flex-1" placeholder="First name" />
-              <Input className="flex-1" placeholder="Last name" />
+              <Input className="flex-1" placeholder="Company name" />
+              <Select>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex w-full gap-4">
-              <Select>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Faculty" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {faculties.map((faculty) => (
-                      <SelectItem key={faculty} value={faculty}>
-                        {faculty}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <Select>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Major" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {majors.map((faculty) => (
-                      <SelectItem key={faculty} value={faculty}>
-                        {faculty}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <Select>
-                <SelectTrigger className="flex-[0.5]">
-                  <SelectValue placeholder="Year" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {years.map((years) => (
-                      <SelectItem key={years} value={years.toString()}>
-                        {years}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              <Input className="flex-[1.5]" placeholder="Location" />
+              <Input
+                className="flex-1 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                placeholder="Phone"
+                type="number"
+              />
             </div>
             <div className="mb-12 flex w-full">
               <Textarea className="resize-none" placeholder="Description" />
@@ -130,11 +111,7 @@ const RegisterStudentForm = () => {
               >
                 <MailIcon className="h-4 w-4 opacity-50" />
               </Label>
-              <Input
-                className="flex-1 pl-10"
-                placeholder="Chula email"
-                id="email"
-              />
+              <Input className="flex-1 pl-10" placeholder="Email" id="email" />
             </div>
             <div className="relative mb-4 flex w-full">
               <Label
@@ -200,4 +177,4 @@ const RegisterStudentForm = () => {
   );
 };
 
-export { RegisterStudentForm };
+export { RegisterCompanyForm };
