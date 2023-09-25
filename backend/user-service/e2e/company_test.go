@@ -268,7 +268,7 @@ func TestUpdateCompany(t *testing.T) {
 	// Admin Sign In
 	admin_res, err := c.SignIn(ctx, &pbv1.LoginRequest{
 		Email:    aa,
-		Password: admin.Password,
+		Password: "password-test",
 	})
 	require.Equal(t, int64(200), admin_res.Status)
 	require.NoError(t, err)
