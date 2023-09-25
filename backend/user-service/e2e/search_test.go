@@ -148,7 +148,7 @@ func TestListApprovedCompanies(t *testing.T) {
 		"success admin": {
 			req: &pbv1.ListApprovedCompaniesRequest{
 				AccessToken: ad.AccessToken,
-				Search:      "Tech",
+				Search:      "Tech!!",
 			},
 			expect: &pbv1.ListApprovedCompaniesResponse{
 				Status:  200,

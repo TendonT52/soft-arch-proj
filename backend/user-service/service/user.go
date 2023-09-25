@@ -87,8 +87,8 @@ func (s *userService) GetApprovedCompany(ctx context.Context, userId int64, sear
 	if err != nil {
 		return nil, domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
-
-	companies, err := s.repo.GetApprovedCompany(ctx, search)
+	searchPlain := domain.RemoveSpecialChars(search)
+	companies, err := s.repo.GetApprovedCompany(ctx, searchPlain)
 	if err != nil {
 		return nil, err
 	}
