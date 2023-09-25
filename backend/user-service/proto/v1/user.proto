@@ -6,6 +6,7 @@ option go_package = "github.com/TikhampornSky/go-auth-verifiedMail/gen";
 import "google/api/annotations.proto";
 
 service UserService {
+    rpc UserHealthCheck(UserHealthCheckRequest) returns (UserHealthCheckResponse) {}
     rpc GetStudentMe(GetStudentMeRequest) returns (GetStudentResponse) {
         option (google.api.http) = {
             get: "/v1/student-me"
@@ -56,8 +57,13 @@ service UserService {
             body: "*"
         };
     }
+}
 
-    rpc DeleteCompanies(DeleteCompaniesRequest) returns (DeleteCompaniesResponse) {}
+// Health Check
+message UserHealthCheckRequest {}
+
+message UserHealthCheckResponse {
+  int64 status = 1;
 }
 
 message User {
@@ -179,16 +185,6 @@ message UpdateCompanyStatusRequest {
 }
 
 message UpdateCompanyStatusResponse {
-    int64 status = 1;
-    string message = 2;
-}
-
-// Delete Company (Internal Purpose)
-message DeleteCompaniesRequest {
-    string access_token = 1;  
-}
-
-message DeleteCompaniesResponse {
     int64 status = 1;
     string message = 2;
 }

@@ -2,13 +2,14 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
-	"github.com/TikhampornSky/go-auth-verifiedMail/e2e/mock"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
+	"github.com/TikhampornSky/go-auth-verifiedMail/tools"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -29,7 +30,8 @@ func approveMultipleCompanies(t *testing.T, ids []int64, ad *pbv1.LoginResponse,
 
 func createMockStudent(t *testing.T, admin_access string) string {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -55,9 +57,12 @@ func createMockStudent(t *testing.T, admin_access string) string {
 	require.NoError(t, err)
 
 	// Verify Student
+	timeNow, err := tools.GetCreateTime(stu.Id)
+	require.NoError(t, err)
+
 	v, err := c.VerifyEmailCode(ctx, &pbv1.VerifyEmailCodeRequest{
 		StudentId: studentEmail[:10],
-		Code:      utils.Encode(studentEmail[:10], mock.NewMockTimeProvider().Now().Unix()),
+		Code:      utils.Encode(studentEmail[:10], timeNow),
 	})
 	require.Equal(t, int64(200), v.Status)
 	require.NoError(t, err)
@@ -75,7 +80,8 @@ func createMockStudent(t *testing.T, admin_access string) string {
 
 func TestListApprovedCompanies(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -85,6 +91,10 @@ func TestListApprovedCompanies(t *testing.T) {
 	u := pbv1.NewUserServiceClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
+	// Delete all companies in table
+	err = tools.DeleteAll()
+	require.NoError(t, err)
 
 	// Create Admin
 	admin := &pbv1.CreateAdminRequest{
@@ -101,12 +111,7 @@ func TestListApprovedCompanies(t *testing.T) {
 		Email:    admin.Email,
 		Password: admin.Password,
 	})
-
-	// Delete all companies in table
-	d, err := u.DeleteCompanies(ctx, &pbv1.DeleteCompaniesRequest{
-		AccessToken: ad.AccessToken,
-	})
-	require.Equal(t, int64(200), d.Status)
+	require.Equal(t, int64(200), ad.Status)
 	require.NoError(t, err)
 
 	// Generate WRONG token

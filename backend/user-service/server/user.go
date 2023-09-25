@@ -24,6 +24,13 @@ func NewUserServer(s port.UserServicePort) *UserServer {
 	}
 }
 
+func (s *UserServer) UserHealthCheck(context.Context, *pbv1.UserHealthCheckRequest) (*pbv1.UserHealthCheckResponse, error) {
+	log.Println("User HealthCheck success: ", http.StatusOK)
+	return &pbv1.UserHealthCheckResponse{
+		Status:  http.StatusOK,
+	}, nil
+}
+
 // Student Zone
 func (s *UserServer) GetStudentMe(ctx context.Context, req *pbv1.GetStudentMeRequest) (*pbv1.GetStudentResponse, error) {
 	payload, err := utils.ValidateAccessToken(req.AccessToken)
@@ -322,39 +329,6 @@ func (s *UserServer) UpdateCompanyStatus(ctx context.Context, req *pbv1.UpdateCo
 	log.Println("Success updating company status: ", req.Id)
 	message := "Update status for company id " + strconv.FormatInt(req.Id, 10) + " successfully!"
 	return &pbv1.UpdateCompanyStatusResponse{
-		Status:  http.StatusOK,
-		Message: message,
-	}, nil
-}
-
-func (s *UserServer) DeleteCompanies(ctx context.Context, req *pbv1.DeleteCompaniesRequest) (*pbv1.DeleteCompaniesResponse, error) {
-	payload, err := utils.ValidateAccessToken(req.AccessToken)
-	if err != nil {
-		log.Println("Error in extract userID: ", err)
-		return &pbv1.DeleteCompaniesResponse{
-			Status:  http.StatusBadRequest,
-			Message: err.Error(),
-		}, nil
-	}
-
-	err = s.UserService.DeleteCompanies(ctx, payload.UserId)
-	if errors.Is(err, domain.ErrNotAuthorized) {
-		return &pbv1.DeleteCompaniesResponse{
-			Status:  http.StatusUnauthorized,
-			Message: "Only admin can delete",
-		}, nil
-	}
-	if err != nil {
-		log.Println("Error from delete company: ", err)
-		return &pbv1.DeleteCompaniesResponse{
-			Status:  http.StatusBadRequest,
-			Message: err.Error(),
-		}, nil
-	}
-
-	log.Println("Success deleting companies!")
-	message := "Delete companies successfully!"
-	return &pbv1.DeleteCompaniesResponse{
 		Status:  http.StatusOK,
 		Message: message,
 	}, nil

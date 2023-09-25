@@ -2,14 +2,11 @@ package e2e_test
 
 import (
 	"context"
-	"log"
-	"os"
+	"fmt"
 	"testing"
 	"time"
 
-	"github.com/TikhampornSky/go-auth-verifiedMail/db"
-	"github.com/TikhampornSky/go-auth-verifiedMail/e2e/mock"
-	"github.com/TikhampornSky/go-auth-verifiedMail/email"
+	"github.com/TikhampornSky/go-auth-verifiedMail/tools"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -17,43 +14,15 @@ import (
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
-	"github.com/TikhampornSky/go-auth-verifiedMail/repo"
-	"github.com/TikhampornSky/go-auth-verifiedMail/server"
-	"github.com/TikhampornSky/go-auth-verifiedMail/service"
 )
 
-func TestMain(m *testing.M) {
-	config, err := config.LoadConfig("..")
-	if err != nil {
-		log.Fatal("? Could not load environment variables", err)
-	}
-
-	os.Chdir("../")
-	db, err := db.NewDatabase(config)
-	if err != nil {
-		log.Fatalf("Something went wrong. Could not connect to the database. %s", err)
-	}
-
-	memphisConn := email.InitMemphisConnection()
-	defer memphisConn.Close()
-
-	memphis := email.NewMemphis(memphisConn, config.MemphisStationNameTest)
-
-	userRepo := repo.NewUserRepository(db.GetPostgresqlDB(), db.GetRedisDB())
-	timeService := mock.NewMockTimeProvider()
-	authService := service.NewAuthService(userRepo, memphis, timeService)
-	userService := service.NewUserService(userRepo, memphis)
-
-	// gRPC Zone
-	go server.NewServer(config.ServerPort, authService, userService)
-
-	code := m.Run()
-	os.Exit(code)
+func TestHealthCheck(t *testing.T) {
 }
 
 func TestCreateStudent(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -167,7 +136,7 @@ func TestCreateStudent(t *testing.T) {
 		},
 	}
 	testOrder := []string{"success", "email already exists", "password and password confirm not match", "email is not student.chula.ac.th", "email length is less than 20", "year must be greater than zero"}
-
+	studentID := 0
 	for _, testName := range testOrder {
 		tc := tests[testName]
 		t.Run(testName, func(t *testing.T) {
@@ -177,14 +146,31 @@ func TestCreateStudent(t *testing.T) {
 			} else {
 				require.Equal(t, tc.expect.Status, res.Status)
 				require.Equal(t, tc.expect.Message, res.Message)
+				if tc.expect.Status == 201 {
+					studentID = int(res.Id)
+				}
 			}
 		})
 	}
+
+	// Check if student is created
+	require.NotEqual(t, 0, studentID)
+	student, status, err := tools.GetStudentByID(int64(studentID))
+	require.NoError(t, err)
+	require.Equal(t, id_student+"@student.chula.ac.th", student.Email)
+	require.Equal(t, "student", status.Role)
+	require.Equal(t, false, status.Verified)
+	require.Equal(t, "Name Test", student.Name)
+	require.Equal(t, "I am a student", student.Description)
+	require.Equal(t, "Engineering", student.Faculty)
+	require.Equal(t, "Computer Engineering", student.Major)
+	require.Equal(t, int32(4), student.Year)
 }
 
 func TestCreateCompany(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -251,6 +237,7 @@ func TestCreateCompany(t *testing.T) {
 	}
 	testOrder := []string{"success", "email already exists", "password and password confirm not match"}
 
+	companyID := 0
 	for _, testName := range testOrder {
 		tc := tests[testName]
 		t.Run(testName, func(t *testing.T) {
@@ -260,14 +247,32 @@ func TestCreateCompany(t *testing.T) {
 			} else {
 				require.Equal(t, tc.expect.Status, res.Status)
 				require.Equal(t, tc.expect.Message, res.Message)
+				if tc.expect.Status == 201 {
+					companyID = int(res.Id)
+				}
 			}
 		})
 	}
+
+	// Check if company is created
+	require.NotEqual(t, 0, companyID)
+	company, status, err := tools.GetCompanyByID(int64(companyID))
+	require.NoError(t, err)
+	require.Equal(t, companyTestEmail, company.Email)
+	require.Equal(t, "Comapany Name Test", company.Name)
+	require.Equal(t, "I am a company", company.Description)
+	require.Equal(t, "Bangkok", company.Location)
+	require.Equal(t, "0123456789", company.Phone)
+	require.Equal(t, "Technology", company.Category)
+	require.Equal(t, "Pending", company.Status)
+	require.Equal(t, "company", status.Role)
+	require.Equal(t, false, status.Verified)
 }
 
 func TestCreateAdmin(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -318,7 +323,7 @@ func TestCreateAdmin(t *testing.T) {
 		},
 	}
 	testOrder := []string{"success", "email already exists", "password and password confirm not match"}
-
+	adminId := 0
 	for _, testName := range testOrder {
 		tc := tests[testName]
 		t.Run(testName, func(t *testing.T) {
@@ -328,14 +333,26 @@ func TestCreateAdmin(t *testing.T) {
 			} else {
 				require.Equal(t, tc.expect.Status, res.Status)
 				require.Equal(t, tc.expect.Message, res.Message)
+				if tc.expect.Status == 201 {
+					adminId = int(res.Id)
+				}
 			}
 		})
 	}
+
+	// Check if admin is created
+	require.NotEqual(t, 0, adminId)
+	admin, err := tools.GetUserByID(int64(adminId))
+	require.NoError(t, err)
+	require.Equal(t, adminTestEmail, admin.Email)
+	require.Equal(t, "admin", admin.Role)
+	require.Equal(t, true, admin.Verified)
 }
 
 func TestSignIn(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -418,7 +435,8 @@ func TestSignIn(t *testing.T) {
 
 func TestRefreshToken(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -515,7 +533,8 @@ func TestRefreshToken(t *testing.T) {
 
 func TestLogOut(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -564,11 +583,17 @@ func TestLogOut(t *testing.T) {
 			}
 		})
 	}
+
+	// Check if refresh token is deleted
+	str, err := tools.GetValueFromRedis(res.RefreshToken)
+	require.NoError(t, err)
+	require.Equal(t, "logged_out", str)
 }
 
 func TestVerifyEmailCode(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -594,13 +619,16 @@ func TestVerifyEmailCode(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, int64(201), res.Status)
 
+	timeNow, err := tools.GetCreateTime(res.Id)
+	require.NoError(t, err)
+
 	tests := map[string]struct {
 		req    *pbv1.VerifyEmailCodeRequest
 		expect *pbv1.VerifyEmailCodeResponse
 	}{
 		"success": {
 			req: &pbv1.VerifyEmailCodeRequest{
-				Code:      utils.Encode(id_student, mock.NewMockTimeProvider().Now().Unix()),
+				Code:      utils.Encode(id_student, timeNow),
 				StudentId: id_student,
 			},
 			expect: &pbv1.VerifyEmailCodeResponse{
@@ -633,4 +661,10 @@ func TestVerifyEmailCode(t *testing.T) {
 			}
 		})
 	}
+
+	// Check if student is verified
+	_, status, err := tools.GetStudentByID(res.Id)
+	require.NoError(t, err)
+	require.Equal(t, true, status.Verified)
+	require.Equal(t, "student", status.Role)
 }

@@ -2,13 +2,14 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
-	"github.com/TikhampornSky/go-auth-verifiedMail/e2e/mock"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
+	"github.com/TikhampornSky/go-auth-verifiedMail/tools"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -17,7 +18,8 @@ import (
 
 func TestGetStudentMe(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":"+config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -44,10 +46,13 @@ func TestGetStudentMe(t *testing.T) {
 	require.Equal(t, int64(201), r.Status)
 	require.NoError(t, err)
 
+	timeNow, err := tools.GetCreateTime(r.Id)
+	require.NoError(t, err)
+
 	// Verify Email
 	result, err := c.VerifyEmailCode(ctx, &pbv1.VerifyEmailCodeRequest{
 		StudentId: id_student,
-		Code:      utils.Encode(id_student, mock.NewMockTimeProvider().Now().Unix()),
+		Code:      utils.Encode(id_student, timeNow),
 	})
 	require.Equal(t, int64(200), result.Status)
 	require.NoError(t, err)
@@ -120,7 +125,8 @@ func TestGetStudentMe(t *testing.T) {
 
 func TestGetStudent(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":"+config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -147,10 +153,13 @@ func TestGetStudent(t *testing.T) {
 	require.Equal(t, int64(201), r.Status)
 	require.NoError(t, err)
 
+	timeNow, err := tools.GetCreateTime(r.Id)
+	require.NoError(t, err)
+
 	// Verify Email
 	result, err := c.VerifyEmailCode(ctx, &pbv1.VerifyEmailCodeRequest{
 		StudentId: id_student,
-		Code:      utils.Encode(id_student, mock.NewMockTimeProvider().Now().Unix()),
+		Code:      utils.Encode(id_student, timeNow),
 	})
 	require.Equal(t, int64(200), result.Status)
 	require.NoError(t, err)
@@ -231,7 +240,8 @@ func TestGetStudent(t *testing.T) {
 
 func TestUpdateStudent(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":"+config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -258,10 +268,13 @@ func TestUpdateStudent(t *testing.T) {
 	require.Equal(t, int64(201), r.Status)
 	require.NoError(t, err)
 
+	timeNow, err := tools.GetCreateTime(r.Id)
+	require.NoError(t, err)
+
 	// Verify Email
 	result, err := c.VerifyEmailCode(ctx, &pbv1.VerifyEmailCodeRequest{
 		StudentId: id_student,
-		Code:      utils.Encode(id_student, mock.NewMockTimeProvider().Now().Unix()),
+		Code:      utils.Encode(id_student, timeNow),
 	})
 	require.Equal(t, int64(200), result.Status)
 	require.NoError(t, err)
@@ -329,15 +342,11 @@ func TestUpdateStudent(t *testing.T) {
 	}
 
 	// Get Student
-	resGet, err := u.GetStudent(ctx, &pbv1.GetStudentRequest{
-		AccessToken: res.AccessToken,
-		Id:          r.Id,
-	})
+	resGet, _, err := tools.GetStudentByID(r.Id)
 	require.NoError(t, err)
-	require.Equal(t, "UPADATED Mock Update Student", resGet.Student.Name)
-	require.Equal(t, "UPADATED I am a mock student", resGet.Student.Description)
-	require.Equal(t, "UPADATED Mock Engineering", resGet.Student.Faculty)
-	require.Equal(t, "UPADATED Mock Computer Engineering", resGet.Student.Major)
-	require.Equal(t, int32(3), resGet.Student.Year)
-	require.Equal(t, int64(200), resGet.Status)
+	require.Equal(t, "UPADATED Mock Update Student", resGet.Name)
+	require.Equal(t, "UPADATED I am a mock student", resGet.Description)
+	require.Equal(t, "UPADATED Mock Engineering", resGet.Faculty)
+	require.Equal(t, "UPADATED Mock Computer Engineering", resGet.Major)
+	require.Equal(t, int32(3), resGet.Year)
 }
