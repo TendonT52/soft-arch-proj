@@ -23,6 +23,13 @@ func NewAuthServer(s port.AuthServicePort) *AuthServer {
 	}
 }
 
+func (s *AuthServer) AuthHealthCheck(context.Context, *pbv1.AuthHealthCheckRequest) (*pbv1.AuthHealthCheckResponse, error) {
+	log.Println("Auth HealthCheck success: ", http.StatusOK)
+	return &pbv1.AuthHealthCheckResponse{
+		Status:  http.StatusOK,
+	}, nil
+}
+
 func (s *AuthServer) CreateStudent(ctx context.Context, req *pbv1.CreateStudentRequest) (*pbv1.CreateStudentResponse, error) {
 	id, err := s.AuthService.SignUpStudent(ctx, req)
 	if errors.Is(err, domain.ErrYearMustBeGreaterThanZero) {

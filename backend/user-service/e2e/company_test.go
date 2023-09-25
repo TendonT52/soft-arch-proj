@@ -2,12 +2,14 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
+	"github.com/TikhampornSky/go-auth-verifiedMail/tools"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -16,7 +18,8 @@ import (
 
 func TestGetCompanyMe(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -128,7 +131,8 @@ func TestGetCompanyMe(t *testing.T) {
 
 func TestGetComapany(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -238,7 +242,8 @@ func TestGetComapany(t *testing.T) {
 
 func TestUpdateCompany(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -341,17 +346,13 @@ func TestUpdateCompany(t *testing.T) {
 	}
 
 	// Get Company
-	get_res, err := u.GetCompany(ctx, &pbv1.GetCompanyRequest{
-		Id:          r.Id,
-		AccessToken: res.AccessToken,
-	})
+	get_res, _, err := tools.GetCompanyByID(r.Id)
 	require.NoError(t, err)
-	require.Equal(t, int64(200), get_res.Status)
-	require.Equal(t, "Mock Company New Name", get_res.Company.Name)
-	require.Equal(t, "I am a company New", get_res.Company.Description)
-	require.Equal(t, "Bangkok New", get_res.Company.Location)
-	require.Equal(t, "0123456780", get_res.Company.Phone)
-	require.Equal(t, "IT New", get_res.Company.Category)
-	require.Equal(t, "Approve", get_res.Company.Status)
-	require.Equal(t, int64(200), get_res.Status)
+	require.Equal(t, "Approve", get_res.Status)
+	require.Equal(t, "Mock Company New Name", get_res.Name)
+	require.Equal(t, "I am a company New", get_res.Description)
+	require.Equal(t, "Bangkok New", get_res.Location)
+	require.Equal(t, "0123456780", get_res.Phone)
+	require.Equal(t, "IT New", get_res.Category)
+	require.Equal(t, "Approve", get_res.Status)
 }

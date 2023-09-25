@@ -24,7 +24,7 @@ server:
 	go run .
 
 test-all:
-	 go test ./...
+	go test ./...
 
 gomock:
 	mockgen -source=port/service.go -destination=test/mock_port/mock_service.go -package=mock
