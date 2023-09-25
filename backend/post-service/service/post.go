@@ -83,6 +83,7 @@ func (s *postService) GetPosts(ctx context.Context, token string, search *pbv1.S
 	}
 
 	companyInfo := domain.NewCompanyInfo(u.Companies)
+	search = domain.RemoveSpecialChars(search)
 	posts, err := s.PostRepo.GetPosts(ctx, search, companyInfo)
 	if posts == nil {
 		return nil, domain.ErrPostNotFound

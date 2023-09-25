@@ -109,7 +109,7 @@ func TestSearchPosts(t *testing.T) {
 			req: &pbv1.ListPostsRequest{
 				AccessToken: token,
 				SearchOptions: &pbv1.SearchOptions{
-					SearchCompany:       "Dime",
+					SearchCompany:       "Dime !!!",
 					SearchOpenPosition:  "Developer",
 					SearchRequiredSkill: "HTML CSS",
 					SearchBenefit:       "Macbook M2",

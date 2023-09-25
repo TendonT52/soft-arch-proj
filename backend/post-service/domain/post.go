@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"regexp"
+
 	pbUser "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 )
@@ -21,6 +23,24 @@ func checkFields(topic, description, period, howTo string, lenOpenPositions, len
 		return false
 	}
 	return true
+}
+
+func RemoveSpecialChars(input *pbv1.SearchOptions) *pbv1.SearchOptions {
+	// In this pattern, [^a-zA-Z0-9 ] matches any character that is not a letter, digit, or space.
+	re := regexp.MustCompile("[^a-zA-Z0-9 ]")
+	resultSearchCompany := re.ReplaceAllString(input.SearchCompany, "")
+	resultSearchOpenPosition := re.ReplaceAllString(input.SearchOpenPosition, "")
+	resultSearchRequiredSkill := re.ReplaceAllString(input.SearchRequiredSkill, "")
+	resultSearchBenefit := re.ReplaceAllString(input.SearchBenefit, "")
+
+	result := &pbv1.SearchOptions{
+		SearchCompany:        resultSearchCompany,
+		SearchOpenPosition:   resultSearchOpenPosition,
+		SearchRequiredSkill:  resultSearchRequiredSkill,
+		SearchBenefit:        resultSearchBenefit,
+	}
+	
+	return result
 }
 
 type CompanyInfo struct {
