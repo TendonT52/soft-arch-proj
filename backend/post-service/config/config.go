@@ -21,6 +21,8 @@ type Config struct {
 	AccessTokenPublicKeyTest  string        `mapstructure:"ACCESS_TOKEN_PUBLIC_KEY_TEST"`
 	AccessTokenExpiredInTest  time.Duration `mapstructure:"ACCESS_TOKEN_EXPIRED_IN_TEST"`
 	AccessTokenMaxAgeTest     int           `mapstructure:"ACCESS_TOKEN_MAXAGE_TEST"`
+
+	MigrationPath string `mapstructure:"MIGRATION_PATH"`
 }
 
 func LoadConfig(path string) (config *Config, err error) {

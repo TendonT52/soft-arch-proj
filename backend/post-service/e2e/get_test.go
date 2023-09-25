@@ -15,7 +15,8 @@ import (
 )
 
 func TestGetPost(t *testing.T) {
-	conn, err := grpc.Dial(":8001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -64,7 +65,6 @@ func TestGetPost(t *testing.T) {
 	requiredSkills := []string{"Golang", "Python"}
 	benefits := []string{"Free lunch", "Free dinner"}
 
-	config, _ := config.LoadConfig("..")
 	token, err := mock.GenerateAccessToken(config.AccessTokenExpiredInTest, &domain.Payload{
 		UserId: 6,
 		Role:   "company",

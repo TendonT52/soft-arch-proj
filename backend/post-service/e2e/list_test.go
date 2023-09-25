@@ -15,7 +15,8 @@ import (
 )
 
 func TestGetOpenPositions(t *testing.T) {
-	conn, err := grpc.Dial(":8001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -25,7 +26,6 @@ func TestGetOpenPositions(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	config, _ := config.LoadConfig("..")
 	token, err := mock.GenerateAccessToken(config.AccessTokenExpiredInTest, &domain.Payload{
 		UserId: 1,
 		Role:   "company",
@@ -120,7 +120,8 @@ func TestGetOpenPositions(t *testing.T) {
 }
 
 func TestGetRequiredSkills(t *testing.T) {
-	conn, err := grpc.Dial(":8001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -130,7 +131,6 @@ func TestGetRequiredSkills(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	config, _ := config.LoadConfig("..")
 	token, err := mock.GenerateAccessToken(config.AccessTokenExpiredInTest, &domain.Payload{
 		UserId: 1,
 		Role:   "company",
@@ -225,7 +225,8 @@ func TestGetRequiredSkills(t *testing.T) {
 }
 
 func TestGetBenefits(t *testing.T) {
-	conn, err := grpc.Dial(":8001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -235,7 +236,6 @@ func TestGetBenefits(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	config, _ := config.LoadConfig("..")
 	token, err := mock.GenerateAccessToken(config.AccessTokenExpiredInTest, &domain.Payload{
 		UserId: 1,
 		Role:   "company",
