@@ -68,27 +68,6 @@ func Serve(conf *config.Config) error {
 
 func TransformIncomingRequest(w http.ResponseWriter, r *http.Request) {
 
-	// if r.Method != http.MethodGet {
-	// 	accessToken := r.Header.Get("Authorization")
-	// 	if strings.HasPrefix(accessToken, "Bearer ") {
-	// 		body := make(map[string]interface{})
-	// 		err := json.NewDecoder(r.Body).Decode(&body)
-	// 		if !errors.Is(err, io.EOF) && err != nil {
-	// 			w.WriteHeader(http.StatusBadRequest)
-	// 			w.Write([]byte("cannot read body"))
-	// 			return
-	// 		}
-	// 		body["accessToken"] = strings.TrimPrefix(accessToken, "Bearer ")
-	// 		jsonBody, err := json.Marshal(body)
-	// 		if err != nil {
-	// 			w.WriteHeader(http.StatusBadRequest)
-	// 			w.Write([]byte("cannot read body"))
-	// 			return
-	// 		}
-	// 		r.Body = io.NopCloser(strings.NewReader(string(jsonBody)))
-	// 	}
-	// }
-
 	refreshToken, err := r.Cookie("refreshToken")
 	if err == nil {
 		var body map[string]interface{}
@@ -111,10 +90,6 @@ func TransformIncomingRequest(w http.ResponseWriter, r *http.Request) {
 
 func TranformOutgoingResponse(ctx context.Context, w http.ResponseWriter, resp proto.Message) error {
 	resp.ProtoReflect().Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
-		// if fd.Name() == "access_token" {
-		// 	resp.ProtoReflect().Clear(fd)
-		// 	w.Header().Set("Authorization", fmt.Sprintf("Bearer %v", v.String()))
-		// }
 		if fd.Name() == "refresh_token" {
 			resp.ProtoReflect().Clear(fd)
 			http.SetCookie(w, &http.Cookie{

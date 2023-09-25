@@ -6,6 +6,11 @@ const (
 	CompanyRole = "company"
 )
 
+type UserStatus struct {
+	Verified bool
+	Role     string
+}
+
 func IsStudentRole(role string) bool {
 	return role == StudentRole
 }

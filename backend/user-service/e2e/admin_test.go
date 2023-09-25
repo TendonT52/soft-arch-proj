@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"testing"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
+	"github.com/TikhampornSky/go-auth-verifiedMail/tools"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -17,7 +19,8 @@ import (
 
 func TestUpdateCompanyStatus(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -27,6 +30,10 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	u := pbv1.NewUserServiceClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
+	// Delete all companies in table
+	err = tools.DeleteAll()
+	require.NoError(t, err)
 
 	// Create Admin
 	admin := &pbv1.CreateAdminRequest{
@@ -43,13 +50,6 @@ func TestUpdateCompanyStatus(t *testing.T) {
 		Email:    admin.Email,
 		Password: admin.Password,
 	})
-
-	// Delete all companies in table
-	d, err := u.DeleteCompanies(ctx, &pbv1.DeleteCompaniesRequest{
-		AccessToken: ad.AccessToken,
-	})
-	require.Equal(t, int64(200), d.Status)
-	require.NoError(t, err)
 
 	// Register
 	companyEmail := utils.GenerateRandomString(10) + "@company.com"
@@ -154,7 +154,8 @@ func TestUpdateCompanyStatus(t *testing.T) {
 
 func createMockComapny(t *testing.T, name, email, description, location, phone, category string) *pbv1.Company {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -193,7 +194,8 @@ func createMockComapny(t *testing.T, name, email, description, location, phone, 
 
 func TestListCompanies(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -203,6 +205,10 @@ func TestListCompanies(t *testing.T) {
 	u := pbv1.NewUserServiceClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
+	// Delete all companies in table
+	err = tools.DeleteAll()
+	require.NoError(t, err)
 
 	// Create Admin
 	admin := &pbv1.CreateAdminRequest{
@@ -219,13 +225,6 @@ func TestListCompanies(t *testing.T) {
 		Email:    admin.Email,
 		Password: admin.Password,
 	})
-
-	// Delete all companies in table
-	d, err := u.DeleteCompanies(ctx, &pbv1.DeleteCompaniesRequest{
-		AccessToken: ad.AccessToken,
-	})
-	require.Equal(t, int64(200), d.Status)
-	require.NoError(t, err)
 
 	// Generate WRONG token
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{

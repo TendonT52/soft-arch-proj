@@ -20,14 +20,15 @@ gen-proto:
     --go-grpc_out=gen \
     --go-grpc_opt=paths=source_relative
 
-server:
-	go run .
-
-test-all:
-	 go test ./...
-
 gomock:
 	mockgen -source=port/service.go -destination=test/mock_port/mock_service.go -package=mock
+
+dependency:
+	mkdir -p ${DATA_PATH}
+	@echo "Persistent data will be stored in ${DATA_PATH}"
+	parallel ::: \
+		"DATA_PATH=${DATA_PATH} make -C ./helm user-service-postgresql" \
+		"DATA_PATH=${DATA_PATH} make -C ./helm user-service-redis"
 
 deploy:
 	@if [ "${MODE}" = "remote" ]; then \
@@ -42,33 +43,33 @@ deploy:
 		exit 1; \
 	fi
 
-DATA_PATH=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/data
 k8s-run-dev:
+	$(eval DATA_PATH := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/data)
 	DATA_PATH=${DATA_PATH} make -C ../.. k8s-clear
 
 	@echo "Persistent data will be stored in ${DATA_PATH}"
 	parallel ::: \
 		"telepresence helm install" \
-		"DATA_PATH=${DATA_PATH} make -C ./helm user-service-postgresql" \
-		"DATA_PATH=${DATA_PATH} make -C ./helm user-service-redis" \
+		"DATA_PATH=${DATA_PATH}/user-service make dependency" \
 		"DATA_PATH=${DATA_PATH} make -C ../../helm memphis"
-	telepresence connect
 	kubectl wait --for=condition=Ready pods --all --all-namespaces
+
+	telepresence connect
 	make migrate-up
 	make seed
 
 k8s-run-prod:
+	$(eval DATA_PATH := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/data)
 	DATA_PATH=${DATA_PATH} make -C ../.. k8s-clear
 
 	@echo "Persistent data will be stored in ${DATA_PATH}"
 	parallel ::: \
 		"telepresence helm install" \
-		"DATA_PATH=${DATA_PATH} make -C ./helm user-service-postgresql  " \
-		"DATA_PATH=${DATA_PATH} make -C ./helm user-service-redis" \
+		"DATA_PATH=${DATA_PATH}/user-service make dependency" \
 		"DATA_PATH=${DATA_PATH} make -C ../../helm memphis"
+	MODE=local make deploy
+	kubectl wait --for=condition=Ready pods --all --all-namespaces
 
 	telepresence connect
-	kubectl wait --for=condition=Ready pods --all --all-namespaces
 	make migrate-up
 	make seed
-	MODE=local make deploy
