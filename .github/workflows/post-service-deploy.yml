@@ -44,7 +44,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backendpost-service-
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend-post-service
           tags: |
             ${{ steps.versioning.outputs.version }}
             latest
