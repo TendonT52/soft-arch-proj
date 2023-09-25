@@ -52,7 +52,8 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateStudent(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -182,7 +183,8 @@ func TestCreateStudent(t *testing.T) {
 }
 
 func TestCreateCompany(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -264,7 +266,8 @@ func TestCreateCompany(t *testing.T) {
 }
 
 func TestCreateAdmin(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -331,7 +334,8 @@ func TestCreateAdmin(t *testing.T) {
 }
 
 func TestSignIn(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -413,7 +417,8 @@ func TestSignIn(t *testing.T) {
 }
 
 func TestRefreshToken(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -439,7 +444,6 @@ func TestRefreshToken(t *testing.T) {
 	})
 
 	// Wrong token (Unknown person)
-	config, _ := config.LoadConfig("..")
 	refresh_token_wrong, err := utils.CreateRefreshToken(config.RefreshTokenExpiresIn, 0)
 	require.NoError(t, err)
 
@@ -510,7 +514,8 @@ func TestRefreshToken(t *testing.T) {
 }
 
 func TestLogOut(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -562,7 +567,8 @@ func TestLogOut(t *testing.T) {
 }
 
 func TestVerifyEmailCode(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}

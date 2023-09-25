@@ -16,7 +16,8 @@ import (
 )
 
 func TestUpdateCompanyStatus(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -83,7 +84,6 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := config.LoadConfig("..")
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: 0,
 		Role:   domain.CompanyRole,
@@ -153,7 +153,8 @@ func TestUpdateCompanyStatus(t *testing.T) {
 }
 
 func createMockComapny(t *testing.T, name, email, description, location, phone, category string) *pbv1.Company {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -191,7 +192,8 @@ func createMockComapny(t *testing.T, name, email, description, location, phone, 
 }
 
 func TestListCompanies(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -226,7 +228,6 @@ func TestListCompanies(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := config.LoadConfig("..")
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: 0,
 		Role:   domain.AdminRole,
