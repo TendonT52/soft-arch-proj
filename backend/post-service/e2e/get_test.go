@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -16,7 +17,8 @@ import (
 
 func TestGetPost(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -65,8 +67,14 @@ func TestGetPost(t *testing.T) {
 	requiredSkills := []string{"Golang", "Python"}
 	benefits := []string{"Free lunch", "Free dinner"}
 
+	a, err := mock.CreateMockAdmin(ctx)
+	require.NoError(t, err)
+	companyName := "Mock Company Name"
+	userRes, _, err := mock.CreateMockApprovedCompany(ctx, companyName, a)
+	require.NoError(t, err)
+
 	token, err := mock.GenerateAccessToken(config.AccessTokenExpiredInTest, &domain.Payload{
-		UserId: 6,
+		UserId: userRes.Id,
 		Role:   "company",
 	})
 	require.NoError(t, err)
@@ -112,8 +120,8 @@ func TestGetPost(t *testing.T) {
 					RequiredSkills: requiredSkills,
 					Benefits:       benefits,
 					Owner: &pbv1.PostOwner{
-						Id:   6,
-						Name: "Mock Company Name",
+						Id:   userRes.Id,
+						Name: companyName,
 					},
 				},
 			},

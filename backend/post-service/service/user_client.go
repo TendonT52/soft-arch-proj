@@ -22,7 +22,9 @@ func (u *userClientService) GetCompanyProfile(ctx context.Context, req *pbUser.G
 	if err != nil {
 		return nil, err
 	}
-	conn, err := grpc.Dial(fmt.Sprintf(":%s", config.UserServicePort), grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	target := fmt.Sprintf("%s:%s", config.UserServiceHost, config.UserServicePort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}

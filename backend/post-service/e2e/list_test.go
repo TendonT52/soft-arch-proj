@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -16,7 +17,8 @@ import (
 
 func TestGetOpenPositions(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -42,15 +44,24 @@ func TestGetOpenPositions(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, int64(200), res.Status)
 
-	post1 := createMockPost(t, ctx, c, 2, "Post 1", lex, "1 month", lex,
+	ad, err := mock.CreateMockAdmin(ctx)
+	require.NoError(t, err)
+	com1Res, _, err := mock.CreateMockApprovedCompany(ctx, "Grab", ad)
+	require.NoError(t, err)
+	com2Res, _, err := mock.CreateMockApprovedCompany(ctx, "Agoda", ad)
+	require.NoError(t, err)
+	com3Res, _, err := mock.CreateMockApprovedCompany(ctx, "Lineman", ad)
+	require.NoError(t, err)
+
+	post1 := createMockPost(t, ctx, c, com1Res.Id, "Post 1", lex, "1 month", lex,
 		[]string{"Software Engineer", "Data Scientist"}, []string{"Golang", "Python"}, []string{"Free lunch", "Free dinner"})
-	post2 := createMockPost(t, ctx, c, 1, "Post 2", lex, "2 month", lex,
+	post2 := createMockPost(t, ctx, c, com2Res.Id, "Post 2", lex, "2 month", lex,
 		[]string{"Data Analysts", "Full-Stack Developer"}, []string{"Python", "HTML", "CSS"}, []string{"Free lunch", "Macbook Pro"})
-	post3 := createMockPost(t, ctx, c, 1, "Post 3", lex, "3 month", lex,
+	post3 := createMockPost(t, ctx, c, com2Res.Id, "Post 3", lex, "3 month", lex,
 		[]string{"Backend Developer", "Data Scientist"}, []string{"Golang", "Python"}, []string{"Free dinner", "Macbook M1"})
-	post4 := createMockPost(t, ctx, c, 1, "Post 4", lex, "4 month", lex,
+	post4 := createMockPost(t, ctx, c, com2Res.Id, "Post 4", lex, "4 month", lex,
 		[]string{"Frontend Developer", "Data Analyst"}, []string{"HTML", "CSS", "Javascript"}, []string{"Free lunch", "Free dinner", "Macbook M1"})
-	post5 := createMockPost(t, ctx, c, 3, "Post 5", lex, "5 month", lex,
+	post5 := createMockPost(t, ctx, c, com3Res.Id, "Post 5", lex, "5 month", lex,
 		[]string{"Frontend Developer", "Data Analyst"}, []string{"HTML", "CSS", "Javascript"}, []string{"Free lunch", "Free dinner", "Macbook Pro"})
 
 	_ = post1
@@ -66,43 +77,43 @@ func TestGetOpenPositions(t *testing.T) {
 		"success": {
 			req: &pbv1.GetOpenPositionsRequest{
 				AccessToken: token,
-				Search: 	"Frontend",
+				Search:      "Frontend",
 			},
 			expect: &pbv1.GetOpenPositionsResponse{
-				Status: 200,
-				Message: "Open positions retrieved successfully",
+				Status:        200,
+				Message:       "Open positions retrieved successfully",
 				OpenPositions: []string{"Frontend Developer", "Backend Developer", "Full-Stack Developer"},
 			},
 		},
 		"empty search": {
 			req: &pbv1.GetOpenPositionsRequest{
 				AccessToken: token,
-				Search: 	"",
+				Search:      "",
 			},
 			expect: &pbv1.GetOpenPositionsResponse{
-				Status: 200,
-				Message: "Open positions retrieved successfully",
+				Status:        200,
+				Message:       "Open positions retrieved successfully",
 				OpenPositions: []string{"Backend Developer", "Data Analyst", "Data Analysts", "Data Scientist", "Frontend Developer", "Full-Stack Developer", "Software Engineer"},
 			},
 		},
 		"not foind any match": {
 			req: &pbv1.GetOpenPositionsRequest{
 				AccessToken: token,
-				Search: 	"xxyyyyzzz",
+				Search:      "xxyyyyzzz",
 			},
 			expect: &pbv1.GetOpenPositionsResponse{
-				Status: 200,
-				Message: "Open positions retrieved successfully",
+				Status:        200,
+				Message:       "Open positions retrieved successfully",
 				OpenPositions: []string(nil),
 			},
 		},
 		"unauthorized": {
 			req: &pbv1.GetOpenPositionsRequest{
 				AccessToken: tokenStudent,
-				Search: 	"Developer",
+				Search:      "Developer",
 			},
 			expect: &pbv1.GetOpenPositionsResponse{
-				Status: 401,
+				Status:  401,
 				Message: "Unauthorized",
 			},
 		},
@@ -121,7 +132,8 @@ func TestGetOpenPositions(t *testing.T) {
 
 func TestGetRequiredSkills(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -147,15 +159,24 @@ func TestGetRequiredSkills(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, int64(200), res.Status)
 
-	post1 := createMockPost(t, ctx, c, 2, "Post 1", lex, "1 month", lex,
+	ad, err := mock.CreateMockAdmin(ctx)
+	require.NoError(t, err)
+	com1Res, _, err := mock.CreateMockApprovedCompany(ctx, "Grab", ad)
+	require.NoError(t, err)
+	com2Res, _, err := mock.CreateMockApprovedCompany(ctx, "KBTG", ad)
+	require.NoError(t, err)
+	com3Res, _, err := mock.CreateMockApprovedCompany(ctx, "SCB", ad)
+	require.NoError(t, err)
+
+	post1 := createMockPost(t, ctx, c, com1Res.Id, "Post 1", lex, "1 month", lex,
 		[]string{"Software Engineer", "Data Scientist"}, []string{"Golang", "Python"}, []string{"Free lunch", "Free dinner"})
-	post2 := createMockPost(t, ctx, c, 1, "Post 2", lex, "2 month", lex,
+	post2 := createMockPost(t, ctx, c, com2Res.Id, "Post 2", lex, "2 month", lex,
 		[]string{"Data Analysts", "Full-Stack Developer"}, []string{"Python", "HTML", "CSS"}, []string{"Free lunch", "Macbook Pro"})
-	post3 := createMockPost(t, ctx, c, 1, "Post 3", lex, "3 month", lex,
+	post3 := createMockPost(t, ctx, c, com2Res.Id, "Post 3", lex, "3 month", lex,
 		[]string{"Backend Developer", "Data Scientist"}, []string{"Golang", "Python"}, []string{"Free dinner", "Macbook M1"})
-	post4 := createMockPost(t, ctx, c, 1, "Post 4", lex, "4 month", lex,
+	post4 := createMockPost(t, ctx, c, com2Res.Id, "Post 4", lex, "4 month", lex,
 		[]string{"Frontend Developer", "Data Analyst"}, []string{"HTML", "CSS", "Javascript"}, []string{"Free lunch", "Free dinner", "Macbook M1"})
-	post5 := createMockPost(t, ctx, c, 3, "Post 5", lex, "5 month", lex,
+	post5 := createMockPost(t, ctx, c, com3Res.Id, "Post 5", lex, "5 month", lex,
 		[]string{"Frontend Developer", "Data Analyst"}, []string{"HTML", "CSS", "Javascript"}, []string{"Free lunch", "Free dinner", "Macbook Pro"})
 
 	_ = post1
@@ -171,43 +192,43 @@ func TestGetRequiredSkills(t *testing.T) {
 		"success": {
 			req: &pbv1.GetRequiredSkillsRequest{
 				AccessToken: token,
-				Search: 	"Go",
+				Search:      "Go",
 			},
 			expect: &pbv1.GetRequiredSkillsResponse{
-				Status: 200,
-				Message: "Required skills retrieved successfully",
+				Status:         200,
+				Message:        "Required skills retrieved successfully",
 				RequiredSkills: []string{"Golang"},
 			},
 		},
 		"empty search": {
 			req: &pbv1.GetRequiredSkillsRequest{
 				AccessToken: token,
-				Search: 	"",
+				Search:      "",
 			},
 			expect: &pbv1.GetRequiredSkillsResponse{
-				Status: 200,
-				Message: "Required skills retrieved successfully",
+				Status:         200,
+				Message:        "Required skills retrieved successfully",
 				RequiredSkills: []string{"CSS", "Golang", "HTML", "Javascript", "Python"},
 			},
 		},
 		"not foind any match": {
 			req: &pbv1.GetRequiredSkillsRequest{
 				AccessToken: token,
-				Search: 	"xxyyyyzzz",
+				Search:      "xxyyyyzzz",
 			},
 			expect: &pbv1.GetRequiredSkillsResponse{
-				Status: 200,
-				Message: "Required skills retrieved successfully",
+				Status:         200,
+				Message:        "Required skills retrieved successfully",
 				RequiredSkills: []string(nil),
 			},
 		},
 		"unauthorized": {
 			req: &pbv1.GetRequiredSkillsRequest{
 				AccessToken: tokenStudent,
-				Search: 	"Go",
+				Search:      "Go",
 			},
 			expect: &pbv1.GetRequiredSkillsResponse{
-				Status: 401,
+				Status:  401,
 				Message: "Unauthorized",
 			},
 		},
@@ -226,7 +247,8 @@ func TestGetRequiredSkills(t *testing.T) {
 
 func TestGetBenefits(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -252,15 +274,24 @@ func TestGetBenefits(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, int64(200), res.Status)
 
-	post1 := createMockPost(t, ctx, c, 2, "Post 1", lex, "1 month", lex,
+	ad, err := mock.CreateMockAdmin(ctx)
+	require.NoError(t, err)
+	com1Res, _, err := mock.CreateMockApprovedCompany(ctx, "TTB", ad)
+	require.NoError(t, err)
+	com2Res, _, err := mock.CreateMockApprovedCompany(ctx, "Wongnai", ad)
+	require.NoError(t, err)
+	com3Res, _, err := mock.CreateMockApprovedCompany(ctx, "KBTG", ad)
+	require.NoError(t, err)
+
+	post1 := createMockPost(t, ctx, c, com1Res.Id, "Post 1", lex, "1 month", lex,
 		[]string{"Software Engineer", "Data Scientist"}, []string{"Golang", "Python"}, []string{"Free lunch", "Free dinner"})
-	post2 := createMockPost(t, ctx, c, 1, "Post 2", lex, "2 month", lex,
+	post2 := createMockPost(t, ctx, c, com2Res.Id, "Post 2", lex, "2 month", lex,
 		[]string{"Data Analysts", "Full-Stack Developer"}, []string{"Python", "HTML", "CSS"}, []string{"Free lunch", "Macbook Pro"})
-	post3 := createMockPost(t, ctx, c, 1, "Post 3", lex, "3 month", lex,
+	post3 := createMockPost(t, ctx, c, com2Res.Id, "Post 3", lex, "3 month", lex,
 		[]string{"Backend Developer", "Data Scientist"}, []string{"Golang", "Python"}, []string{"Free dinner", "Macbook M1"})
-	post4 := createMockPost(t, ctx, c, 1, "Post 4", lex, "4 month", lex,
+	post4 := createMockPost(t, ctx, c, com2Res.Id, "Post 4", lex, "4 month", lex,
 		[]string{"Frontend Developer", "Data Analyst"}, []string{"HTML", "CSS", "Javascript"}, []string{"Free lunch", "Free dinner", "Macbook M1"})
-	post5 := createMockPost(t, ctx, c, 3, "Post 5", lex, "5 month", lex,
+	post5 := createMockPost(t, ctx, c, com3Res.Id, "Post 5", lex, "5 month", lex,
 		[]string{"Frontend Developer", "Data Analyst"}, []string{"HTML", "CSS", "Javascript"}, []string{"Free lunch", "Free dinner", "Macbook Pro"})
 
 	_ = post1
@@ -276,43 +307,43 @@ func TestGetBenefits(t *testing.T) {
 		"success": {
 			req: &pbv1.GetBenefitsRequest{
 				AccessToken: token,
-				Search: 	"free",
+				Search:      "free",
 			},
 			expect: &pbv1.GetBenefitsResponse{
-				Status: 200,
-				Message: "Benefits retrieved successfully",
+				Status:   200,
+				Message:  "Benefits retrieved successfully",
 				Benefits: []string{"Free lunch", "Free dinner"},
 			},
 		},
 		"empty search": {
 			req: &pbv1.GetBenefitsRequest{
 				AccessToken: token,
-				Search: 	"",
+				Search:      "",
 			},
 			expect: &pbv1.GetBenefitsResponse{
-				Status: 200,
-				Message: "Benefits retrieved successfully",
+				Status:   200,
+				Message:  "Benefits retrieved successfully",
 				Benefits: []string{"Free dinner", "Free lunch", "Macbook M1", "Macbook Pro"},
 			},
 		},
 		"not foind any match": {
 			req: &pbv1.GetBenefitsRequest{
 				AccessToken: token,
-				Search: 	"xxyyyyzzz",
+				Search:      "xxyyyyzzz",
 			},
 			expect: &pbv1.GetBenefitsResponse{
-				Status: 200,
-				Message: "Benefits retrieved successfully",
+				Status:   200,
+				Message:  "Benefits retrieved successfully",
 				Benefits: []string(nil),
 			},
 		},
 		"unauthorized": {
 			req: &pbv1.GetBenefitsRequest{
 				AccessToken: tokenStudent,
-				Search: 	"free",
+				Search:      "free",
 			},
 			expect: &pbv1.GetBenefitsResponse{
-				Status: 401,
+				Status:  401,
 				Message: "Unauthorized",
 			},
 		},

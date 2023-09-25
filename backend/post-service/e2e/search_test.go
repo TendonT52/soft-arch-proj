@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -49,7 +50,8 @@ func createMockPost(t *testing.T, ctx context.Context, c pbv1.PostServiceClient,
 
 func TestSearchPosts(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -59,9 +61,12 @@ func TestSearchPosts(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	ad, err := mock.CreateMockAdmin(ctx)
+	userRes, _, err := mock.CreateMockApprovedCompany(ctx, "Some cute company", ad)
+	require.NoError(t, err)
 	token, err := mock.GenerateAccessToken(config.AccessTokenExpiredInTest, &domain.Payload{
-		UserId: 1,
-		Role:   "admin",
+		UserId: userRes.Id,
+		Role:   "company",
 	})
 	require.NoError(t, err)
 
@@ -71,15 +76,23 @@ func TestSearchPosts(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, int64(200), res.Status)
 
-	post1 := createMockPost(t, ctx, c, 2, "Post 1", lex, "1 month", lex,
+	// Create Mock companies
+	com1Res, _, err := mock.CreateMockApprovedCompany(ctx, "Agoda", ad)
+	require.NoError(t, err)
+	com2Res, _, err := mock.CreateMockApprovedCompany(ctx, "Dime", ad)
+	require.NoError(t, err)
+	com3Res, _, err := mock.CreateMockApprovedCompany(ctx, "Grab", ad)
+	require.NoError(t, err)
+
+	post1 := createMockPost(t, ctx, c, com1Res.Id, "Post 1", lex, "1 month", lex,
 		[]string{"Software Engineer", "Data Scientist"}, []string{"Golang", "Python"}, []string{"Free lunch", "Free dinner"})
-	post2 := createMockPost(t, ctx, c, 1, "Post 2", lex, "2 month", lex,
+	post2 := createMockPost(t, ctx, c, com2Res.Id, "Post 2", lex, "2 month", lex,
 		[]string{"Data Analysts", "Full-Stack Developer"}, []string{"Python", "HTML", "CSS"}, []string{"Free lunch", "Macbook Pro"})
-	post3 := createMockPost(t, ctx, c, 1, "Post 3", lex, "3 month", lex,
+	post3 := createMockPost(t, ctx, c, com2Res.Id, "Post 3", lex, "3 month", lex,
 		[]string{"Backend Developer", "Data Scientist"}, []string{"Golang", "Python"}, []string{"Free dinner", "Macbook M1"})
-	post4 := createMockPost(t, ctx, c, 1, "Post 4", lex, "4 month", lex,
+	post4 := createMockPost(t, ctx, c, com2Res.Id, "Post 4", lex, "4 month", lex,
 		[]string{"Frontend Developer", "Data Analyst"}, []string{"HTML", "CSS", "Javascript"}, []string{"Free lunch", "Free dinner", "Macbook M1"})
-	post5 := createMockPost(t, ctx, c, 3, "Post 5", lex, "5 month", lex,
+	post5 := createMockPost(t, ctx, c, com3Res.Id, "Post 5", lex, "5 month", lex,
 		[]string{"Frontend Developer", "Data Analyst"}, []string{"HTML", "CSS", "Javascript"}, []string{"Free lunch", "Free dinner", "Macbook Pro"})
 
 	_ = post1
@@ -96,7 +109,7 @@ func TestSearchPosts(t *testing.T) {
 			req: &pbv1.ListPostsRequest{
 				AccessToken: token,
 				SearchOptions: &pbv1.SearchOptions{
-					SearchCompany:       "mock-search-company",
+					SearchCompany:       "Dime",
 					SearchOpenPosition:  "Developer",
 					SearchRequiredSkill: "HTML CSS",
 					SearchBenefit:       "Macbook M2",
@@ -115,7 +128,7 @@ func TestSearchPosts(t *testing.T) {
 			req: &pbv1.ListPostsRequest{
 				AccessToken: token,
 				SearchOptions: &pbv1.SearchOptions{
-					SearchCompany:       "mock-search-company",
+					SearchCompany:       "Dime",
 					SearchOpenPosition:  "",
 					SearchRequiredSkill: "",
 					SearchBenefit:       "",
@@ -135,7 +148,7 @@ func TestSearchPosts(t *testing.T) {
 			req: &pbv1.ListPostsRequest{
 				AccessToken: token,
 				SearchOptions: &pbv1.SearchOptions{
-					SearchCompany:       "mock-search-company",
+					SearchCompany:       "Dime",
 					SearchOpenPosition:  "",
 					SearchRequiredSkill: "Golang Javascript",
 					SearchBenefit:       "",
@@ -154,7 +167,7 @@ func TestSearchPosts(t *testing.T) {
 			req: &pbv1.ListPostsRequest{
 				AccessToken: token,
 				SearchOptions: &pbv1.SearchOptions{
-					SearchCompany:       "mock-search-company",
+					SearchCompany:       "Dime",
 					SearchOpenPosition:  "Data Analyst",
 					SearchRequiredSkill: "",
 					SearchBenefit:       "",
@@ -174,7 +187,7 @@ func TestSearchPosts(t *testing.T) {
 			req: &pbv1.ListPostsRequest{
 				AccessToken: token,
 				SearchOptions: &pbv1.SearchOptions{
-					SearchCompany:       "mock-search-company",
+					SearchCompany:       "Dime",
 					SearchOpenPosition:  "",
 					SearchRequiredSkill: "",
 					SearchBenefit:       "Macbook Pro",
@@ -195,7 +208,7 @@ func TestSearchPosts(t *testing.T) {
 			req: &pbv1.ListPostsRequest{
 				AccessToken: token,
 				SearchOptions: &pbv1.SearchOptions{
-					SearchCompany:       "mock-search-company",
+					SearchCompany:       "Dime",
 					SearchOpenPosition:  "mock-search-open-position",
 					SearchRequiredSkill: "mock-search-required-skill",
 					SearchBenefit:       "mock-search-benefit",

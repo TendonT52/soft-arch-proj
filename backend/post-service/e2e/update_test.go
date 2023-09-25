@@ -2,11 +2,11 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/TikhampornSky/go-post-service/config"
-	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 	"github.com/TikhampornSky/go-post-service/mock"
 	"github.com/TikhampornSky/go-post-service/utils"
@@ -17,7 +17,8 @@ import (
 
 func TestUpdatePost(t *testing.T) {
 	config, _ := config.LoadConfig("..")
-	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -27,16 +28,13 @@ func TestUpdatePost(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	token, err := mock.GenerateAccessToken(config.AccessTokenExpiredInTest, &domain.Payload{
-		UserId: 1,
-		Role:   "company",
-	})
+	ad, err := mock.CreateMockAdmin(ctx)
 	require.NoError(t, err)
 
-	tokenStudent, err := mock.GenerateAccessToken(config.AccessTokenExpiredInTest, &domain.Payload{
-		UserId: 2,
-		Role:   "student",
-	})
+	_, token, err := mock.CreateMockApprovedCompany(ctx, "Company", ad)
+	require.NoError(t, err)
+
+	tokenAdmin, err := mock.CreateMockAdmin(ctx)
 	require.NoError(t, err)
 
 	resDelete, err := c.DeletePosts(ctx, &pbv1.DeletePostsRequest{
@@ -124,7 +122,7 @@ func TestUpdatePost(t *testing.T) {
 		},
 		"fail: unauthorized": {
 			req: &pbv1.UpdatePostRequest{
-				AccessToken: tokenStudent,
+				AccessToken: tokenAdmin,
 				Id:          CreateRes.Id,
 				Post:        p,
 			},
