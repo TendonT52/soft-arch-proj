@@ -5,8 +5,8 @@ create-migrate:
 migrate-up:
 	migrate -database "postgres://postgres:password@localhost:5432/?sslmode=disable" -path migrations up
 
-migrate-down:
-	migrate -database "postgres://postgres:password@localhost:5432/?sslmode=disable" -path migrations down
+seed:
+	psql postgres://postgres:password@localhost:5432/?sslmode=disable -a -f ./seed.sql
 
 clean-db:
 	psql postgres://postgres:password@localhost:5432/?sslmode=disable -a -f ./cleanup.sql
