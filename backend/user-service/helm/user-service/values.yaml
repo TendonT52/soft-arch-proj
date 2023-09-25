@@ -1,1 +1,1 @@
-BUILD_VERSION: latest
+image: ghcr.io/tendont52/soft-arch-proj-backend-user-service:latest

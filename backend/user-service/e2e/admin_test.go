@@ -16,7 +16,8 @@ import (
 )
 
 func TestUpdateCompanyStatus(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -83,7 +84,6 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := config.LoadConfig("..")
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: 0,
 		Role:   domain.CompanyRole,
@@ -152,8 +152,9 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	}
 }
 
-func createMockComapny(t *testing.T, name, email, description, location, phone, category string) *pbv1.CreateCompanyResponse {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+func createMockComapny(t *testing.T, name, email, description, location, phone, category string) *pbv1.Company {
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -178,11 +179,21 @@ func createMockComapny(t *testing.T, name, email, description, location, phone, 
 	require.Equal(t, int64(201), com.Status)
 	require.NoError(t, err)
 
-	return com
+	return &pbv1.Company{
+		Id:          com.Id,
+		Name:        name,
+		Email:       email,
+		Description: description,
+		Location:    location,
+		Phone:       phone,
+		Category:    category,
+		Status:      "Pending",
+	}
 }
 
 func TestListCompanies(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -217,7 +228,6 @@ func TestListCompanies(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := config.LoadConfig("..")
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: 0,
 		Role:   domain.AdminRole,
@@ -242,26 +252,8 @@ func TestListCompanies(t *testing.T) {
 				Status:  200,
 				Message: "success",
 				Companies: []*pbv1.Company{
-					{
-						Id:          c1.Id,
-						Name:        "Mock Company 1",
-						Email:       mail1,
-						Description: "Company1 desc",
-						Location:    "Bangkok",
-						Phone:       "0123456789",
-						Category:    "Technology",
-						Status:      "Pending",
-					},
-					{
-						Id:          c2.Id,
-						Name:        "Mock Company 2",
-						Email:       mail2,
-						Description: "Company2 desc",
-						Location:    "Bangkok",
-						Phone:       "0123456789",
-						Category:    "Technical Finanace",
-						Status:      "Pending",
-					},
+					c1,
+					c2,
 				},
 			},
 		},

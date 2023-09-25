@@ -15,7 +15,8 @@ import (
 )
 
 func TestGetCompanyMe(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -77,7 +78,6 @@ func TestGetCompanyMe(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := config.LoadConfig("..")
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: 0,
 		Role:   domain.CompanyRole,
@@ -127,7 +127,8 @@ func TestGetCompanyMe(t *testing.T) {
 }
 
 func TestGetComapany(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -236,7 +237,8 @@ func TestGetComapany(t *testing.T) {
 }
 
 func TestUpdateCompany(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":" + config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -337,4 +339,19 @@ func TestUpdateCompany(t *testing.T) {
 			require.Equal(t, tc.expect.Message, res.Message)
 		})
 	}
+
+	// Get Company
+	get_res, err := u.GetCompany(ctx, &pbv1.GetCompanyRequest{
+		Id:          r.Id,
+		AccessToken: res.AccessToken,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), get_res.Status)
+	require.Equal(t, "Mock Company New Name", get_res.Company.Name)
+	require.Equal(t, "I am a company New", get_res.Company.Description)
+	require.Equal(t, "Bangkok New", get_res.Company.Location)
+	require.Equal(t, "0123456780", get_res.Company.Phone)
+	require.Equal(t, "IT New", get_res.Company.Category)
+	require.Equal(t, "Approve", get_res.Company.Status)
+	require.Equal(t, int64(200), get_res.Status)
 }

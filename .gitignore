@@ -6,3 +6,5 @@ provision/secret.tfvars
 
 setup/join_command.out
 .DS_Store
+*.code-workspace
+**/*.code-workspace

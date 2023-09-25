@@ -16,7 +16,8 @@ import (
 )
 
 func TestGetStudentMe(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":"+config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -60,7 +61,6 @@ func TestGetStudentMe(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := config.LoadConfig("..")
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: 0,
 		Role:   domain.StudentRole,
@@ -119,7 +119,8 @@ func TestGetStudentMe(t *testing.T) {
 }
 
 func TestGetStudent(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":"+config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -229,7 +230,8 @@ func TestGetStudent(t *testing.T) {
 }
 
 func TestUpdateStudent(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	conn, err := grpc.Dial(":"+config.ServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -273,7 +275,6 @@ func TestUpdateStudent(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := config.LoadConfig("..")
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: 0,
 		Role:   domain.StudentRole,
@@ -288,16 +289,16 @@ func TestUpdateStudent(t *testing.T) {
 			req: &pbv1.UpdateStudentRequest{
 				AccessToken: res.AccessToken,
 				Student: &pbv1.Student{
-					Name:        "Mock Update Student",
-					Description: "I am a mock student",
-					Faculty:     "Mock Engineering",
-					Major:       "Mock Computer Engineering",
+					Name:        "UPADATED Mock Update Student",
+					Description: "UPADATED I am a mock student",
+					Faculty:     "UPADATED Mock Engineering",
+					Major:       "UPADATED Mock Computer Engineering",
 					Year:        3,
 				},
 			},
 			expect: &pbv1.UpdateCompanyResponse{
 				Status:  200,
-				Message: "Update data for Mock Update Student successfully!",
+				Message: "Update data for UPADATED Mock Update Student successfully!",
 			},
 		},
 		"invalid token": {
@@ -326,4 +327,17 @@ func TestUpdateStudent(t *testing.T) {
 			require.Equal(t, tc.expect.Message, res.Message)
 		})
 	}
+
+	// Get Student
+	resGet, err := u.GetStudent(ctx, &pbv1.GetStudentRequest{
+		AccessToken: res.AccessToken,
+		Id:          r.Id,
+	})
+	require.NoError(t, err)
+	require.Equal(t, "UPADATED Mock Update Student", resGet.Student.Name)
+	require.Equal(t, "UPADATED I am a mock student", resGet.Student.Description)
+	require.Equal(t, "UPADATED Mock Engineering", resGet.Student.Faculty)
+	require.Equal(t, "UPADATED Mock Computer Engineering", resGet.Student.Major)
+	require.Equal(t, int32(3), resGet.Student.Year)
+	require.Equal(t, int64(200), resGet.Status)
 }
