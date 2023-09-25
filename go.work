@@ -4,4 +4,5 @@ use (
 	./api-gateway
 	./backend/post-service
 	./backend/user-service
+	./backend/mail-service
 )
