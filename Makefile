@@ -35,6 +35,13 @@ k8s-clear:
 	kubectl delete pv --all
 	telepresence helm uninstall || true
 	telepresence quit || true
-	if [ -d ${DATA_PATH} ]; then \
-		rm -rf ${DATA_PATH}/*; \
+
+	$(eval real_dir := $(shell realpath ${DATA_PATH}))
+	$(eval parent_dir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST)))))
+	@echo "Removing all files in ${real_dir} that should be in ${parent_dir} and end with /data"
+	@if [[ ${real_dir} == ${parent_dir}/* ]] && [[ ${real_dir} == */data ]]; then \
+		rm -rf ${real_dir}/* ; \
+	else \
+		echo "DATA_PATH=${real_dir} is not set to a directory that is a child of the ${parent_dir} directory and ends with /data"; \
+		exit 1; \
 	fi

@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: { { .Values.image } }
+          image: {{ .Values.image }}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

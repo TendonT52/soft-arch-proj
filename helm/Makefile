@@ -9,4 +9,5 @@ memphis:
 	--set master.metadata.persistence.size=10Gi \
 	--set master.metadata.persistence.path="${DATA_PATH}/memphis-meta" \
 	--set metadata.persistence.existingClaim=memphis-metadata-persistent-claim \
+	--timeout 10m \
 	--wait

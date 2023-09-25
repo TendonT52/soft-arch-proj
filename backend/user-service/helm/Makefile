@@ -7,6 +7,7 @@ user-service-postgresql:
 	--set master.persistence.path="${DATA_PATH}/postgresql" \
 	--set primary.persistence.existingClaim=user-service-postgresql-persistent-claim \
 	--set volumePermissions.enabled=true \
+	--timeout 10m \
 	--wait
 
 user-service-redis:
@@ -18,9 +19,11 @@ user-service-redis:
 	--set master.persistence.path="${DATA_PATH}/redis" \
 	--set master.persistence.existingClaim=user-service-redis-persistent-claim \
 	--set volumePermissions.enabled=true \
+	--timeout 10m \
 	--wait
 
 user-service:
 	helm install user-service ./user-service \
 	--set image=${IMAGE} \
+	--timeout 10m \
 	--wait
