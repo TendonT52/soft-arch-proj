@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	pbUser "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
-	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/TikhampornSky/go-post-service/config"
+	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
+	"github.com/TikhampornSky/go-post-service/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func CreateMockApprovedCompany(ctx context.Context, name, accessToken string) (*pbUser.CreateCompanyResponse, string, error) {
+func CreateMockApprovedCompany(ctx context.Context, name, accessToken string) (*pbv1.CreateCompanyResponse, string, error) {
 	config, err := config.LoadConfig("../")
 	if err != nil {
 		return nil, "", err
@@ -24,12 +24,12 @@ func CreateMockApprovedCompany(ctx context.Context, name, accessToken string) (*
 	}
 	defer conn.Close()
 
-	client := pbUser.NewAuthServiceClient(conn)
-	clientUser := pbUser.NewUserServiceClient(conn)
+	client := pbv1.NewAuthServiceClient(conn)
+	clientUser := pbv1.NewUserServiceClient(conn)
 
 	companyEmail := utils.GenerateRandomString(10) + "@company.com"
 	// Create req
-	req := &pbUser.CreateCompanyRequest{
+	req := &pbv1.CreateCompanyRequest{
 		Name:            name,
 		Email:           companyEmail,
 		Password:        "password-test",
@@ -46,7 +46,7 @@ func CreateMockApprovedCompany(ctx context.Context, name, accessToken string) (*
 	}
 
 	// Approve Company
-	reqApprove := &pbUser.UpdateCompanyStatusRequest{
+	reqApprove := &pbv1.UpdateCompanyStatusRequest{
 		AccessToken: accessToken,
 		Id:          res.Id,
 		Status:      "Approve",
@@ -58,7 +58,7 @@ func CreateMockApprovedCompany(ctx context.Context, name, accessToken string) (*
 	}
 
 	// SignIn Company
-	reqSignIn := &pbUser.LoginRequest{
+	reqSignIn := &pbv1.LoginRequest{
 		Email:    companyEmail,
 		Password: "password-test",
 	}
@@ -83,11 +83,11 @@ func CreateMockAdmin(ctx context.Context) (string, error) {
 	}
 	defer conn.Close()
 
-	client := pbUser.NewAuthServiceClient(conn)
+	client := pbv1.NewAuthServiceClient(conn)
 
 	// Create Admin
 	adminEmail := utils.GenerateRandomString(10) + "@admin.com"
-	reqAdmin := &pbUser.CreateAdminRequest{
+	reqAdmin := &pbv1.CreateAdminRequest{
 		Email:           adminEmail,
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
@@ -99,7 +99,7 @@ func CreateMockAdmin(ctx context.Context) (string, error) {
 	}
 
 	// SignIn Admin
-	reqSignIn := &pbUser.LoginRequest{
+	reqSignIn := &pbv1.LoginRequest{
 		Email:    adminEmail,
 		Password: "password-test",
 	}

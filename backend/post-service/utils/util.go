@@ -39,10 +39,10 @@ func CheckArrayEqual(s1 *[]string, s2 *[]string) bool {
 	return true
 }
 
-func RandomString(length int) string {
+func GenerateRandomString(length int) string {
 	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	source := rand.NewSource(time.Now().UnixNano())
-    randomGenerator := rand.New(source)
+	randomGenerator := rand.New(source)
 
 	var result string
 	charsetLength := len(charset)

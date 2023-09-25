@@ -3,7 +3,6 @@ package port
 import (
 	"context"
 
-	pbUser "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 )
 
@@ -13,13 +12,13 @@ type PostServicePort interface {
 	GetPosts(ctx context.Context, token string, search *pbv1.SearchOptions) ([]*pbv1.Post, error)
 	UpdatePost(ctx context.Context, token string, postId int64, post *pbv1.UpdatedPost) error
 	DeletePost(ctx context.Context, token string, postId int64) error
-	DeleteAllPosts(ctx context.Context, token string) error // for testing
+	DeleteAllPosts(ctx context.Context, token string) error
 	GetOpenPositions(ctx context.Context, token, search string) ([]string, error)
 	GetRequiredSkills(ctx context.Context, token, search string) ([]string, error)
 	GetBenefits(ctx context.Context, token, search string) ([]string, error)
 }
 
 type UserClientPort interface {
-	GetCompanyProfile(ctx context.Context, req *pbUser.GetCompanyRequest) (*pbUser.GetCompanyResponse, error)
-	ListApprovedCompanies(ctx context.Context, req *pbUser.ListApprovedCompaniesRequest) (*pbUser.ListApprovedCompaniesResponse, error)
+	GetCompanyProfile(ctx context.Context, req *pbv1.GetCompanyRequest) (*pbv1.GetCompanyResponse, error)
+	ListApprovedCompanies(ctx context.Context, req *pbv1.ListApprovedCompaniesRequest) (*pbv1.ListApprovedCompaniesResponse, error)
 }

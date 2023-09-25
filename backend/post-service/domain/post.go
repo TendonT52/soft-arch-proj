@@ -3,7 +3,6 @@ package domain
 import (
 	"regexp"
 
-	pbUser "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 )
 
@@ -45,12 +44,12 @@ func RemoveSpecialChars(input *pbv1.SearchOptions) *pbv1.SearchOptions {
 
 type CompanyInfo struct {
 	Ids      *[]int64
-	Profiles map[int64](*pbUser.Company)
+	Profiles map[int64](*pbv1.Company)
 }
 
-func NewCompanyInfo(data []*pbUser.Company) *CompanyInfo {
+func NewCompanyInfo(data []*pbv1.Company) *CompanyInfo {
 	ids := make([]int64, len(data))
-	profiles := make(map[int64](*pbUser.Company))
+	profiles := make(map[int64](*pbv1.Company))
 	for i, d := range data {
 		ids[i] = d.Id
 		profiles[d.Id] = d
