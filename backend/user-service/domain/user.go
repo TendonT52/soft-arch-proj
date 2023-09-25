@@ -1,5 +1,7 @@
 package domain
 
+import "regexp"
+
 const (
 	StudentRole = "student"
 	AdminRole   = "admin"
@@ -21,4 +23,12 @@ func IsAdminRole(role string) bool {
 
 func IsCompanyRole(role string) bool {
 	return role == CompanyRole
+}
+
+func RemoveSpecialChars(input string) string {
+	// In this pattern, [^a-zA-Z0-9 ] matches any character that is not a letter, digit, or space.
+	re := regexp.MustCompile("[^a-zA-Z0-9 ]")
+	result := re.ReplaceAllString(input, "")
+
+	return result
 }
