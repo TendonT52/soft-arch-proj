@@ -4,7 +4,6 @@ import (
 	"context"
 
 	pbUser "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
-	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 )
 
@@ -18,10 +17,6 @@ type PostServicePort interface {
 	GetOpenPositions(ctx context.Context, token, search string) ([]string, error)
 	GetRequiredSkills(ctx context.Context, token, search string) ([]string, error)
 	GetBenefits(ctx context.Context, token, search string) ([]string, error)
-}
-
-type TokenServicePort interface {
-	ValidateAccessToken(token string) (*domain.Payload, error)
 }
 
 type UserClientPort interface {

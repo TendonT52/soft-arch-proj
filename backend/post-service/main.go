@@ -23,9 +23,8 @@ func main() {
 	defer db.Close()
 
 	postRepo := repo.NewPostRepository(db.GetPostgresqlDB())
-	tokenService := service.NewTokenService()
 	userClientService := service.NewUserClientService()
-	postService := service.NewPostService(postRepo, tokenService, userClientService)
+	postService := service.NewPostService(postRepo, userClientService)
 
 	server.NewServer(config.ServerPort, postService)
 }

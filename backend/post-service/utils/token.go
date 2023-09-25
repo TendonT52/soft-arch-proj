@@ -1,4 +1,4 @@
-package service
+package utils
 
 import (
 	"encoding/base64"
@@ -6,17 +6,10 @@ import (
 
 	"github.com/TikhampornSky/go-post-service/config"
 	"github.com/TikhampornSky/go-post-service/domain"
-	"github.com/TikhampornSky/go-post-service/port"
 	"github.com/golang-jwt/jwt"
 )
 
-type tokenService struct{}
-
-func NewTokenService() port.TokenServicePort {
-	return &tokenService{}
-}
-
-func (*tokenService) ValidateAccessToken(token string) (*domain.Payload, error) {
+func ValidateAccessToken(token string) (*domain.Payload, error) {
 	config, _ := config.LoadConfig("..")
 	decodedPublicKey, err := base64.StdEncoding.DecodeString(config.AccessTokenPublicKey)
 	if err != nil {

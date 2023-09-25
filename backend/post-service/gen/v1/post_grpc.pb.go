@@ -19,6 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
+	PostService_PostHealthCheck_FullMethodName   = "/user.PostService/PostHealthCheck"
 	PostService_CreatePost_FullMethodName        = "/user.PostService/CreatePost"
 	PostService_GetPost_FullMethodName           = "/user.PostService/GetPost"
 	PostService_ListPosts_FullMethodName         = "/user.PostService/ListPosts"
@@ -34,6 +35,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PostServiceClient interface {
+	PostHealthCheck(ctx context.Context, in *PostHealthCheckRequest, opts ...grpc.CallOption) (*PostHealthCheckResponse, error)
 	CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*CreatePostResponse, error)
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error)
 	ListPosts(ctx context.Context, in *ListPostsRequest, opts ...grpc.CallOption) (*ListPostsResponse, error)
@@ -51,6 +53,15 @@ type postServiceClient struct {
 
 func NewPostServiceClient(cc grpc.ClientConnInterface) PostServiceClient {
 	return &postServiceClient{cc}
+}
+
+func (c *postServiceClient) PostHealthCheck(ctx context.Context, in *PostHealthCheckRequest, opts ...grpc.CallOption) (*PostHealthCheckResponse, error) {
+	out := new(PostHealthCheckResponse)
+	err := c.cc.Invoke(ctx, PostService_PostHealthCheck_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *postServiceClient) CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*CreatePostResponse, error) {
@@ -138,6 +149,7 @@ func (c *postServiceClient) GetBenefits(ctx context.Context, in *GetBenefitsRequ
 // All implementations must embed UnimplementedPostServiceServer
 // for forward compatibility
 type PostServiceServer interface {
+	PostHealthCheck(context.Context, *PostHealthCheckRequest) (*PostHealthCheckResponse, error)
 	CreatePost(context.Context, *CreatePostRequest) (*CreatePostResponse, error)
 	GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error)
 	ListPosts(context.Context, *ListPostsRequest) (*ListPostsResponse, error)
@@ -154,6 +166,9 @@ type PostServiceServer interface {
 type UnimplementedPostServiceServer struct {
 }
 
+func (UnimplementedPostServiceServer) PostHealthCheck(context.Context, *PostHealthCheckRequest) (*PostHealthCheckResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PostHealthCheck not implemented")
+}
 func (UnimplementedPostServiceServer) CreatePost(context.Context, *CreatePostRequest) (*CreatePostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePost not implemented")
 }
@@ -192,6 +207,24 @@ type UnsafePostServiceServer interface {
 
 func RegisterPostServiceServer(s grpc.ServiceRegistrar, srv PostServiceServer) {
 	s.RegisterService(&PostService_ServiceDesc, srv)
+}
+
+func _PostService_PostHealthCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostHealthCheckRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).PostHealthCheck(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_PostHealthCheck_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).PostHealthCheck(ctx, req.(*PostHealthCheckRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _PostService_CreatePost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -363,6 +396,10 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "user.PostService",
 	HandlerType: (*PostServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "PostHealthCheck",
+			Handler:    _PostService_PostHealthCheck_Handler,
+		},
 		{
 			MethodName: "CreatePost",
 			Handler:    _PostService_CreatePost_Handler,

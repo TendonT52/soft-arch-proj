@@ -6,6 +6,7 @@ option go_package = "github.com/TikhampornSky/go-post-service/gen";
 import "google/api/annotations.proto";
 
 service PostService {
+    rpc PostHealthCheck(PostHealthCheckRequest) returns (PostHealthCheckResponse) {} 
     rpc CreatePost(CreatePostRequest) returns (CreatePostResponse) {
         option (google.api.http) = {
             post: "/v1/posts"
@@ -50,6 +51,12 @@ service PostService {
             get: "/v1/benefits"
         };
     }
+}
+
+message PostHealthCheckRequest {}
+
+message PostHealthCheckResponse {
+    int64 status = 1;
 }
 
 message PostOwner {

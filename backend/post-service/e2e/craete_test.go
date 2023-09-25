@@ -16,6 +16,24 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+func TestHealthCheck(t *testing.T) {
+	config, _ := config.LoadConfig("..")
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		t.Errorf("could not connect to grpc server: %v", err)
+	}
+	defer conn.Close()
+
+	c := pbv1.NewPostServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	res, err := c.PostHealthCheck(ctx, &pbv1.PostHealthCheckRequest{})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), res.Status)
+}
+
 func TestCreatePost(t *testing.T) {
 	config, _ := config.LoadConfig("..")
 	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)

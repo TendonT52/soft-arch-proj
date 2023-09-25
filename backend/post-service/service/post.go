@@ -7,21 +7,20 @@ import (
 	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 	"github.com/TikhampornSky/go-post-service/port"
+	"github.com/TikhampornSky/go-post-service/utils"
 )
 
 const companyRole = "company"
 
 type postService struct {
-	PostRepo     port.PostRepoPort
-	TokenService port.TokenServicePort
-	UserService  port.UserClientPort
+	PostRepo    port.PostRepoPort
+	UserService port.UserClientPort
 }
 
-func NewPostService(postRepo port.PostRepoPort, tokenService port.TokenServicePort, userService port.UserClientPort) port.PostServicePort {
+func NewPostService(postRepo port.PostRepoPort, userService port.UserClientPort) port.PostServicePort {
 	return &postService{
-		PostRepo:     postRepo,
-		TokenService: tokenService,
-		UserService:  userService,
+		PostRepo:    postRepo,
+		UserService: userService,
 	}
 }
 
@@ -30,7 +29,7 @@ func (s *postService) CreatePost(ctx context.Context, token string, post *pbv1.P
 		return 0, domain.ErrFieldsAreRequired
 	}
 
-	payload, err := s.TokenService.ValidateAccessToken(token)
+	payload, err := utils.ValidateAccessToken(token)
 	if err != nil {
 		return 0, err
 	}
@@ -47,7 +46,7 @@ func (s *postService) CreatePost(ctx context.Context, token string, post *pbv1.P
 }
 
 func (s *postService) GetPost(ctx context.Context, token string, postId int64) (*pbv1.Post, error) {
-	_, err := s.TokenService.ValidateAccessToken(token)
+	_, err := utils.ValidateAccessToken(token)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +69,7 @@ func (s *postService) GetPost(ctx context.Context, token string, postId int64) (
 }
 
 func (s *postService) GetPosts(ctx context.Context, token string, search *pbv1.SearchOptions) ([]*pbv1.Post, error) {
-	_, err := s.TokenService.ValidateAccessToken(token)
+	_, err := utils.ValidateAccessToken(token)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +81,7 @@ func (s *postService) GetPosts(ctx context.Context, token string, search *pbv1.S
 	if err != nil {
 		return nil, err
 	}
-	
+
 	companyInfo := domain.NewCompanyInfo(u.Companies)
 	posts, err := s.PostRepo.GetPosts(ctx, search, companyInfo)
 	if posts == nil {
@@ -104,7 +103,7 @@ func (s *postService) UpdatePost(ctx context.Context, token string, postId int64
 	if err != nil {
 		return err
 	}
-	payload, err := s.TokenService.ValidateAccessToken(token)
+	payload, err := utils.ValidateAccessToken(token)
 	if err != nil {
 		return err
 	}
@@ -124,7 +123,7 @@ func (s *postService) DeletePost(ctx context.Context, token string, postId int64
 	if err != nil {
 		return err
 	}
-	payload, err := s.TokenService.ValidateAccessToken(token)
+	payload, err := utils.ValidateAccessToken(token)
 	if err != nil {
 		return err
 	}
@@ -141,7 +140,7 @@ func (s *postService) DeletePost(ctx context.Context, token string, postId int64
 }
 
 func (s *postService) DeleteAllPosts(ctx context.Context, token string) error {
-	_, err := s.TokenService.ValidateAccessToken(token)
+	_, err := utils.ValidateAccessToken(token)
 	if err != nil {
 		return err
 	}
@@ -154,7 +153,7 @@ func (s *postService) DeleteAllPosts(ctx context.Context, token string) error {
 }
 
 func (s *postService) GetOpenPositions(ctx context.Context, token, search string) ([]string, error) {
-	payload, err := s.TokenService.ValidateAccessToken(token)
+	payload, err := utils.ValidateAccessToken(token)
 	if payload.Role != companyRole {
 		return nil, domain.ErrUnauthorized
 	}
@@ -171,7 +170,7 @@ func (s *postService) GetOpenPositions(ctx context.Context, token, search string
 }
 
 func (s *postService) GetRequiredSkills(ctx context.Context, token, search string) ([]string, error) {
-	payload, err := s.TokenService.ValidateAccessToken(token)
+	payload, err := utils.ValidateAccessToken(token)
 	if payload.Role != companyRole {
 		return nil, domain.ErrUnauthorized
 	}
@@ -188,7 +187,7 @@ func (s *postService) GetRequiredSkills(ctx context.Context, token, search strin
 }
 
 func (s *postService) GetBenefits(ctx context.Context, token, search string) ([]string, error) {
-	payload, err := s.TokenService.ValidateAccessToken(token)
+	payload, err := utils.ValidateAccessToken(token)
 	if payload.Role != companyRole {
 		return nil, domain.ErrUnauthorized
 	}

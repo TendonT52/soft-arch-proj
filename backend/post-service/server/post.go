@@ -20,6 +20,13 @@ func NewPostServer(postService port.PostServicePort) *PostServer {
 	return &PostServer{PostService: postService}
 }
 
+func (s *PostServer) PostHealthCheck(ctx context.Context, req *pbv1.PostHealthCheckRequest) (*pbv1.PostHealthCheckResponse, error) {
+	log.Println("Post HealthCheck success: ", http.StatusOK)
+	return &pbv1.PostHealthCheckResponse{
+		Status: http.StatusOK,
+	}, nil
+}
+
 func (s *PostServer) CreatePost(ctx context.Context, req *pbv1.CreatePostRequest) (*pbv1.CreatePostResponse, error) {
 	postId, err := s.PostService.CreatePost(ctx, req.AccessToken, req.Post)
 	if errors.Is(err, domain.ErrFieldsAreRequired) {
@@ -191,8 +198,8 @@ func (s *PostServer) GetOpenPositions(ctx context.Context, req *pbv1.GetOpenPosi
 	}
 
 	return &pbv1.GetOpenPositionsResponse{
-		Status:  http.StatusOK,
-		Message: "Open positions retrieved successfully",
+		Status:        http.StatusOK,
+		Message:       "Open positions retrieved successfully",
 		OpenPositions: openPositions,
 	}, nil
 }
@@ -215,8 +222,8 @@ func (s *PostServer) GetRequiredSkills(ctx context.Context, req *pbv1.GetRequire
 	}
 
 	return &pbv1.GetRequiredSkillsResponse{
-		Status:  http.StatusOK,
-		Message: "Required skills retrieved successfully",
+		Status:         http.StatusOK,
+		Message:        "Required skills retrieved successfully",
 		RequiredSkills: requiredSkills,
 	}, nil
 }
@@ -239,8 +246,8 @@ func (s *PostServer) GetBenefits(ctx context.Context, req *pbv1.GetBenefitsReque
 	}
 
 	return &pbv1.GetBenefitsResponse{
-		Status:  http.StatusOK,
-		Message: "Benefits retrieved successfully",
+		Status:   http.StatusOK,
+		Message:  "Benefits retrieved successfully",
 		Benefits: benefits,
 	}, nil
 }
