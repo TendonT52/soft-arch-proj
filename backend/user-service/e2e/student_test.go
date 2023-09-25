@@ -288,16 +288,16 @@ func TestUpdateStudent(t *testing.T) {
 			req: &pbv1.UpdateStudentRequest{
 				AccessToken: res.AccessToken,
 				Student: &pbv1.Student{
-					Name:        "Mock Update Student",
-					Description: "I am a mock student",
-					Faculty:     "Mock Engineering",
-					Major:       "Mock Computer Engineering",
+					Name:        "UPADATED Mock Update Student",
+					Description: "UPADATED I am a mock student",
+					Faculty:     "UPADATED Mock Engineering",
+					Major:       "UPADATED Mock Computer Engineering",
 					Year:        3,
 				},
 			},
 			expect: &pbv1.UpdateCompanyResponse{
 				Status:  200,
-				Message: "Update data for Mock Update Student successfully!",
+				Message: "Update data for UPADATED Mock Update Student successfully!",
 			},
 		},
 		"invalid token": {
@@ -326,4 +326,17 @@ func TestUpdateStudent(t *testing.T) {
 			require.Equal(t, tc.expect.Message, res.Message)
 		})
 	}
+
+	// Get Student
+	resGet, err := u.GetStudent(ctx, &pbv1.GetStudentRequest{
+		AccessToken: res.AccessToken,
+		Id:          r.Id,
+	})
+	require.NoError(t, err)
+	require.Equal(t, "UPADATED Mock Update Student", resGet.Student.Name)
+	require.Equal(t, "UPADATED I am a mock student", resGet.Student.Description)
+	require.Equal(t, "UPADATED Mock Engineering", resGet.Student.Faculty)
+	require.Equal(t, "UPADATED Mock Computer Engineering", resGet.Student.Major)
+	require.Equal(t, int32(3), resGet.Student.Year)
+	require.Equal(t, int64(200), resGet.Status)
 }
