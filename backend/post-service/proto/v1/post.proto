@@ -6,6 +6,7 @@ option go_package = "github.com/TikhampornSky/go-post-service/gen";
 import "google/api/annotations.proto";
 
 service PostService {
+    rpc PostHealthCheck(PostHealthCheckRequest) returns (PostHealthCheckResponse) {} 
     rpc CreatePost(CreatePostRequest) returns (CreatePostResponse) {
         option (google.api.http) = {
             post: "/v1/posts"
@@ -33,6 +34,45 @@ service PostService {
             delete: "/v1/posts/{id}"
         };
     }
+
+    rpc DeletePosts(DeletePostsRequest) returns (DeletePostsResponse) {} // Internal use only!
+    rpc GetOpenPositions(GetOpenPositionsRequest) returns (GetOpenPositionsResponse) {
+        option (google.api.http) = {
+            get: "/v1/open_positions"
+        };
+    }
+    rpc GetRequiredSkills(GetRequiredSkillsRequest) returns (GetRequiredSkillsResponse) {
+        option (google.api.http) = {
+            get: "/v1/required_skills"
+        };
+    }
+    rpc GetBenefits(GetBenefitsRequest) returns (GetBenefitsResponse) {
+        option (google.api.http) = {
+            get: "/v1/benefits"
+        };
+    }
+}
+
+message PostHealthCheckRequest {}
+
+message PostHealthCheckResponse {
+    int64 status = 1;
+}
+
+message PostOwner {
+    int64 id = 1;
+    string name = 2;
+}
+
+enum ElementStatus {
+    SAME = 0;
+    ADD = 1;
+    REMOVE = 2;
+}
+
+message Element {
+    ElementStatus action = 1;
+    string value = 2;
 }
 
 message Post {
@@ -43,6 +83,20 @@ message Post {
     repeated string open_positions = 5;
     repeated string required_skills = 6;
     repeated string benefits = 7;
+    PostOwner owner = 8;
+    int64 post_id = 9;
+    int64 updated_at = 10;
+}
+
+message UpdatedPost {
+    string topic = 1;
+    string description = 2;
+    string period = 3;
+    string how_to = 4;
+    repeated Element open_positions = 5;
+    repeated Element required_skills = 6;
+    repeated Element benefits = 7;
+    int64 post_id = 8;
 }
 
 // Create Post
@@ -70,21 +124,29 @@ message GetPostResponse {
 }
 
 // List Posts
+message SearchOptions {
+    string search_company = 1;
+    string search_open_position = 2;
+    string search_required_skill = 3;
+    string search_benefit = 4;
+}
+
 message ListPostsRequest {
     string access_token = 1;
-    string search = 2;
+    SearchOptions search_options = 2;
 }
 
 message ListPostsResponse {
     int64 status = 1;
     string message = 2;
     repeated Post posts = 3;
+    int64 total = 4;
 }
 
 // Update Post
 message UpdatePostRequest {
     int64 id = 1;
-    Post post = 2;
+    UpdatedPost post = 2;
     string access_token = 3;
 }
 
@@ -102,4 +164,50 @@ message DeletePostRequest {
 message DeletePostResponse {
     int64 status = 1;
     string message = 2;
+}
+
+// Delete Posts
+message DeletePostsRequest {
+    string access_token = 1;
+}
+
+message DeletePostsResponse {
+    int64 status = 1;
+    string message = 2;
+}
+
+// Get Open Positions
+message GetOpenPositionsRequest {
+    string access_token = 1;
+    string search = 2;
+}
+
+message GetOpenPositionsResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated string open_positions = 3;
+}
+
+// Get Required Skills
+message GetRequiredSkillsRequest {
+    string access_token = 1;
+    string search = 2;
+}
+
+message GetRequiredSkillsResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated string required_skills = 3;
+}
+
+// Get Benefits
+message GetBenefitsRequest {
+    string access_token = 1;
+    string search = 2;
+}
+
+message GetBenefitsResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated string benefits = 3;
 }

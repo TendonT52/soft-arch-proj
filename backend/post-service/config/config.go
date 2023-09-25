@@ -13,13 +13,18 @@ type Config struct {
 	DBUserPassword       string `mapstructure:"POSTGRES_PASSWORD"`
 	DBName               string `mapstructure:"POSTGRES_DB"`
 	DBPort               string `mapstructure:"POSTGRES_PORT"`
-	ServerPort           string `mapstructure:"PORT"`
+	UserServiceHost      string `mapstructure:"USER_SERVICE_HOST"`
+	UserServicePort      string `mapstructure:"USER_SERVICE_PORT"`
+	ServerHost           string `mapstructure:"SERVER_HOST"`
+	ServerPort           string `mapstructure:"SERVER_PORT"`
 	AccessTokenPublicKey string `mapstructure:"ACCESS_TOKEN_PUBLIC_KEY"`
 
 	AccessTokenPrivateKeyTest string        `mapstructure:"ACCESS_TOKEN_PRIVATE_KEY_TEST"`
 	AccessTokenPublicKeyTest  string        `mapstructure:"ACCESS_TOKEN_PUBLIC_KEY_TEST"`
 	AccessTokenExpiredInTest  time.Duration `mapstructure:"ACCESS_TOKEN_EXPIRED_IN_TEST"`
 	AccessTokenMaxAgeTest     int           `mapstructure:"ACCESS_TOKEN_MAXAGE_TEST"`
+
+	MigrationPath string `mapstructure:"MIGRATION_PATH"`
 }
 
 func LoadConfig(path string) (config *Config, err error) {

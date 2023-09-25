@@ -8,6 +8,7 @@ const (
 	_ ErrKind = iota
 	Internal
 	PostNotFound
+	UserIdNotFound
 	FieldsAreRequired
 	Unauthorized
 )
@@ -15,6 +16,7 @@ const (
 var (
 	ErrInternal          = BackEndError{Kind: Internal}
 	ErrPostNotFound      = BackEndError{Kind: PostNotFound}
+	ErrUserIdNotFound    = BackEndError{Kind: UserIdNotFound}
 	ErrFieldsAreRequired = BackEndError{Kind: FieldsAreRequired}
 	ErrUnauthorized      = BackEndError{Kind: Unauthorized}
 )
