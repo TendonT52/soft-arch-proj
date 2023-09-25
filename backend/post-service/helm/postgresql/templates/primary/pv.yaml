@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ printf "%s-persistent-volume" (include "postgresql.primary.fullname" .) }}
+  labels:
+    service: todo-postgresql-persistent
+spec:
+  storageClassName: manual
+  capacity:
+    storage: {{ .Values.master.persistence.size }}
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: {{ .Values.master.persistence.path }}
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-persistent-claim" (include "postgresql.primary.fullname" .) }}
+spec:
+  selector:
+    matchLabels:
+      service: todo-postgresql-persistent
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.master.persistence.size }}

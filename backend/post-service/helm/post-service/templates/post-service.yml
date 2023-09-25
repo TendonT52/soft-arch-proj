@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: post-service
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: post-service
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: post-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: post-service
+  template:
+    metadata:
+      labels:
+        app: post-service
+    spec:
+      containers:
+        - name: post-service
+          image: {{ .Values.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: "/app/app.env"
+              subPath: app.env
+              name: dot-env-file
+              readOnly: true
+      volumes:
+        - name: dot-env-file
+          secret:
+            secretName: post-service

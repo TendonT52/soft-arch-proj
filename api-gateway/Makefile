@@ -15,8 +15,8 @@ deploy:
 		exit 1; \
 	fi
 
-DATA_PATH=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/data
 k8s-run-dev:
+	$(eval DATA_PATH := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/data)
 	DATA_PATH=${DATA_PATH} make -C .. k8s-clear
 
 	@echo "Persistent data will be stored in ${DATA_PATH}"
@@ -33,6 +33,7 @@ k8s-run-dev:
 	kubectl wait --for=condition=Ready pods --all --all-namespaces
 
 k8s-run-prod:
+	$(eval DATA_PATH := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/data)
 	DATA_PATH=${DATA_PATH} make -C .. k8s-clear
 
 	@echo "Persistent data will be stored in ${DATA_PATH}"
