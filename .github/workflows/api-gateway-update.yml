@@ -8,6 +8,7 @@ on:
       - main
     paths:
       - "backend/**"
+      - "api-gateway/**"
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -16,7 +17,7 @@ jobs:
   update-api-gateway:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
     steps:
       - run: sudo chown runner:docker /var/run/docker.sock
