@@ -10,6 +10,7 @@ import (
 	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 	"github.com/TikhampornSky/go-post-service/mock"
+	"github.com/TikhampornSky/go-post-service/tools"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -79,11 +80,8 @@ func TestGetPost(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	resDelete, err := c.DeletePosts(ctx, &pbv1.DeletePostsRequest{
-		AccessToken: token,
-	})
+	err = tools.DeleteAllPosts()
 	require.NoError(t, err)
-	require.Equal(t, int64(200), resDelete.Status)
 
 	res, err := c.CreatePost(ctx, &pbv1.CreatePostRequest{
 		AccessToken: token,

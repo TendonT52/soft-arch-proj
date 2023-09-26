@@ -164,22 +164,6 @@ func (s *PostServer) DeletePost(ctx context.Context, req *pbv1.DeletePostRequest
 	}, nil
 }
 
-func (s *PostServer) DeletePosts(ctx context.Context, req *pbv1.DeletePostsRequest) (*pbv1.DeletePostsResponse, error) {
-	err := s.PostService.DeleteAllPosts(ctx, req.AccessToken)
-	if err != nil {
-		log.Println("Delete Posts: ", err)
-		return &pbv1.DeletePostsResponse{
-			Status:  http.StatusInternalServerError,
-			Message: "Internal server error",
-		}, nil
-	}
-
-	return &pbv1.DeletePostsResponse{
-		Status:  http.StatusOK,
-		Message: "Posts deleted successfully",
-	}, nil
-}
-
 func (s *PostServer) GetOpenPositions(ctx context.Context, req *pbv1.GetOpenPositionsRequest) (*pbv1.GetOpenPositionsResponse, error) {
 	openPositions, err := s.PostService.GetOpenPositions(ctx, req.AccessToken, req.Search)
 	if errors.Is(err, domain.ErrUnauthorized) {
