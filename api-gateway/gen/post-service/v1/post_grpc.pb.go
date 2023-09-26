@@ -24,7 +24,6 @@ type PostServiceClient interface {
 	ListPosts(ctx context.Context, in *ListPostsRequest, opts ...grpc.CallOption) (*ListPostsResponse, error)
 	UpdatePost(ctx context.Context, in *UpdatePostRequest, opts ...grpc.CallOption) (*UpdatePostResponse, error)
 	DeletePost(ctx context.Context, in *DeletePostRequest, opts ...grpc.CallOption) (*DeletePostResponse, error)
-	DeletePosts(ctx context.Context, in *DeletePostsRequest, opts ...grpc.CallOption) (*DeletePostsResponse, error)
 	GetOpenPositions(ctx context.Context, in *GetOpenPositionsRequest, opts ...grpc.CallOption) (*GetOpenPositionsResponse, error)
 	GetRequiredSkills(ctx context.Context, in *GetRequiredSkillsRequest, opts ...grpc.CallOption) (*GetRequiredSkillsResponse, error)
 	GetBenefits(ctx context.Context, in *GetBenefitsRequest, opts ...grpc.CallOption) (*GetBenefitsResponse, error)
@@ -92,15 +91,6 @@ func (c *postServiceClient) DeletePost(ctx context.Context, in *DeletePostReques
 	return out, nil
 }
 
-func (c *postServiceClient) DeletePosts(ctx context.Context, in *DeletePostsRequest, opts ...grpc.CallOption) (*DeletePostsResponse, error) {
-	out := new(DeletePostsResponse)
-	err := c.cc.Invoke(ctx, "/user.PostService/DeletePosts", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *postServiceClient) GetOpenPositions(ctx context.Context, in *GetOpenPositionsRequest, opts ...grpc.CallOption) (*GetOpenPositionsResponse, error) {
 	out := new(GetOpenPositionsResponse)
 	err := c.cc.Invoke(ctx, "/user.PostService/GetOpenPositions", in, out, opts...)
@@ -138,7 +128,6 @@ type PostServiceServer interface {
 	ListPosts(context.Context, *ListPostsRequest) (*ListPostsResponse, error)
 	UpdatePost(context.Context, *UpdatePostRequest) (*UpdatePostResponse, error)
 	DeletePost(context.Context, *DeletePostRequest) (*DeletePostResponse, error)
-	DeletePosts(context.Context, *DeletePostsRequest) (*DeletePostsResponse, error)
 	GetOpenPositions(context.Context, *GetOpenPositionsRequest) (*GetOpenPositionsResponse, error)
 	GetRequiredSkills(context.Context, *GetRequiredSkillsRequest) (*GetRequiredSkillsResponse, error)
 	GetBenefits(context.Context, *GetBenefitsRequest) (*GetBenefitsResponse, error)
@@ -166,9 +155,6 @@ func (UnimplementedPostServiceServer) UpdatePost(context.Context, *UpdatePostReq
 }
 func (UnimplementedPostServiceServer) DeletePost(context.Context, *DeletePostRequest) (*DeletePostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePost not implemented")
-}
-func (UnimplementedPostServiceServer) DeletePosts(context.Context, *DeletePostsRequest) (*DeletePostsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeletePosts not implemented")
 }
 func (UnimplementedPostServiceServer) GetOpenPositions(context.Context, *GetOpenPositionsRequest) (*GetOpenPositionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOpenPositions not implemented")
@@ -300,24 +286,6 @@ func _PostService_DeletePost_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PostService_DeletePosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeletePostsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PostServiceServer).DeletePosts(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/user.PostService/DeletePosts",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostServiceServer).DeletePosts(ctx, req.(*DeletePostsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _PostService_GetOpenPositions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetOpenPositionsRequest)
 	if err := dec(in); err != nil {
@@ -402,10 +370,6 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeletePost",
 			Handler:    _PostService_DeletePost_Handler,
-		},
-		{
-			MethodName: "DeletePosts",
-			Handler:    _PostService_DeletePosts_Handler,
 		},
 		{
 			MethodName: "GetOpenPositions",
