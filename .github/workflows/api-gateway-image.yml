@@ -43,7 +43,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend-api-gateway
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api-gateway
           tags: |
             ${{ steps.versioning.outputs.version }}
             latest
