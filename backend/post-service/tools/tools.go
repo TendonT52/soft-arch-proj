@@ -7,6 +7,7 @@ import (
 
 	"github.com/TikhampornSky/go-post-service/config"
 	"github.com/TikhampornSky/go-post-service/domain"
+	_ "github.com/lib/pq"
 )
 
 func createDBConnection() (*sql.DB, error) {
