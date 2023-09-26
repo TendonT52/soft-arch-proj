@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 
-	pbUser "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 	"github.com/TikhampornSky/go-post-service/port"
@@ -55,7 +54,7 @@ func (s *postService) GetPost(ctx context.Context, token string, postId int64) (
 		return nil, err
 	}
 
-	req := &pbUser.GetCompanyRequest{
+	req := &pbv1.GetCompanyRequest{
 		AccessToken: token,
 		Id:          post.Owner.Id,
 	}
@@ -74,7 +73,7 @@ func (s *postService) GetPosts(ctx context.Context, token string, search *pbv1.S
 		return nil, err
 	}
 
-	u, err := s.UserService.ListApprovedCompanies(ctx, &pbUser.ListApprovedCompaniesRequest{
+	u, err := s.UserService.ListApprovedCompanies(ctx, &pbv1.ListApprovedCompaniesRequest{
 		AccessToken: token,
 		Search:      search.SearchCompany,
 	})
