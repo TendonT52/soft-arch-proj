@@ -48,9 +48,11 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git commit -a -m "Update api-gateway and swagger"
+          # Check for changes
+          git diff-index --quiet HEAD || git commit -a -m "Update api-gateway and swagger"
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
+        continue-on-error: true
