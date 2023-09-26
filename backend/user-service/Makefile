@@ -5,9 +5,6 @@ create-migrate:
 migrate-up:
 	migrate -database "postgres://postgres:password@user-service-postgresql.default:5432/?sslmode=disable" -path migrations up
 
-seed:
-	psql postgres://postgres:password@user-service-postgresql.default:5432/?sslmode=disable -a -f ./seed.sql
-
 clean-db:
 	psql postgres://postgres:password@user-service-postgresql.default:5432/?sslmode=disable -a -f ./cleanup.sql
 
@@ -56,7 +53,6 @@ k8s-run-dev:
 
 	telepresence connect
 	make migrate-up
-	make seed
 
 k8s-run-prod:
 	$(eval DATA_PATH := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/data)
@@ -72,4 +68,3 @@ k8s-run-prod:
 
 	telepresence connect
 	make migrate-up
-	make seed
