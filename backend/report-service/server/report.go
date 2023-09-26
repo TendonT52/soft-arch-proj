@@ -20,6 +20,13 @@ func NewReportServer(reportService port.ReportServicePort) *ReportServer {
 	return &ReportServer{ReportService: reportService}
 }
 
+func (s *ReportServer) ReportHealthCheck(ctx context.Context, req *pbv1.ReportHealthCheckRequest) (*pbv1.ReportHealthCheckResponse, error) {
+	log.Println("Report HealthCheck success: ", http.StatusOK)
+	return &pbv1.ReportHealthCheckResponse{
+		Status: http.StatusOK,
+	}, nil
+}
+
 func (s *ReportServer) CreateReport(ctx context.Context, req *pbv1.CreateReportRequest) (*pbv1.CreateReportResponse, error) {
 	reportId, err := s.ReportService.CreateReport(ctx, req.AccessToken, req.Report)
 	if errors.Is(err, domain.ErrFieldsAreRequired) {
@@ -37,6 +44,7 @@ func (s *ReportServer) CreateReport(ctx context.Context, req *pbv1.CreateReportR
 		}, nil
 	}
 
+	log.Println("Create Report: Report created successfully: ", reportId)
 	return &pbv1.CreateReportResponse{
 		Status:  http.StatusCreated,
 		Message: "Report created successfully",
@@ -68,6 +76,7 @@ func (s *ReportServer) GetReport(ctx context.Context, req *pbv1.GetReportRequest
 		}, nil
 	}
 
+	log.Println("Get Report: Report retrieved successfully: ", report)
 	return &pbv1.GetReportResponse{
 		Status:  http.StatusOK,
 		Message: "Report retrieved successfully",
@@ -92,6 +101,7 @@ func (s *ReportServer) ListReports(ctx context.Context, req *pbv1.ListReportsReq
 		}, nil
 	}
 
+	log.Println("List Reports: Reports retrieved successfully: Total is ", len(reports))
 	return &pbv1.ListReportsResponse{
 		Status:  http.StatusOK,
 		Message: "Reports retrieved successfully",

@@ -62,7 +62,7 @@ func (r *reportRepository) GetReport(ctx context.Context, reportId int64) (*gen.
 }
 
 func (r *reportRepository) GetReports(ctx context.Context) ([]*gen.Report, error) {
-	query := "SELECT topic, type, description, updated_at FROM reports"
+	query := "SELECT topic, type, description, updated_at FROM reports ORDER BY updated_at DESC"
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return nil, err
