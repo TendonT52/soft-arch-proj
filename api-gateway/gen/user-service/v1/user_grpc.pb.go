@@ -18,6 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
+	UserHealthCheck(ctx context.Context, in *UserHealthCheckRequest, opts ...grpc.CallOption) (*UserHealthCheckResponse, error)
 	GetStudentMe(ctx context.Context, in *GetStudentMeRequest, opts ...grpc.CallOption) (*GetStudentResponse, error)
 	GetStudent(ctx context.Context, in *GetStudentRequest, opts ...grpc.CallOption) (*GetStudentResponse, error)
 	UpdateStudent(ctx context.Context, in *UpdateStudentRequest, opts ...grpc.CallOption) (*UpdateStudentResponse, error)
@@ -27,7 +28,6 @@ type UserServiceClient interface {
 	ListApprovedCompanies(ctx context.Context, in *ListApprovedCompaniesRequest, opts ...grpc.CallOption) (*ListApprovedCompaniesResponse, error)
 	ListCompanies(ctx context.Context, in *ListCompaniesRequest, opts ...grpc.CallOption) (*ListCompaniesResponse, error)
 	UpdateCompanyStatus(ctx context.Context, in *UpdateCompanyStatusRequest, opts ...grpc.CallOption) (*UpdateCompanyStatusResponse, error)
-	DeleteCompanies(ctx context.Context, in *DeleteCompaniesRequest, opts ...grpc.CallOption) (*DeleteCompaniesResponse, error)
 }
 
 type userServiceClient struct {
@@ -36,6 +36,15 @@ type userServiceClient struct {
 
 func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
+}
+
+func (c *userServiceClient) UserHealthCheck(ctx context.Context, in *UserHealthCheckRequest, opts ...grpc.CallOption) (*UserHealthCheckResponse, error) {
+	out := new(UserHealthCheckResponse)
+	err := c.cc.Invoke(ctx, "/user.UserService/UserHealthCheck", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *userServiceClient) GetStudentMe(ctx context.Context, in *GetStudentMeRequest, opts ...grpc.CallOption) (*GetStudentResponse, error) {
@@ -119,19 +128,11 @@ func (c *userServiceClient) UpdateCompanyStatus(ctx context.Context, in *UpdateC
 	return out, nil
 }
 
-func (c *userServiceClient) DeleteCompanies(ctx context.Context, in *DeleteCompaniesRequest, opts ...grpc.CallOption) (*DeleteCompaniesResponse, error) {
-	out := new(DeleteCompaniesResponse)
-	err := c.cc.Invoke(ctx, "/user.UserService/DeleteCompanies", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
+	UserHealthCheck(context.Context, *UserHealthCheckRequest) (*UserHealthCheckResponse, error)
 	GetStudentMe(context.Context, *GetStudentMeRequest) (*GetStudentResponse, error)
 	GetStudent(context.Context, *GetStudentRequest) (*GetStudentResponse, error)
 	UpdateStudent(context.Context, *UpdateStudentRequest) (*UpdateStudentResponse, error)
@@ -141,7 +142,6 @@ type UserServiceServer interface {
 	ListApprovedCompanies(context.Context, *ListApprovedCompaniesRequest) (*ListApprovedCompaniesResponse, error)
 	ListCompanies(context.Context, *ListCompaniesRequest) (*ListCompaniesResponse, error)
 	UpdateCompanyStatus(context.Context, *UpdateCompanyStatusRequest) (*UpdateCompanyStatusResponse, error)
-	DeleteCompanies(context.Context, *DeleteCompaniesRequest) (*DeleteCompaniesResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -149,6 +149,9 @@ type UserServiceServer interface {
 type UnimplementedUserServiceServer struct {
 }
 
+func (UnimplementedUserServiceServer) UserHealthCheck(context.Context, *UserHealthCheckRequest) (*UserHealthCheckResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserHealthCheck not implemented")
+}
 func (UnimplementedUserServiceServer) GetStudentMe(context.Context, *GetStudentMeRequest) (*GetStudentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStudentMe not implemented")
 }
@@ -176,9 +179,6 @@ func (UnimplementedUserServiceServer) ListCompanies(context.Context, *ListCompan
 func (UnimplementedUserServiceServer) UpdateCompanyStatus(context.Context, *UpdateCompanyStatusRequest) (*UpdateCompanyStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCompanyStatus not implemented")
 }
-func (UnimplementedUserServiceServer) DeleteCompanies(context.Context, *DeleteCompaniesRequest) (*DeleteCompaniesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteCompanies not implemented")
-}
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
 // UnsafeUserServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -190,6 +190,24 @@ type UnsafeUserServiceServer interface {
 
 func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
 	s.RegisterService(&UserService_ServiceDesc, srv)
+}
+
+func _UserService_UserHealthCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserHealthCheckRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UserHealthCheck(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/user.UserService/UserHealthCheck",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UserHealthCheck(ctx, req.(*UserHealthCheckRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _UserService_GetStudentMe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -354,24 +372,6 @@ func _UserService_UpdateCompanyStatus_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_DeleteCompanies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteCompaniesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServiceServer).DeleteCompanies(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/user.UserService/DeleteCompanies",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).DeleteCompanies(ctx, req.(*DeleteCompaniesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -379,6 +379,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "user.UserService",
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "UserHealthCheck",
+			Handler:    _UserService_UserHealthCheck_Handler,
+		},
 		{
 			MethodName: "GetStudentMe",
 			Handler:    _UserService_GetStudentMe_Handler,
@@ -414,10 +418,6 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateCompanyStatus",
 			Handler:    _UserService_UpdateCompanyStatus_Handler,
-		},
-		{
-			MethodName: "DeleteCompanies",
-			Handler:    _UserService_DeleteCompanies_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

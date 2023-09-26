@@ -1,6 +1,6 @@
 gen-swagger:
 	make -C .. gen-gateway
-	statik -src=./swagger-ui/
+	statik -f -src=./swagger-ui/
 
 deploy:
 	@if [ "${MODE}" = "remote" ]; then \
@@ -22,14 +22,12 @@ k8s-run-dev:
 	@echo "Persistent data will be stored in ${DATA_PATH}"
 	parallel ::: \
 		"telepresence helm install" \
-		"DATA_PATH=${DATA_PATH}/user-service make -C ../backend/user-service/helm user-service-postgresql" \
-		"DATA_PATH=${DATA_PATH}/user-service make -C ../backend/user-service/helm user-service-redis" \
-		"DATA_PATH=${DATA_PATH} make -C ../helm memphis"
+		"DATA_PATH=${DATA_PATH} make -C ../helm memphis" \
+		"DATA_PATH=${DATA_PATH}/user-service make -C ../backend/user-service dependency" \
+		"DATA_PATH=${DATA_PATH}/post-service make -C ../backend/post-service dependency" \
+		"MODE=remote make -C ../backend/user-service deploy" \
+		"MODE=remote make -C ../backend/post-service deploy"
 	telepresence connect
-	make -C ../backend/user-service migrate-up
-	make -C ../backend/user-service seed
-	MODE=remote make -C ../backend/user-service deploy
-
 	kubectl wait --for=condition=Ready pods --all --all-namespaces
 
 k8s-run-prod:
@@ -39,13 +37,11 @@ k8s-run-prod:
 	@echo "Persistent data will be stored in ${DATA_PATH}"
 	parallel ::: \
 		"telepresence helm install" \
-		"DATA_PATH=${DATA_PATH}/user-service make -C ../backend/user-service/helm user-service-postgresql" \
-		"DATA_PATH=${DATA_PATH}/user-service make -C ../backend/user-service/helm user-service-redis" \
-		"DATA_PATH=${DATA_PATH} make -C ../helm memphis"
+		"DATA_PATH=${DATA_PATH} make -C ../helm memphis" \
+		"DATA_PATH=${DATA_PATH}/user-service make -C ../backend/user-service dependency" \
+		"DATA_PATH=${DATA_PATH}/post-service make -C ../backend/post-service dependency" \
+		"MODE=remote make -C ../backend/user-service deploy" \
+		"MODE=remote make -C ../backend/post-service deploy" \
+		"MODE=local make deploy"
 	telepresence connect
-	make -C ../backend/user-service migrate-up
-	make -C ../backend/user-service seed
-	MODE=remote make -C ../backend/user-service deploy
-	MODE=local make deploy
-
 	kubectl wait --for=condition=Ready pods --all --all-namespaces

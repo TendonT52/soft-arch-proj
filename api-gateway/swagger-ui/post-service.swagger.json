@@ -16,6 +16,78 @@
     "application/json"
   ],
   "paths": {
+    "/v1/benefits": {
+      "get": {
+        "operationId": "PostService_GetBenefits",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userGetBenefitsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "accessToken",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "PostService"
+        ]
+      }
+    },
+    "/v1/open_positions": {
+      "get": {
+        "operationId": "PostService_GetOpenPositions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userGetOpenPositionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "accessToken",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "PostService"
+        ]
+      }
+    },
     "/v1/posts": {
       "get": {
         "operationId": "PostService_ListPosts",
@@ -41,7 +113,25 @@
             "type": "string"
           },
           {
-            "name": "search",
+            "name": "searchOptions.searchCompany",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "searchOptions.searchOpenPosition",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "searchOptions.searchRequiredSkill",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "searchOptions.searchBenefit",
             "in": "query",
             "required": false,
             "type": "string"
@@ -185,7 +275,7 @@
               "type": "object",
               "properties": {
                 "post": {
-                  "$ref": "#/definitions/userPost"
+                  "$ref": "#/definitions/userUpdatedPost"
                 },
                 "accessToken": {
                   "type": "string"
@@ -193,6 +283,42 @@
               },
               "title": "Update Post"
             }
+          }
+        ],
+        "tags": [
+          "PostService"
+        ]
+      }
+    },
+    "/v1/required_skills": {
+      "get": {
+        "operationId": "PostService_GetRequiredSkills",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userGetRequiredSkillsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "accessToken",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -270,6 +396,74 @@
         }
       }
     },
+    "userDeletePostsResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "userElement": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#/definitions/userElementStatus"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "userElementStatus": {
+      "type": "string",
+      "enum": [
+        "SAME",
+        "ADD",
+        "REMOVE"
+      ],
+      "default": "SAME"
+    },
+    "userGetBenefitsResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        },
+        "benefits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "userGetOpenPositionsResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        },
+        "openPositions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "userGetPostResponse": {
       "type": "object",
       "properties": {
@@ -282,6 +476,24 @@
         },
         "post": {
           "$ref": "#/definitions/userPost"
+        }
+      }
+    },
+    "userGetRequiredSkillsResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        },
+        "requiredSkills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -301,6 +513,10 @@
             "type": "object",
             "$ref": "#/definitions/userPost"
           }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -336,8 +552,58 @@
           "items": {
             "type": "string"
           }
+        },
+        "owner": {
+          "$ref": "#/definitions/userPostOwner"
+        },
+        "postId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "int64"
         }
       }
+    },
+    "userPostHealthCheckResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "userPostOwner": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "userSearchOptions": {
+      "type": "object",
+      "properties": {
+        "searchCompany": {
+          "type": "string"
+        },
+        "searchOpenPosition": {
+          "type": "string"
+        },
+        "searchRequiredSkill": {
+          "type": "string"
+        },
+        "searchBenefit": {
+          "type": "string"
+        }
+      },
+      "title": "List Posts"
     },
     "userUpdatePostResponse": {
       "type": "object",
@@ -348,6 +614,48 @@
         },
         "message": {
           "type": "string"
+        }
+      }
+    },
+    "userUpdatedPost": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "period": {
+          "type": "string"
+        },
+        "howTo": {
+          "type": "string"
+        },
+        "openPositions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/userElement"
+          }
+        },
+        "requiredSkills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/userElement"
+          }
+        },
+        "benefits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/userElement"
+          }
+        },
+        "postId": {
+          "type": "string",
+          "format": "int64"
         }
       }
     }

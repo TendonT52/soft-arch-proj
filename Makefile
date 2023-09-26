@@ -29,12 +29,12 @@ gen-gateway:
 		backend/${SERVICE_NAME}/proto/**/*.proto
 
 k8s-clear:
-	helm list -q | xargs -I {} helm uninstall {} --wait
+	helm list -q | xargs -I {} helm uninstall {}
+	telepresence helm uninstall || true
+	telepresence quit || true
 	kubectl delete secrets --all
 	kubectl delete pvc --all
 	kubectl delete pv --all
-	telepresence helm uninstall || true
-	telepresence quit || true
 
 	$(eval real_dir := $(shell realpath ${DATA_PATH}))
 	$(eval parent_dir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST)))))
