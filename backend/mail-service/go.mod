@@ -6,13 +6,11 @@ require (
 	github.com/k3a/html2text v1.2.1
 	github.com/memphisdev/memphis.go v1.1.1
 	github.com/spf13/viper v1.16.0
-	github.com/stretchr/testify v1.8.3
 	google.golang.org/protobuf v1.30.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
 
 require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/graph-gophers/graphql-go v1.5.0 // indirect
@@ -30,7 +28,6 @@ require (
 	github.com/nats-io/nkeys v0.4.4 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v5 v5.1.0 // indirect
 	github.com/spf13/afero v1.9.5 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
