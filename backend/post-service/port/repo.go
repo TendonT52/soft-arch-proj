@@ -14,7 +14,6 @@ type PostRepoPort interface {
 	GetOwner(ctx context.Context, postId int64) (int64, error)
 	UpdatePost(ctx context.Context, postId int64, post *pbv1.UpdatedPost) error
 	DeletePost(ctx context.Context, postId int64) error
-	DeleteAllPosts(ctx context.Context) error // for testing
 	GetOpenPositions(ctx context.Context, search string) ([]string, error)
 	GetRequiredSkills(ctx context.Context, search string) ([]string, error)
 	GetBenefits(ctx context.Context, search string) ([]string, error)

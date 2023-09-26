@@ -139,19 +139,6 @@ func (s *postService) DeletePost(ctx context.Context, token string, postId int64
 	return nil
 }
 
-func (s *postService) DeleteAllPosts(ctx context.Context, token string) error {
-	_, err := utils.ValidateAccessToken(token)
-	if err != nil {
-		return err
-	}
-
-	err = s.PostRepo.DeleteAllPosts(ctx)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (s *postService) GetOpenPositions(ctx context.Context, token, search string) ([]string, error) {
 	payload, err := utils.ValidateAccessToken(token)
 	if payload.Role != companyRole {
