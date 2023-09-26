@@ -5,7 +5,7 @@ on:
   workflow_run:
     workflows: ["Update api-gateway and swagger"]
     types:
-      - success
+      - completed
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
