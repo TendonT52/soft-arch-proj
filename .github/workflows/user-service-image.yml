@@ -1,4 +1,4 @@
-name: Deploy post-service
+name: Create user-service image
 
 on:
   workflow_dispatch:
@@ -6,13 +6,13 @@ on:
     branches:
       - main
     paths:
-      - "backend/post-service/**"
+      - "backend/user-service/**"
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  containerize-post-service:
+  containerize-user-service:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,8 +28,8 @@ jobs:
         id: versioning
         uses: paulhatch/semantic-version@v5.1.0
         with:
-          namespace: "backend/post-service"
-          change_path: "backend/post-service/**"
+          namespace: "backend/user-service"
+          change_path: "backend/user-service/**"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -46,7 +46,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend-post-service
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend-user-service
           tags: |
             ${{ steps.versioning.outputs.version }}
             latest
@@ -55,7 +55,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          context: "{{defaultContext}}:backend/post-service"
+          context: "{{defaultContext}}:backend/user-service"
           tags: |
             ${{ steps.meta.outputs.tags }}
           platforms: linux/amd64,linux/arm64/v8
