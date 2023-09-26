@@ -539,6 +539,15 @@
     }
   },
   "definitions": {
+    "authAuthHealthCheckResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
     "authCreateAdminRequest": {
       "type": "object",
       "properties": {
@@ -820,18 +829,6 @@
         }
       }
     },
-    "userDeleteCompaniesResponse": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "string",
-          "format": "int64"
-        },
-        "message": {
-          "type": "string"
-        }
-      }
-    },
     "userGetCompanyResponse": {
       "type": "object",
       "properties": {
@@ -1009,6 +1006,15 @@
         },
         "message": {
           "type": "string"
+        }
+      }
+    },
+    "userUserHealthCheckResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "format": "int64"
         }
       }
     }
