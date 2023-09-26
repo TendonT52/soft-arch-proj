@@ -1,0 +1,60 @@
+name: Create mail-service image
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/mail-service/**"
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  containerize-mail-service:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - run: sudo chown runner:docker /var/run/docker.sock
+        if: ${{ env.ACT }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Application Version
+        id: versioning
+        uses: paulhatch/semantic-version@v5.1.0
+        with:
+          namespace: "backend/mail-service"
+          change_path: "backend/mail-service/**"
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend-mail-service
+          tags: |
+            ${{ steps.versioning.outputs.version }}
+            latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          context: "{{defaultContext}}:backend/mail-service"
+          tags: |
+            ${{ steps.meta.outputs.tags }}
+          platforms: linux/amd64,linux/arm64/v8
