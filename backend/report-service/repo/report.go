@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	gen "github.com/TikhampornSky/report-service/gen/v1"
+	pbv1 "github.com/TikhampornSky/report-service/gen/v1"
 	"github.com/TikhampornSky/report-service/port"
 	_ "github.com/lib/pq"
 )
@@ -26,7 +26,7 @@ func NewReportRepository(db DBTX) port.ReportRepoPort {
 	return &reportRepository{db: db}
 }
 
-func (r *reportRepository) CreateReport(ctx context.Context, userId int64, post *gen.Report) (int64, error) {
+func (r *reportRepository) CreateReport(ctx context.Context, userId int64, report *pbv1.Report) (int64, error) {
 	current_timestamp := time.Now().Unix()
 
 	stmt, err := r.db.PrepareContext(ctx, "INSERT INTO reports (uid, topic, type, description, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id")
@@ -36,7 +36,7 @@ func (r *reportRepository) CreateReport(ctx context.Context, userId int64, post 
 	defer stmt.Close()
 
 	var id int64
-	err = stmt.QueryRowContext(ctx, userId, post.Topic, post.Type, post.Description, current_timestamp, current_timestamp).Scan(&id)
+	err = stmt.QueryRowContext(ctx, userId, report.Topic, report.Type, report.Description, current_timestamp, current_timestamp).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
@@ -44,7 +44,7 @@ func (r *reportRepository) CreateReport(ctx context.Context, userId int64, post 
 	return id, nil
 }
 
-func (r *reportRepository) GetReport(ctx context.Context, reportId int64) (*gen.Report, error) {
+func (r *reportRepository) GetReport(ctx context.Context, reportId int64) (*pbv1.Report, error) {
 	query := "SELECT topic, type, description, updated_at FROM reports WHERE id = $1"
 	var topic, reportType, description string
 	var updatedAt int64
@@ -53,7 +53,7 @@ func (r *reportRepository) GetReport(ctx context.Context, reportId int64) (*gen.
 		return nil, err
 	}
 
-	return &gen.Report{
+	return &pbv1.Report{
 		Topic:       topic,
 		Type:        reportType,
 		Description: description,
@@ -61,7 +61,7 @@ func (r *reportRepository) GetReport(ctx context.Context, reportId int64) (*gen.
 	}, nil
 }
 
-func (r *reportRepository) GetReports(ctx context.Context) ([]*gen.Report, error) {
+func (r *reportRepository) GetReports(ctx context.Context) ([]*pbv1.Report, error) {
 	query := "SELECT topic, type, description, updated_at FROM reports ORDER BY updated_at DESC"
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -73,7 +73,7 @@ func (r *reportRepository) GetReports(ctx context.Context) ([]*gen.Report, error
 		return nil, err
 	}
 
-	var reports []*gen.Report
+	var reports []*pbv1.Report
 	for rows.Next() {
 		var topic, reportType, description string
 		var updatedAt int64
@@ -82,7 +82,7 @@ func (r *reportRepository) GetReports(ctx context.Context) ([]*gen.Report, error
 			return nil, err
 		}
 
-		reports = append(reports, &gen.Report{
+		reports = append(reports, &pbv1.Report{
 			Topic:       topic,
 			Type:        reportType,
 			Description: description,

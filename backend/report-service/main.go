@@ -23,7 +23,7 @@ func main() {
 	defer db.Close()
 
 	reportRepo := repo.NewReportRepository(db.GetPostgresqlDB())
-	postService := service.NewReportService(reportRepo)
+	reportService := service.NewReportService(reportRepo)
 
-	server.NewServer(config.ServerPort, postService)
+	server.NewServer(config.ServerPort, reportService)
 }
