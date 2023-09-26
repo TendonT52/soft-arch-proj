@@ -1,4 +1,4 @@
-CREATE TYPE "reporttype" AS ENUM ('Scam And Fraudulent Listing', 'Fake Review', 'Suspicious User', 'Website Bug', 'Suggestion');
+CREATE TYPE "reporttype" AS ENUM ('Scam And Fraudulent Listing', 'Fake Review', 'Suspicious User', 'Website Bug', 'Suggestion', 'Other');
 
 CREATE TABLE IF NOT EXISTS reports (
     id BIGSERIAL PRIMARY KEY,

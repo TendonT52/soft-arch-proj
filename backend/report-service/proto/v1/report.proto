@@ -60,6 +60,7 @@ message ListReportsResponse {
     int64 status = 1;
     string message = 2;
     repeated Report reports = 3;
+    int64 total = 4;
 }
 
 // Get Report

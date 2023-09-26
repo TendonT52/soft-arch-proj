@@ -3,8 +3,11 @@ package main
 import (
 	"log"
 
+	"github.com/TikhampornSky/report-service/repo"
+	"github.com/TikhampornSky/report-service/service"
 	"github.com/TikhampornSky/report-service/config"
 	"github.com/TikhampornSky/report-service/db"
+	"github.com/TikhampornSky/report-service/server"
 )
 
 func main() {
@@ -19,9 +22,8 @@ func main() {
 	}
 	defer db.Close()
 
-	// postRepo := repo.NewPostRepository(db.GetPostgresqlDB())
-	// userClientService := service.NewUserClientService()
-	// postService := service.NewPostService(postRepo, userClientService)
+	reportRepo := repo.NewReportRepository(db.GetPostgresqlDB())
+	postService := service.NewReportService(reportRepo)
 
-	// server.NewServer(config.ServerPort, postService)
+	server.NewServer(config.ServerPort, postService)
 }

@@ -22,7 +22,7 @@ type reportRepository struct {
 	db DBTX
 }
 
-func NewRepository(db DBTX) port.ReportRepoPort {
+func NewReportRepository(db DBTX) port.ReportRepoPort {
 	return &reportRepository{db: db}
 }
 
