@@ -16,6 +16,7 @@ deploy:
 	fi
 
 k8s-run-dev:
+	make gen-swagger
 	$(eval DATA_PATH := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/data)
 	DATA_PATH=${DATA_PATH} make -C .. k8s-clear
 
@@ -31,6 +32,7 @@ k8s-run-dev:
 	kubectl wait --for=condition=Ready pods --all --all-namespaces
 
 k8s-run-prod:
+	make gen-swagger
 	$(eval DATA_PATH := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/data)
 	DATA_PATH=${DATA_PATH} make -C .. k8s-clear
 
