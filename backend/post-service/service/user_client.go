@@ -42,6 +42,7 @@ func NewUserClientService() port.UserClientPort {
 	if err != nil || healthUser.Status != 200 {
 		log.Fatalln("Could not connect to the user service (USER)", err)
 	}
+	log.Println("Connected to the user service successfully")
 
 	return &userClientService{}
 }
@@ -73,7 +74,8 @@ func (u *userClientService) ListApprovedCompanies(ctx context.Context, req *pbv1
 	if err != nil {
 		return nil, err
 	}
-	conn, err := grpc.Dial(fmt.Sprintf(":%s", config.UserServicePort), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	target := fmt.Sprintf("%s:%s", config.UserServiceHost, config.UserServicePort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
