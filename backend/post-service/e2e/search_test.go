@@ -217,6 +217,16 @@ func TestSearchPosts(t *testing.T) {
 				Message: "Posts not found",
 			},
 		},
+		"token wrong": {
+			req: &pbv1.ListPostsRequest{
+				AccessToken: "wrong",
+				SearchOptions: &pbv1.SearchOptions{},
+			},
+			expect: &pbv1.ListPostsResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
+			},
+		},
 	}
 
 	for name, tc := range tests {

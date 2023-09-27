@@ -118,15 +118,15 @@ func TestUpdatePost(t *testing.T) {
 				Message: "Post updated successfully",
 			},
 		},
-		"fail: unauthorized": {
+		"not owner": {
 			req: &pbv1.UpdatePostRequest{
 				AccessToken: tokenAdmin,
 				Id:          CreateRes.Id,
 				Post:        p,
 			},
 			expect: &pbv1.UpdatePostResponse{
-				Status:  401,
-				Message: "Unauthorized",
+				Status:  403,
+				Message: "You are not allowed to update post",
 			},
 		},
 		"some field is empty": {
@@ -146,6 +146,17 @@ func TestUpdatePost(t *testing.T) {
 			expect: &pbv1.UpdatePostResponse{
 				Status:  400,
 				Message: "Please fill all required fields",
+			},
+		},
+		"invalid token": {
+			req: &pbv1.UpdatePostRequest{
+				AccessToken: "",
+				Id:          CreateRes.Id,
+				Post:        p,
+			},
+			expect: &pbv1.UpdatePostResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
 			},
 		},
 	}

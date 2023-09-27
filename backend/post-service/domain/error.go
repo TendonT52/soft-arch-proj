@@ -10,7 +10,8 @@ const (
 	PostNotFound
 	UserIdNotFound
 	FieldsAreRequired
-	Unauthorized
+	Unauthorize
+	Forbidden
 )
 
 var (
@@ -18,7 +19,8 @@ var (
 	ErrPostNotFound      = BackEndError{Kind: PostNotFound}
 	ErrUserIdNotFound    = BackEndError{Kind: UserIdNotFound}
 	ErrFieldsAreRequired = BackEndError{Kind: FieldsAreRequired}
-	ErrUnauthorized      = BackEndError{Kind: Unauthorized}
+	ErrUnauthorize       = BackEndError{Kind: Unauthorize}
+	ErrForbidden         = BackEndError{Kind: Forbidden}
 )
 
 type BackEndError struct {

@@ -106,14 +106,14 @@ func TestDeletePost(t *testing.T) {
 				Message: "Post deleted successfully",
 			},
 		},
-		"Unauthorized": {
+		"Not Owner": {
 			req: &pbv1.DeletePostRequest{
 				AccessToken: tokenNotOwner,
 				Id:          CreateRes2.Id,
 			},
 			expect: &pbv1.DeletePostResponse{
-				Status:  401,
-				Message: "Unauthorized",
+				Status:  403,
+				Message: "You are not allowed to delete post",
 			},
 		},
 		"delete when some value still in use": {
@@ -124,6 +124,16 @@ func TestDeletePost(t *testing.T) {
 			expect: &pbv1.DeletePostResponse{
 				Status:  200,
 				Message: "Post deleted successfully",
+			},
+		},
+		"invalid token": {
+			req: &pbv1.DeletePostRequest{
+				AccessToken: "invalid token",
+				Id:          CreateRes2.Id,
+			},
+			expect: &pbv1.DeletePostResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
 			},
 		},
 	}

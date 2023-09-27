@@ -30,10 +30,10 @@ func (s *postService) CreatePost(ctx context.Context, token string, post *pbv1.P
 
 	payload, err := utils.ValidateAccessToken(token)
 	if err != nil {
-		return 0, err
+		return 0, domain.ErrUnauthorize
 	}
 	if payload.Role != companyRole {
-		return 0, domain.ErrUnauthorized
+		return 0, domain.ErrForbidden
 	}
 
 	postId, err := s.PostRepo.CreatePost(ctx, payload.UserId, post)
@@ -47,7 +47,7 @@ func (s *postService) CreatePost(ctx context.Context, token string, post *pbv1.P
 func (s *postService) GetPost(ctx context.Context, token string, postId int64) (*pbv1.Post, error) {
 	_, err := utils.ValidateAccessToken(token)
 	if err != nil {
-		return nil, err
+		return nil, domain.ErrUnauthorize
 	}
 	post, err := s.PostRepo.GetPost(ctx, postId)
 	if err != nil {
@@ -70,7 +70,7 @@ func (s *postService) GetPost(ctx context.Context, token string, postId int64) (
 func (s *postService) GetPosts(ctx context.Context, token string, search *pbv1.SearchOptions) ([]*pbv1.Post, error) {
 	_, err := utils.ValidateAccessToken(token)
 	if err != nil {
-		return nil, err
+		return nil, domain.ErrUnauthorize
 	}
 
 	u, err := s.UserService.ListApprovedCompanies(ctx, &pbv1.ListApprovedCompaniesRequest{
@@ -105,10 +105,10 @@ func (s *postService) UpdatePost(ctx context.Context, token string, postId int64
 	}
 	payload, err := utils.ValidateAccessToken(token)
 	if err != nil {
-		return err
+		return domain.ErrUnauthorize
 	}
 	if payload.Role != companyRole || payload.UserId != owner {
-		return domain.ErrUnauthorized
+		return domain.ErrForbidden
 	}
 
 	err = s.PostRepo.UpdatePost(ctx, postId, post)
@@ -125,10 +125,10 @@ func (s *postService) DeletePost(ctx context.Context, token string, postId int64
 	}
 	payload, err := utils.ValidateAccessToken(token)
 	if err != nil {
-		return err
+		return domain.ErrUnauthorize
 	}
 	if payload.Role != companyRole || payload.UserId != owner {
-		return domain.ErrUnauthorized
+		return domain.ErrForbidden
 	}
 
 	err = s.PostRepo.DeletePost(ctx, postId)
@@ -141,11 +141,11 @@ func (s *postService) DeletePost(ctx context.Context, token string, postId int64
 
 func (s *postService) GetOpenPositions(ctx context.Context, token, search string) ([]string, error) {
 	payload, err := utils.ValidateAccessToken(token)
-	if payload.Role != companyRole {
-		return nil, domain.ErrUnauthorized
-	}
 	if err != nil {
-		return nil, err
+		return nil, domain.ErrUnauthorize
+	}
+	if payload.Role != companyRole {
+		return nil, domain.ErrForbidden
 	}
 
 	openPositions, err := s.PostRepo.GetOpenPositions(ctx, search)
@@ -158,11 +158,11 @@ func (s *postService) GetOpenPositions(ctx context.Context, token, search string
 
 func (s *postService) GetRequiredSkills(ctx context.Context, token, search string) ([]string, error) {
 	payload, err := utils.ValidateAccessToken(token)
-	if payload.Role != companyRole {
-		return nil, domain.ErrUnauthorized
-	}
 	if err != nil {
-		return nil, err
+		return nil, domain.ErrUnauthorize
+	}
+	if payload.Role != companyRole {
+		return nil, domain.ErrForbidden
 	}
 
 	requiredSkills, err := s.PostRepo.GetRequiredSkills(ctx, search)
@@ -175,11 +175,11 @@ func (s *postService) GetRequiredSkills(ctx context.Context, token, search strin
 
 func (s *postService) GetBenefits(ctx context.Context, token, search string) ([]string, error) {
 	payload, err := utils.ValidateAccessToken(token)
-	if payload.Role != companyRole {
-		return nil, domain.ErrUnauthorized
-	}
 	if err != nil {
-		return nil, err
+		return nil, domain.ErrUnauthorize
+	}
+	if payload.Role != companyRole {
+		return nil, domain.ErrForbidden
 	}
 
 	benefits, err := s.PostRepo.GetBenefits(ctx, search)
