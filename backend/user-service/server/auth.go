@@ -198,6 +198,13 @@ func (s *AuthServer) RefreshToken(ctx context.Context, req *pbv1.RefreshTokenReq
 			Message: "the user belonging to this token no logger exists",
 		}, nil
 	}
+	if errors.Is(err, domain.ErrUnauthorized) {
+		log.Printf("Your refresh token is invalid: %v", err)
+		return &pbv1.RefreshTokenResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your refresh token is invalid",
+		}, nil
+	}
 
 	if err != nil {
 		log.Printf("Error: %v", err)
@@ -217,6 +224,13 @@ func (s *AuthServer) RefreshToken(ctx context.Context, req *pbv1.RefreshTokenReq
 
 func (s *AuthServer) LogOut(ctx context.Context, req *pbv1.LogOutRequest) (*pbv1.LogOutResponse, error) {
 	err := s.AuthService.LogOut(ctx, req.RefreshToken)
+	if errors.Is(err, domain.ErrUnauthorized) {
+		log.Printf("Your refresh token is invalid: %v", err)
+		return &pbv1.LogOutResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your refresh token is invalid",
+		}, nil
+	}
 	if err != nil {
 		log.Printf("Error: %v", err)
 		return &pbv1.LogOutResponse{

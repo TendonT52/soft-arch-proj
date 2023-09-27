@@ -140,8 +140,8 @@ func TestListApprovedCompanies(t *testing.T) {
 	c5 := createMockComapny(t, "Mock Company 5 Tech Company", mail5, "Company5 desc", "Bangkok", "0123456789", "Food")
 
 	// Approve Companies
-	approveMultipleCompanies(t, []int64{c1.Id, c2.Id, c3.Id, c4.Id}, ad, u, "Approve")
-	approveMultipleCompanies(t, []int64{c5.Id}, ad, u, "Reject")
+	approveMultipleCompanies(t, []int64{c1.Id, c2.Id, c3.Id, c4.Id}, ad, u, domain.ComapanyStatusApprove)
+	approveMultipleCompanies(t, []int64{c5.Id}, ad, u, domain.ComapanyStatusReject)
 
 	// Create Student
 	student_access := createMockStudent(t, ad.AccessToken)
@@ -202,6 +202,15 @@ func TestListApprovedCompanies(t *testing.T) {
 					c3,
 					c4,
 				},
+			},
+		},
+		"invalidate token": {
+			req: &pbv1.ListApprovedCompaniesRequest{
+				AccessToken: "wrong token",
+			},
+			expect: &pbv1.ListApprovedCompaniesResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
 			},
 		},
 	}

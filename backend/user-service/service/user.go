@@ -131,6 +131,15 @@ func (s *userService) UpdateCompanyMe(ctx context.Context, id int64, req *pbv1.C
 }
 
 func (s *userService) UpdateCompanyStatus(ctx context.Context, userId, id int64, status string) error {
+	var typeEmail string
+	if status == domain.ComapanyStatusApprove {
+		typeEmail = domain.CompanyApproveEmail
+	} else if status == domain.ComapanyStatusReject {
+		typeEmail = domain.CompanyRejectEmail
+	} else {
+		return domain.ErrInvalidStatus.With("status must be Approve or Reject")
+	}
+
 	err := s.repo.CheckIfAdmin(ctx, userId)
 	if err != nil {
 		return domain.ErrForbidden.With("user not admin")
@@ -141,17 +150,8 @@ func (s *userService) UpdateCompanyStatus(ctx context.Context, userId, id int64,
 		return err
 	}
 
-	if company.Status != "Pending" {
+	if company.Status != domain.ComapanyStatusPending {
 		return domain.ErrAlreadyVerified.With("company already approved or rejected")
-	}
-
-	var typeEmail string
-	if status == "Approve" {
-		typeEmail = domain.CompanyApproveEmail
-	} else if status == "Reject" {
-		typeEmail = domain.CompanyRejectEmail
-	} else {
-		return domain.ErrInvalidStatus.With("status must be Approve or Reject")
 	}
 
 	err = email.SendEmail(s.memphis, typeEmail, "", status+" Company", company.Name, company.Email)

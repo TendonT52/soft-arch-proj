@@ -14,6 +14,7 @@ const (
 	AlreadyVerified
 	NotVerified
 	Forbidden
+	Unauthorized
 	RedisNotFound
 	MailNotSent
 	InvalidStatus
@@ -31,6 +32,7 @@ var (
 	ErrAlreadyVerified           = BackEndError{Kind: AlreadyVerified}
 	ErrNotVerified               = BackEndError{Kind: NotVerified}
 	ErrForbidden                 = BackEndError{Kind: Forbidden}
+	ErrUnauthorized              = BackEndError{Kind: Unauthorized}
 	ErrRedisNotFound             = BackEndError{Kind: RedisNotFound}
 	ErrMailNotSent               = BackEndError{Kind: MailNotSent}
 	ErrInvalidStatus             = BackEndError{Kind: InvalidStatus}

@@ -318,11 +318,18 @@ func (s *UserServer) UpdateCompanyStatus(ctx context.Context, req *pbv1.UpdateCo
 			Message: "Only admin can approve",
 		}, nil
 	}
-	if err != nil {
+	if errors.Is(err, domain.ErrAlreadyVerified) || errors.Is(err, domain.ErrInvalidStatus) || errors.Is(err, domain.ErrMailNotSent) {
 		log.Println("Error from update company status: ", err)
 		return &pbv1.UpdateCompanyStatusResponse{
 			Status:  http.StatusBadRequest,
 			Message: err.Error(),
+		}, nil
+	}
+	if err != nil {
+		log.Println("Error internal when update company status: ", err)
+		return &pbv1.UpdateCompanyStatusResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Something went wrong",
 		}, nil
 	}
 

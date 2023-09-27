@@ -73,7 +73,7 @@ func TestGetCompanyMe(t *testing.T) {
 	result, err := u.UpdateCompanyStatus(ctx, &pbv1.UpdateCompanyStatusRequest{
 		AccessToken: admin_res.AccessToken,
 		Id:          r.Id,
-		Status:      "Approve",
+		Status:      domain.ComapanyStatusApprove,
 	})
 	require.Equal(t, int64(200), result.Status)
 
@@ -110,16 +110,26 @@ func TestGetCompanyMe(t *testing.T) {
 					Location:    com.Location,
 					Phone:       com.Phone,
 					Category:    com.Category,
-					Status:      "Approve",
+					Status:      domain.ComapanyStatusApprove,
 				},
 			},
 		},
-		"fail: invalid token": {
+		"fail: not correct company": {
 			req: &pbv1.GetCompanyMeRequest{
 				AccessToken: access_token_wrong,
 			},
 			expect: &pbv1.GetCompanyResponse{
 				Status: 500,
+				Message: "Something went wrong",
+			},
+		},
+		"fail: invalid token": {
+			req: &pbv1.GetCompanyMeRequest{
+				AccessToken: "",
+			},
+			expect: &pbv1.GetCompanyResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
 			},
 		},
 	}
@@ -191,7 +201,7 @@ func TestGetComapany(t *testing.T) {
 	result, err := u.UpdateCompanyStatus(ctx, &pbv1.UpdateCompanyStatusRequest{
 		AccessToken: admin_res.AccessToken,
 		Id:          r.Id,
-		Status:      "Approve",
+		Status:      domain.ComapanyStatusApprove,
 	})
 	require.Equal(t, int64(200), result.Status)
 
@@ -223,7 +233,7 @@ func TestGetComapany(t *testing.T) {
 					Location:    com.Location,
 					Phone:       com.Phone,
 					Category:    com.Category,
-					Status:      "Approve",
+					Status:      domain.ComapanyStatusApprove,
 				},
 			},
 		},
@@ -235,6 +245,16 @@ func TestGetComapany(t *testing.T) {
 			expect: &pbv1.GetCompanyResponse{
 				Status:  404,
 				Message: "company id not found",
+			},
+		},
+		"fail: invalid token": {
+			req: &pbv1.GetCompanyRequest{
+				Id:          r.Id,
+				AccessToken: "",
+			},
+			expect: &pbv1.GetCompanyResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
 			},
 		},
 	}
@@ -307,7 +327,7 @@ func TestUpdateCompany(t *testing.T) {
 	result, err := u.UpdateCompanyStatus(ctx, &pbv1.UpdateCompanyStatusRequest{
 		AccessToken: admin_res.AccessToken,
 		Id:          r.Id,
-		Status:      "Approve",
+		Status:      domain.ComapanyStatusApprove,
 	})
 	require.Equal(t, int64(200), result.Status)
 
@@ -349,6 +369,16 @@ func TestUpdateCompany(t *testing.T) {
 				Message: "You are not authorized to update this company",
 			},
 		},
+		"invalide token": {
+			req: &pbv1.UpdateCompanyRequest{
+				AccessToken: "",
+				Company:     &pbv1.Company{},
+			},
+			expect: &pbv1.UpdateCompanyResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
+			},
+		},
 	}
 
 	for name, tc := range tests {
@@ -363,11 +393,11 @@ func TestUpdateCompany(t *testing.T) {
 	// Get Company
 	get_res, _, err := tools.GetCompanyByID(r.Id)
 	require.NoError(t, err)
-	require.Equal(t, "Approve", get_res.Status)
+	require.Equal(t, domain.ComapanyStatusApprove, get_res.Status)
 	require.Equal(t, "Mock Company New Name", get_res.Name)
 	require.Equal(t, "I am a company New", get_res.Description)
 	require.Equal(t, "Bangkok New", get_res.Location)
 	require.Equal(t, "0123456780", get_res.Phone)
 	require.Equal(t, "IT New", get_res.Category)
-	require.Equal(t, "Approve", get_res.Status)
+	require.Equal(t, domain.ComapanyStatusApprove, get_res.Status)
 }

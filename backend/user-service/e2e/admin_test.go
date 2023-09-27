@@ -103,7 +103,7 @@ func TestUpdateCompanyStatus(t *testing.T) {
 			req: &pbv1.UpdateCompanyStatusRequest{
 				AccessToken: ad.AccessToken,
 				Id:          com.Id,
-				Status:      "Approve",
+				Status:      domain.ComapanyStatusApprove,
 			},
 			expect: &pbv1.UpdateCompanyStatusResponse{
 				Status:  200,
@@ -114,7 +114,7 @@ func TestUpdateCompanyStatus(t *testing.T) {
 			req: &pbv1.UpdateCompanyStatusRequest{
 				AccessToken: ad.AccessToken,
 				Id:          com2.Id,
-				Status:      "Reject",
+				Status:      domain.ComapanyStatusReject,
 			},
 			expect: &pbv1.UpdateCompanyStatusResponse{
 				Status:  200,
@@ -125,7 +125,7 @@ func TestUpdateCompanyStatus(t *testing.T) {
 			req: &pbv1.UpdateCompanyStatusRequest{
 				AccessToken: access_token_wrong,
 				Id:          com.Id,
-				Status:      "verified",
+				Status:      domain.ComapanyStatusApprove,
 			},
 			expect: &pbv1.UpdateCompanyStatusResponse{
 				Status:  403,
@@ -136,15 +136,26 @@ func TestUpdateCompanyStatus(t *testing.T) {
 			req: &pbv1.UpdateCompanyStatusRequest{
 				AccessToken: ad.AccessToken,
 				Id:          com.Id,
-				Status:      "Reject",
+				Status:      domain.ComapanyStatusReject,
 			},
 			expect: &pbv1.UpdateCompanyStatusResponse{
 				Status:  400,
 				Message: "company already approved or rejected",
 			},
 		},
+		"invalidate status": {
+			req: &pbv1.UpdateCompanyStatusRequest{
+				AccessToken: ad.AccessToken,
+				Id:          com.Id,
+				Status:      "verified",
+			},
+			expect: &pbv1.UpdateCompanyStatusResponse{
+				Status:  400,
+				Message: "status must be Approve or Reject",
+			},
+		},
 	}
-	testOrder := []string{"success approve", "success reject", "fail: not admin", "fail: company already approved"}
+	testOrder := []string{"success approve", "success reject", "fail: not admin", "fail: company already approved", "invalidate status"}
 
 	for _, testName := range testOrder {
 		tc := tests[testName]
@@ -193,7 +204,7 @@ func createMockComapny(t *testing.T, name, email, description, location, phone, 
 		Location:    location,
 		Phone:       phone,
 		Category:    category,
-		Status:      "Pending",
+		Status:      domain.ComapanyStatusPending,
 	}
 }
 

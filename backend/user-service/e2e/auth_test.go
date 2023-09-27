@@ -265,7 +265,7 @@ func TestCreateCompany(t *testing.T) {
 	require.Equal(t, "Bangkok", company.Location)
 	require.Equal(t, "0123456789", company.Phone)
 	require.Equal(t, "Technology", company.Category)
-	require.Equal(t, "Pending", company.Status)
+	require.Equal(t, domain.ComapanyStatusPending, company.Status)
 	require.Equal(t, "company", status.Role)
 	require.Equal(t, false, status.Verified)
 }
@@ -345,8 +345,20 @@ func TestCreateAdmin(t *testing.T) {
 				Message: "You are not admin",
 			},
 		},
+		"invalid access token": {
+			req: &pbv1.CreateAdminRequest{
+				Email:           adminTestEmail,
+				Password:        "password-test",
+				PasswordConfirm: "password-test",
+				AccessToken:     "",
+			},
+			expect: &pbv1.CreateAdminResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
+			},
+		},
 	}
-	testOrder := []string{"success", "email already exists", "password and password confirm not match"}
+	testOrder := []string{"success", "email already exists", "password and password confirm not match", "not admin to create", "invalid access token"}
 	adminId := 0
 	for _, testName := range testOrder {
 		tc := tests[testName]
@@ -549,8 +561,17 @@ func TestRefreshToken(t *testing.T) {
 				Message: "your token has been logged out!",
 			},
 		},
+		"refresh token is invalid": {
+			req: &pbv1.RefreshTokenRequest{
+				RefreshToken: "",
+			},
+			expect: &pbv1.RefreshTokenResponse{
+				Status:  401,
+				Message: "Your refresh token is invalid",
+			},
+		},
 	}
-	testOrder := []string{"success", "user not found", "already logged out"}
+	testOrder := []string{"success", "user not found", "already logged out", "refresh token is invalid"}
 
 	for _, testName := range testOrder {
 		tc := tests[testName]
@@ -608,6 +629,15 @@ func TestLogOut(t *testing.T) {
 			expect: &pbv1.LogOutResponse{
 				Status:  200,
 				Message: "Logout success",
+			},
+		},
+		"refresh token is invalid": {
+			req: &pbv1.LogOutRequest{
+				RefreshToken: "",
+			},
+			expect: &pbv1.LogOutResponse{
+				Status:  401,
+				Message: "Your refresh token is invalid",
 			},
 		},
 	}
