@@ -36,10 +36,15 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create Admin
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	admin := &pbv1.CreateAdminRequest{
 		Email:           utils.GenerateRandomString(10) + "@admin.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	}
 	a, err := c.CreateAdmin(ctx, admin)
 	require.Equal(t, int64(201), a.Status)
@@ -211,10 +216,15 @@ func TestListCompanies(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create Admin
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	admin := &pbv1.CreateAdminRequest{
 		Email:           utils.GenerateRandomString(10) + "@admin.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	}
 	a, err := c.CreateAdmin(ctx, admin)
 	require.Equal(t, int64(201), a.Status)

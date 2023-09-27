@@ -9,6 +9,7 @@ import (
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	"github.com/TikhampornSky/go-auth-verifiedMail/port"
+	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 )
 
 // Same idea as handler/auth.go but this is for gRPC
@@ -26,7 +27,7 @@ func NewAuthServer(s port.AuthServicePort) *AuthServer {
 func (s *AuthServer) AuthHealthCheck(context.Context, *pbv1.AuthHealthCheckRequest) (*pbv1.AuthHealthCheckResponse, error) {
 	log.Println("Auth HealthCheck success: ", http.StatusOK)
 	return &pbv1.AuthHealthCheckResponse{
-		Status:  http.StatusOK,
+		Status: http.StatusOK,
 	}, nil
 }
 
@@ -109,6 +110,21 @@ func (s *AuthServer) CreateCompany(ctx context.Context, req *pbv1.CreateCompanyR
 }
 
 func (s *AuthServer) CreateAdmin(ctx context.Context, req *pbv1.CreateAdminRequest) (*pbv1.CreateAdminResponse, error) {
+	payload, err := utils.ValidateAccessToken(req.AccessToken)
+	if err != nil {
+		log.Println("Error in extract userID: ", err)
+		return &pbv1.CreateAdminResponse{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
+		}, nil
+	}
+	if payload.Role != "admin" {
+		log.Println("Error: ", err)
+		return &pbv1.CreateAdminResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "You are not admin",
+		}, nil
+	}
 	id, err := s.AuthService.SignUpAdmin(ctx, req)
 	if errors.Is(err, domain.ErrPasswordNotMatch) {
 		log.Printf("Passwords do not match: %v", err)

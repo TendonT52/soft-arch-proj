@@ -173,10 +173,15 @@ func TestGetStudent(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create Admin
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	a := &pbv1.CreateAdminRequest{
 		Email:           utils.GenerateRandomString(10) + "@gmail.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	}
 	_, err = c.CreateAdmin(ctx, a)
 	require.NoError(t, err)

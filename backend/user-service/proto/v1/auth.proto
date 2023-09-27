@@ -101,6 +101,7 @@ message CreateAdminRequest {
   string email = 1;
   string password = 2;
   string password_confirm = 3;
+  string access_token = 4;
 }
 
 message CreateAdminResponse {
