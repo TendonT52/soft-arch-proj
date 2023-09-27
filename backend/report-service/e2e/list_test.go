@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/TikhampornSky/report-service/tools"
 	"github.com/TikhampornSky/report-service/config"
 	"github.com/TikhampornSky/report-service/domain"
 	pbv1 "github.com/TikhampornSky/report-service/gen/v1"
 	"github.com/TikhampornSky/report-service/mock"
+	"github.com/TikhampornSky/report-service/tools"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -101,8 +101,8 @@ func TestListReports(t *testing.T) {
 				AccessToken: tokenStudent,
 			},
 			expect: &pbv1.ListReportsResponse{
-				Status:  401,
-				Message: "Unauthorized",
+				Status:  403,
+				Message: "You don't have permission to access this resource",
 			},
 		},
 		"Company list reports": {
@@ -110,8 +110,17 @@ func TestListReports(t *testing.T) {
 				AccessToken: tokenCompany,
 			},
 			expect: &pbv1.ListReportsResponse{
+				Status:  403,
+				Message: "You don't have permission to access this resource",
+			},
+		},
+		"invalid token": {
+			req: &pbv1.ListReportsRequest{
+				AccessToken: "invalid-token",
+			},
+			expect: &pbv1.ListReportsResponse{
 				Status:  401,
-				Message: "Unauthorized",
+				Message: "Your access token is invalid",
 			},
 		},
 	}

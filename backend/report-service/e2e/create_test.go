@@ -189,6 +189,20 @@ func TestCreateReport(t *testing.T) {
 				Message: "Please fill in all required fields",
 			},
 		},
+		"invalid token": {
+			req: &pbv1.CreateReportRequest{
+				AccessToken: "",
+				Report: &pbv1.Report{
+					Topic:       "test-report-other",
+					Type:        domain.REPORT_TYPE_OTHER,
+					Description: "This report is fake and should be deleted",
+				},
+			},
+			expect: &pbv1.CreateReportResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
+			},
+		},
 	}
 
 	ids := make(map[string]int64)

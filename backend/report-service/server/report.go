@@ -36,6 +36,13 @@ func (s *ReportServer) CreateReport(ctx context.Context, req *pbv1.CreateReportR
 			Message: "Please fill in all required fields",
 		}, nil
 	}
+	if errors.Is(err, domain.ErrUnauthorize) {
+		log.Println("Create Report: Unauthorized")
+		return &pbv1.CreateReportResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
+		}, nil
+	}
 	if err != nil {
 		log.Println("Create Report: ", err)
 		return &pbv1.CreateReportResponse{
@@ -54,11 +61,18 @@ func (s *ReportServer) CreateReport(ctx context.Context, req *pbv1.CreateReportR
 
 func (s *ReportServer) GetReport(ctx context.Context, req *pbv1.GetReportRequest) (*pbv1.GetReportResponse, error) {
 	report, err := s.ReportService.GetReport(ctx, req.AccessToken, req.Id)
-	if errors.Is(err, domain.ErrUnauthorized) {
+	if errors.Is(err, domain.ErrForbidden) {
+		log.Println("Get Report: Forbidden")
+		return &pbv1.GetReportResponse{
+			Status:  http.StatusForbidden,
+			Message: "You don't have permission to access this resource",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrUnauthorize) {
 		log.Println("Get Report: Unauthorized")
 		return &pbv1.GetReportResponse{
 			Status:  http.StatusUnauthorized,
-			Message: "Unauthorized",
+			Message: "Your access token is invalid",
 		}, nil
 	}
 	if errors.Is(err, domain.ErrReportNotFound) {
@@ -86,11 +100,18 @@ func (s *ReportServer) GetReport(ctx context.Context, req *pbv1.GetReportRequest
 
 func (s *ReportServer) ListReports(ctx context.Context, req *pbv1.ListReportsRequest) (*pbv1.ListReportsResponse, error) {
 	reports, err := s.ReportService.GetReports(ctx, req.AccessToken)
-	if errors.Is(err, domain.ErrUnauthorized) {
+	if errors.Is(err, domain.ErrForbidden) {
+		log.Println("List Reports: Forbidden")
+		return &pbv1.ListReportsResponse{
+			Status:  http.StatusForbidden,
+			Message: "You don't have permission to access this resource",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrUnauthorize) {
 		log.Println("List Reports: Unauthorized")
 		return &pbv1.ListReportsResponse{
 			Status:  http.StatusUnauthorized,
-			Message: "Unauthorized",
+			Message: "Your access token is invalid",
 		}, nil
 	}
 	if err != nil {

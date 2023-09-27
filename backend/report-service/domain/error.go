@@ -7,15 +7,17 @@ type ErrKind int
 const (
 	_ ErrKind = iota
 	Internal
-	Unauthorized
+	Unauthorize
+	Forbidden
 	ReportNotFound
 	FieldsAreRequired
 )
 
 var (
-	ErrInternal       = BackEndError{Kind: Internal}
-	ErrUnauthorized   = BackEndError{Kind: Unauthorized}
-	ErrReportNotFound = BackEndError{Kind: ReportNotFound}
+	ErrInternal          = BackEndError{Kind: Internal}
+	ErrUnauthorize       = BackEndError{Kind: Unauthorize}
+	ErrForbidden         = BackEndError{Kind: Forbidden}
+	ErrReportNotFound    = BackEndError{Kind: ReportNotFound}
 	ErrFieldsAreRequired = BackEndError{Kind: FieldsAreRequired}
 )
 
