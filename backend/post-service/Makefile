@@ -3,10 +3,10 @@ create-migrate:
 	migrate create -ext sql -dir migrations/ $$name
 
 migrate-up:
-	migrate -database "postgres://postgres:password@localhost:5432/?sslmode=disable" -path migrations up
+	migrate -database "postgres://postgres:password@post-service-postgresql.default:5432/?sslmode=disable" -path migrations up
 
 clean-db:
-	psql postgres://postgres:password@localhost:5432/?sslmode=disable -a -f ./cleanup.sql
+	psql postgres://postgres:password@post-service-postgresql.default:5432/?sslmode=disable -a -f ./cleanup.sql
 
 gen-proto:
 	protoc \
@@ -61,6 +61,7 @@ k8s-run-dev:
 
 	telepresence connect
 	make -C ../user-service migrate-up
+	make migrate-up
 
 k8s-run-prod:
 	$(eval DATA_PATH := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/data)
@@ -77,5 +78,6 @@ k8s-run-prod:
 
 	telepresence connect
 	make -C ../user-service migrate-up
+	make migrate-up
 
 	MODE=local make deploy

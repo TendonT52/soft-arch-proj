@@ -3,13 +3,13 @@ create-migrate:
 	migrate create -ext sql -dir migrations/ $$name
 
 migrate-up:
-	migrate -database "postgres://postgres:password@localhost:5432/?sslmode=disable" -path migrations up
+	migrate -database "postgres://postgres:password@report-service-postgresql.default:5432/?sslmode=disable" -path migrations up
 
 migrate-down:
-	migrate -database "postgres://postgres:password@localhost:5432/?sslmode=disable" -path migrations down
+	migrate -database "postgres://postgres:password@report-service-postgresql.default:5432/?sslmode=disable" -path migrations down
 
 clean-db:
-	psql postgres://postgres:password@localhost:5432/?sslmode=disable -a -f ./cleanup.sql
+	psql postgres://postgres:password@report-service-postgresql.default:5432/?sslmode=disable -a -f ./cleanup.sql
 
 gen-proto:
 	protoc \
@@ -27,16 +27,16 @@ dependency:
 	mkdir -p ${DATA_PATH}
 	@echo "Persistent data will be stored in ${DATA_PATH}"
 	parallel ::: \
-		"DATA_PATH=${DATA_PATH} make -C ./helm post-service-postgresql"
+		"DATA_PATH=${DATA_PATH} make -C ./helm report-service-postgresql"
 
 deploy:
 	@if [ "${MODE}" = "remote" ]; then \
-		kubectl create secret generic post-service --from-file=app.env; \
-		IMAGE=ghcr.io/tendont52/soft-arch-proj-backend-post-service:latest make -C ./helm post-service; \
+		kubectl create secret generic report-service --from-file=app.env; \
+		IMAGE=ghcr.io/tendont52/soft-arch-proj-backend-report-service:latest make -C ./helm report-service; \
 	elif [ "${MODE}" = "local" ]; then \
-		docker build -t post-service .; \
-		kubectl create secret generic post-service --from-file=app.env; \
-		IMAGE=post-service make -C ./helm post-service; \
+		docker build -t report-service .; \
+		kubectl create secret generic report-service --from-file=app.env; \
+		IMAGE=report-service make -C ./helm report-service; \
 	else \
 		echo "MODE is not set to main or local"; \
 		exit 1; \
@@ -49,14 +49,11 @@ k8s-run-dev:
 	@echo "Persistent data will be stored in ${DATA_PATH}"
 	parallel ::: \
 		"telepresence helm install" \
-		"DATA_PATH=${DATA_PATH} make -C ../../helm memphis" \
-		"DATA_PATH=${DATA_PATH}/user-service make -C ../user-service dependency" \
 		"DATA_PATH=${DATA_PATH} make dependency"
-	MODE=remote make -C ../user-service deploy
 	kubectl wait --for=condition=Ready pods --all --all-namespaces
 
 	telepresence connect
-	make -C ../user-service migrate-up
+	make migrate-up
 
 k8s-run-prod:
 	$(eval DATA_PATH := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/data)
@@ -65,13 +62,9 @@ k8s-run-prod:
 	@echo "Persistent data will be stored in ${DATA_PATH}"
 	parallel ::: \
 		"telepresence helm install" \
-		"DATA_PATH=${DATA_PATH} make -C ../../helm memphis" \
-		"DATA_PATH=${DATA_PATH}/user-service make -C ../user-service dependency" \
 		"DATA_PATH=${DATA_PATH} make dependency"
-	MODE=remote make -C ../user-service deploy
 	kubectl wait --for=condition=Ready pods --all --all-namespaces
 
 	telepresence connect
-	make -C ../user-service migrate-up
-
+	make migrate-up
 	MODE=local make deploy
