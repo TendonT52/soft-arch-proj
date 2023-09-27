@@ -1,8 +1,9 @@
-go 1.20
+go 1.21.1
 
 use (
 	./api-gateway
-	./backend/post-service
-	./backend/user-service
 	./backend/mail-service
+	./backend/post-service
+	./backend/report-service
+	./backend/user-service
 )
