@@ -40,6 +40,20 @@ func (s *AuthServer) CreateStudent(ctx context.Context, req *pbv1.CreateStudentR
 			Message: "Year must be greater than zero",
 		}, nil
 	}
+	if errors.Is(err, domain.ErrFieldsAreRequired) {
+		log.Printf("Fields are required: %v", err)
+		return &pbv1.CreateStudentResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Some fields are empty",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrPasswordLengthMustBeGreaterThanSix) {
+		log.Printf("Password length must be greater than six: %v", err)
+		return &pbv1.CreateStudentResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Password length must be greater than six",
+		}, nil
+	}
 	if errors.Is(err, domain.ErrPasswordNotMatch) {
 		log.Printf("Passwords do not match: %v", err)
 		return &pbv1.CreateStudentResponse{
@@ -93,6 +107,20 @@ func (s *AuthServer) CreateCompany(ctx context.Context, req *pbv1.CreateCompanyR
 			Message: "Email not in correct format",
 		}, nil
 	}
+	if errors.Is(err, domain.ErrFieldsAreRequired) {
+		log.Printf("Fields are required: %v", err)
+		return &pbv1.CreateCompanyResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Some fields are empty",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrPasswordLengthMustBeGreaterThanSix) {
+		log.Printf("Password length must be greater than six: %v", err)
+		return &pbv1.CreateCompanyResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Password length must be greater than six",
+		}, nil
+	}
 	if errors.Is(err, domain.ErrDuplicateEmail) {
 		log.Printf("Email already exists: %v", err)
 		return &pbv1.CreateCompanyResponse{
@@ -138,6 +166,13 @@ func (s *AuthServer) CreateAdmin(ctx context.Context, req *pbv1.CreateAdminReque
 		return &pbv1.CreateAdminResponse{
 			Status:  http.StatusBadRequest,
 			Message: "Email not in correct format",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrPasswordLengthMustBeGreaterThanSix) {
+		log.Printf("Password length must be greater than six: %v", err)
+		return &pbv1.CreateAdminResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Password length must be greater than six",
 		}, nil
 	}
 	if errors.Is(err, domain.ErrPasswordNotMatch) {

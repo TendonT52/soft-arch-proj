@@ -104,6 +104,12 @@ func (s *userService) UpdateStudentMe(ctx context.Context, id int64, req *pbv1.S
 	if role != domain.StudentRole {
 		return domain.ErrForbidden.With("user not student")
 	}
+	if req.Year <= 0 {
+		return domain.ErrYearMustBeGreaterThanZero.With("year must be greater than zero")
+	}
+	if !domain.CheckStudentRequiredFields(req) {
+		return domain.ErrFieldsAreRequired
+	}
 
 	err = s.repo.UpdateStudentByID(ctx, id, req)
 	if err != nil {
@@ -120,6 +126,9 @@ func (s *userService) UpdateCompanyMe(ctx context.Context, id int64, req *pbv1.C
 	}
 	if role != domain.CompanyRole {
 		return domain.ErrForbidden.With("user not company")
+	}
+	if !domain.CheckCompanyRequiredFields(req) {
+		return domain.ErrFieldsAreRequired
 	}
 
 	err = s.repo.UpdateCompanyByID(ctx, id, req)

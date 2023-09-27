@@ -19,24 +19,28 @@ const (
 	MailNotSent
 	InvalidStatus
 	YearMustBeGreaterThanZero
+	FieldsAreRequired
+	PasswordLengthMustBeGreaterThanSix
 
 	Internal
 )
 
 var (
-	ErrPasswordNotMatch          = BackEndError{Kind: PasswordNotMatch}
-	ErrUserEmailNotFound         = BackEndError{Kind: UserEmailNotFound}
-	ErrUserIDNotFound            = BackEndError{Kind: UserIDNotFound}
-	ErrDuplicateEmail            = BackEndError{Kind: DuplicateEmail}
-	ErrNotCorrectEmailFormat     = BackEndError{Kind: NotCorrectEmailFormat}
-	ErrAlreadyVerified           = BackEndError{Kind: AlreadyVerified}
-	ErrNotVerified               = BackEndError{Kind: NotVerified}
-	ErrForbidden                 = BackEndError{Kind: Forbidden}
-	ErrUnauthorized              = BackEndError{Kind: Unauthorized}
-	ErrRedisNotFound             = BackEndError{Kind: RedisNotFound}
-	ErrMailNotSent               = BackEndError{Kind: MailNotSent}
-	ErrInvalidStatus             = BackEndError{Kind: InvalidStatus}
-	ErrYearMustBeGreaterThanZero = BackEndError{Kind: YearMustBeGreaterThanZero}
+	ErrPasswordNotMatch                   = BackEndError{Kind: PasswordNotMatch}
+	ErrUserEmailNotFound                  = BackEndError{Kind: UserEmailNotFound}
+	ErrUserIDNotFound                     = BackEndError{Kind: UserIDNotFound}
+	ErrDuplicateEmail                     = BackEndError{Kind: DuplicateEmail}
+	ErrNotCorrectEmailFormat              = BackEndError{Kind: NotCorrectEmailFormat}
+	ErrAlreadyVerified                    = BackEndError{Kind: AlreadyVerified}
+	ErrNotVerified                        = BackEndError{Kind: NotVerified}
+	ErrForbidden                          = BackEndError{Kind: Forbidden}
+	ErrUnauthorized                       = BackEndError{Kind: Unauthorized}
+	ErrRedisNotFound                      = BackEndError{Kind: RedisNotFound}
+	ErrMailNotSent                        = BackEndError{Kind: MailNotSent}
+	ErrInvalidStatus                      = BackEndError{Kind: InvalidStatus}
+	ErrYearMustBeGreaterThanZero          = BackEndError{Kind: YearMustBeGreaterThanZero}
+	ErrFieldsAreRequired                  = BackEndError{Kind: FieldsAreRequired}
+	ErrPasswordLengthMustBeGreaterThanSix = BackEndError{Kind: PasswordLengthMustBeGreaterThanSix}
 
 	ErrInternal = BackEndError{Kind: Internal}
 )
