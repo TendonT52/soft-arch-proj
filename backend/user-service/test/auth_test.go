@@ -3,11 +3,13 @@ package test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	"github.com/TikhampornSky/go-auth-verifiedMail/server"
 	mock "github.com/TikhampornSky/go-auth-verifiedMail/test/mock_port"
+	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 )
@@ -181,10 +183,15 @@ func TestCreateCompanyDuplicateEmail(t *testing.T) {
 }
 
 func TestCreateAdminSuccess(t *testing.T) {
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	u := pbv1.CreateAdminRequest{
 		Email:           "mock-company@email.com",
 		Password:        "mypassword",
 		PasswordConfirm: "mypassword",
+		AccessToken:     admin_access_token,
 	}
 
 	ctrl := gomock.NewController(t)
@@ -200,10 +207,15 @@ func TestCreateAdminSuccess(t *testing.T) {
 }
 
 func TestCreateAdminPasswordNotMatch(t *testing.T) {
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	u := pbv1.CreateAdminRequest{
 		Email:           "mock-admin-email-1",
 		Password:        "mypassword-1",
 		PasswordConfirm: "mypassword-",
+		AccessToken:     admin_access_token,
 	}
 
 	ctrl := gomock.NewController(t)
@@ -219,10 +231,15 @@ func TestCreateAdminPasswordNotMatch(t *testing.T) {
 }
 
 func TestCreateAdminDuplicateEmail(t *testing.T) {
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	u := pbv1.CreateAdminRequest{
 		Email:           "duplicate-mock-admin-email-1",
 		Password:        "mypassword-1",
 		PasswordConfirm: "mypassword-1",
+		AccessToken:     admin_access_token,
 	}
 
 	ctrl := gomock.NewController(t)
@@ -246,7 +263,7 @@ func TestVerifyCodeSuccess(t *testing.T) {
 	m.EXPECT().VerifyEmail(gomock.Any(), "1", mockCode).Return(nil)
 
 	p := &pbv1.VerifyEmailCodeRequest{
-		Code: mockCode,
+		Code:      mockCode,
 		StudentId: "1",
 	}
 	s := server.NewAuthServer(m)
@@ -264,7 +281,7 @@ func TestVerifyCodeAlreadyVerified(t *testing.T) {
 	m.EXPECT().VerifyEmail(gomock.Any(), "2", mockCode).Return(domain.ErrAlreadyVerified)
 
 	p := &pbv1.VerifyEmailCodeRequest{
-		Code: mockCode,
+		Code:      mockCode,
 		StudentId: "2",
 	}
 	s := server.NewAuthServer(m)

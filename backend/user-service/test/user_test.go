@@ -138,12 +138,12 @@ func TestUpdateStudentUnAuthorized(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockUserServicePort(ctrl)
-	m.EXPECT().UpdateStudentMe(gomock.Any(), int64(33), req.Student).Return(domain.ErrNotAuthorized)
+	m.EXPECT().UpdateStudentMe(gomock.Any(), int64(33), req.Student).Return(domain.ErrForbidden)
 
 	s := server.NewUserServer(m)
 	r, err := s.UpdateStudent(context.Background(), req)
 	require.NoError(t, err)
-	require.Equal(t, int64(401), r.Status)
+	require.Equal(t, int64(403), r.Status)
 }
 
 // Company Zone
@@ -260,12 +260,12 @@ func TestUpdateCompanyUnAuthorized(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockUserServicePort(ctrl)
-	m.EXPECT().UpdateCompanyMe(gomock.Any(), int64(66), req.Company).Return(domain.ErrNotAuthorized)
+	m.EXPECT().UpdateCompanyMe(gomock.Any(), int64(66), req.Company).Return(domain.ErrForbidden)
 
 	s := server.NewUserServer(m)
 	r, err := s.UpdateCompany(context.Background(), req)
 	require.NoError(t, err)
-	require.Equal(t, int64(401), r.Status)
+	require.Equal(t, int64(403), r.Status)
 }
 
 func TestListCompaniesSuccess(t *testing.T) {
@@ -313,12 +313,12 @@ func TestListCompaniesNotAuthorized(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockUserServicePort(ctrl)
-	m.EXPECT().GetAllCompany(gomock.Any(), int64(77)).Return(nil, domain.ErrNotAuthorized)
+	m.EXPECT().GetAllCompany(gomock.Any(), int64(77)).Return(nil, domain.ErrForbidden)
 
 	s := server.NewUserServer(m)
 	r, err := s.ListCompanies(context.Background(), req)
 	require.NoError(t, err)
-	require.Equal(t, int64(401), r.Status)
+	require.Equal(t, int64(403), r.Status)
 }
 
 func TestListApprovedCompaniesSuccess(t *testing.T) {
@@ -362,14 +362,14 @@ func TestApproveCompanySuccess(t *testing.T) {
 	req := &pbv1.UpdateCompanyStatusRequest{
 		AccessToken: createMockToken(t, 9, domain.AdminRole),
 		Id:          99,
-		Status:      "Approve",
+		Status:      domain.ComapanyStatusApprove,
 	}
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	m := mock.NewMockUserServicePort(ctrl)
-	m.EXPECT().UpdateCompanyStatus(gomock.Any(), int64(9), int64(99), "Approve").Return(nil)
+	m.EXPECT().UpdateCompanyStatus(gomock.Any(), int64(9), int64(99), domain.ComapanyStatusApprove).Return(nil)
 
 	s := server.NewUserServer(m)
 	r, err := s.UpdateCompanyStatus(context.Background(), req)
@@ -381,14 +381,14 @@ func TestRejectCompanySuccess(t *testing.T) {
 	req := &pbv1.UpdateCompanyStatusRequest{
 		AccessToken: createMockToken(t, 9, domain.AdminRole),
 		Id:          999,
-		Status:      "Reject",
+		Status:      domain.ComapanyStatusReject,
 	}
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	m := mock.NewMockUserServicePort(ctrl)
-	m.EXPECT().UpdateCompanyStatus(gomock.Any(), int64(9), int64(999), "Reject").Return(nil)
+	m.EXPECT().UpdateCompanyStatus(gomock.Any(), int64(9), int64(999), domain.ComapanyStatusReject).Return(nil)
 
 	s := server.NewUserServer(m)
 	r, err := s.UpdateCompanyStatus(context.Background(), req)
@@ -400,17 +400,17 @@ func TestUpdateCompanyStatusUnAuthorized(t *testing.T) {
 	req := &pbv1.UpdateCompanyStatusRequest{
 		AccessToken: createMockToken(t, 99, domain.StudentRole),
 		Id:          9999,
-		Status:      "Approve",
+		Status:      domain.ComapanyStatusApprove,
 	}
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	m := mock.NewMockUserServicePort(ctrl)
-	m.EXPECT().UpdateCompanyStatus(gomock.Any(), int64(99), int64(9999), "Approve").Return(domain.ErrNotAuthorized)
+	m.EXPECT().UpdateCompanyStatus(gomock.Any(), int64(99), int64(9999), domain.ComapanyStatusApprove).Return(domain.ErrForbidden)
 
 	s := server.NewUserServer(m)
 	r, err := s.UpdateCompanyStatus(context.Background(), req)
 	require.NoError(t, err)
-	require.Equal(t, int64(401), r.Status)
+	require.Equal(t, int64(403), r.Status)
 }

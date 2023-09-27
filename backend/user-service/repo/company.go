@@ -156,7 +156,7 @@ func (r *userRepository) UpdateCompanyStatus(ctx context.Context, id int64, stat
 
 	// Update Table users
 	var verified bool
-	if status == "Approve" {
+	if status == domain.ComapanyStatusApprove {
 		verified = true
 	} else {
 		verified = false

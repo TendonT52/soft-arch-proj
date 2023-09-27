@@ -8,6 +8,12 @@ const (
 	CompanyRole = "company"
 )
 
+const (
+	ComapanyStatusPending = "Pending"
+	ComapanyStatusApprove = "Approve"
+	ComapanyStatusReject  = "Reject"
+)
+
 type UserStatus struct {
 	Verified bool
 	Role     string

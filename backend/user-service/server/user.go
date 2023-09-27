@@ -27,7 +27,7 @@ func NewUserServer(s port.UserServicePort) *UserServer {
 func (s *UserServer) UserHealthCheck(context.Context, *pbv1.UserHealthCheckRequest) (*pbv1.UserHealthCheckResponse, error) {
 	log.Println("User HealthCheck success: ", http.StatusOK)
 	return &pbv1.UserHealthCheckResponse{
-		Status:  http.StatusOK,
+		Status: http.StatusOK,
 	}, nil
 }
 
@@ -37,8 +37,8 @@ func (s *UserServer) GetStudentMe(ctx context.Context, req *pbv1.GetStudentMeReq
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.GetStudentResponse{
-			Status:  http.StatusBadRequest,
-			Message: err.Error(),
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
 		}, nil
 	}
 
@@ -47,7 +47,7 @@ func (s *UserServer) GetStudentMe(ctx context.Context, req *pbv1.GetStudentMeReq
 		log.Println("Error from get student (Me): ", err)
 		return &pbv1.GetStudentResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
@@ -64,8 +64,8 @@ func (s *UserServer) GetStudent(ctx context.Context, req *pbv1.GetStudentRequest
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.GetStudentResponse{
-			Status:  http.StatusBadRequest,
-			Message: err.Error(),
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
 		}, nil
 	}
 
@@ -81,7 +81,7 @@ func (s *UserServer) GetStudent(ctx context.Context, req *pbv1.GetStudentRequest
 		log.Println("Error from get student: ", err)
 		return &pbv1.GetStudentResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
@@ -98,8 +98,8 @@ func (s *UserServer) UpdateStudent(ctx context.Context, req *pbv1.UpdateStudentR
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.UpdateStudentResponse{
-			Status:  http.StatusBadRequest,
-			Message: err.Error(),
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
 		}, nil
 	}
 
@@ -111,10 +111,10 @@ func (s *UserServer) UpdateStudent(ctx context.Context, req *pbv1.UpdateStudentR
 			Message: "user id not found",
 		}, nil
 	}
-	if errors.Is(err, domain.ErrNotAuthorized) {
+	if errors.Is(err, domain.ErrForbidden) {
 		log.Println("Error NOT Authorize: ", err)
 		return &pbv1.UpdateStudentResponse{
-			Status:  http.StatusUnauthorized,
+			Status:  http.StatusForbidden,
 			Message: "You are not authorized to update this student",
 		}, nil
 	}
@@ -122,7 +122,7 @@ func (s *UserServer) UpdateStudent(ctx context.Context, req *pbv1.UpdateStudentR
 		log.Println("Error from update student: ", err)
 		return &pbv1.UpdateStudentResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
@@ -140,8 +140,8 @@ func (s *UserServer) GetCompanyMe(ctx context.Context, req *pbv1.GetCompanyMeReq
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.GetCompanyResponse{
-			Status:  http.StatusBadRequest,
-			Message: err.Error(),
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
 		}, nil
 	}
 
@@ -150,7 +150,7 @@ func (s *UserServer) GetCompanyMe(ctx context.Context, req *pbv1.GetCompanyMeReq
 		log.Println("Error from get company (Me): ", err)
 		return &pbv1.GetCompanyResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
@@ -168,8 +168,8 @@ func (s *UserServer) GetCompany(ctx context.Context, req *pbv1.GetCompanyRequest
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.GetCompanyResponse{
-			Status:  http.StatusBadRequest,
-			Message: err.Error(),
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
 		}, nil
 	}
 
@@ -185,7 +185,7 @@ func (s *UserServer) GetCompany(ctx context.Context, req *pbv1.GetCompanyRequest
 		log.Println("Error from get company: ", err)
 		return &pbv1.GetCompanyResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
@@ -202,8 +202,8 @@ func (s *UserServer) UpdateCompany(ctx context.Context, req *pbv1.UpdateCompanyR
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.UpdateCompanyResponse{
-			Status:  http.StatusBadRequest,
-			Message: err.Error(),
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
 		}, nil
 	}
 
@@ -215,10 +215,10 @@ func (s *UserServer) UpdateCompany(ctx context.Context, req *pbv1.UpdateCompanyR
 			Message: "user id not found",
 		}, nil
 	}
-	if errors.Is(err, domain.ErrNotAuthorized) {
+	if errors.Is(err, domain.ErrForbidden) {
 		log.Println("Error NOT Authorize: ", err)
 		return &pbv1.UpdateCompanyResponse{
-			Status:  http.StatusUnauthorized,
+			Status:  http.StatusForbidden,
 			Message: "You are not authorized to update this company",
 		}, nil
 	}
@@ -226,7 +226,7 @@ func (s *UserServer) UpdateCompany(ctx context.Context, req *pbv1.UpdateCompanyR
 		log.Println("Error from update company: ", err)
 		return &pbv1.UpdateCompanyResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
@@ -243,16 +243,16 @@ func (s *UserServer) ListCompanies(ctx context.Context, req *pbv1.ListCompaniesR
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.ListCompaniesResponse{
-			Status:  http.StatusBadRequest,
-			Message: err.Error(),
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
 		}, nil
 	}
 
 	res, err := s.UserService.GetAllCompany(ctx, payload.UserId)
-	if errors.Is(err, domain.ErrNotAuthorized) {
+	if errors.Is(err, domain.ErrForbidden) {
 		log.Println("Error NOT Authorize: ", err)
 		return &pbv1.ListCompaniesResponse{
-			Status:  http.StatusUnauthorized,
+			Status:  http.StatusForbidden,
 			Message: "Only admin can view",
 		}, nil
 	}
@@ -260,7 +260,7 @@ func (s *UserServer) ListCompanies(ctx context.Context, req *pbv1.ListCompaniesR
 		log.Println("Error from list companies: ", err)
 		return &pbv1.ListCompaniesResponse{
 			Status:  http.StatusBadRequest,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
@@ -278,8 +278,8 @@ func (s *UserServer) ListApprovedCompanies(ctx context.Context, req *pbv1.ListAp
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.ListApprovedCompaniesResponse{
-			Status:  http.StatusBadRequest,
-			Message: err.Error(),
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
 		}, nil
 	}
 
@@ -306,23 +306,30 @@ func (s *UserServer) UpdateCompanyStatus(ctx context.Context, req *pbv1.UpdateCo
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.UpdateCompanyStatusResponse{
-			Status:  http.StatusBadRequest,
-			Message: err.Error(),
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
 		}, nil
 	}
 
 	err = s.UserService.UpdateCompanyStatus(ctx, payload.UserId, req.Id, req.Status)
-	if errors.Is(err, domain.ErrNotAuthorized) {
+	if errors.Is(err, domain.ErrForbidden) {
 		return &pbv1.UpdateCompanyStatusResponse{
-			Status:  http.StatusUnauthorized,
+			Status:  http.StatusForbidden,
 			Message: "Only admin can approve",
 		}, nil
 	}
-	if err != nil {
+	if errors.Is(err, domain.ErrAlreadyVerified) || errors.Is(err, domain.ErrInvalidStatus) || errors.Is(err, domain.ErrMailNotSent) {
 		log.Println("Error from update company status: ", err)
 		return &pbv1.UpdateCompanyStatusResponse{
 			Status:  http.StatusBadRequest,
 			Message: err.Error(),
+		}, nil
+	}
+	if err != nil {
+		log.Println("Error internal when update company status: ", err)
+		return &pbv1.UpdateCompanyStatusResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Something went wrong",
 		}, nil
 	}
 

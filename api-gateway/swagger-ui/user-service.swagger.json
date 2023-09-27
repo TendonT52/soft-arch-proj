@@ -559,6 +559,9 @@
         },
         "passwordConfirm": {
           "type": "string"
+        },
+        "accessToken": {
+          "type": "string"
         }
       },
       "title": "Create admin (Internal Use)"

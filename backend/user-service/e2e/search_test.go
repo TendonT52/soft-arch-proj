@@ -42,7 +42,7 @@ func createMockStudent(t *testing.T, admin_access string) string {
 	defer cancel()
 
 	// Register
-	studentEmail := utils.GenerateRandomString(10) + "@student.chula.ac.th"
+	studentEmail := utils.GenerateRandomNumber(10) + "@student.chula.ac.th"
 	student := &pbv1.CreateStudentRequest{
 		Name:            "Mock Student" + utils.GenerateRandomString(3),
 		Email:           studentEmail,
@@ -97,10 +97,15 @@ func TestListApprovedCompanies(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create Admin
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	admin := &pbv1.CreateAdminRequest{
-		Email:           utils.GenerateRandomString(10) + "@admin.com",
+		Email:           utils.GenerateRandomString(18) + "@admin.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	}
 	a, err := c.CreateAdmin(ctx, admin)
 	require.Equal(t, int64(201), a.Status)
@@ -135,8 +140,8 @@ func TestListApprovedCompanies(t *testing.T) {
 	c5 := createMockComapny(t, "Mock Company 5 Tech Company", mail5, "Company5 desc", "Bangkok", "0123456789", "Food")
 
 	// Approve Companies
-	approveMultipleCompanies(t, []int64{c1.Id, c2.Id, c3.Id, c4.Id}, ad, u, "Approve")
-	approveMultipleCompanies(t, []int64{c5.Id}, ad, u, "Reject")
+	approveMultipleCompanies(t, []int64{c1.Id, c2.Id, c3.Id, c4.Id}, ad, u, domain.ComapanyStatusApprove)
+	approveMultipleCompanies(t, []int64{c5.Id}, ad, u, domain.ComapanyStatusReject)
 
 	// Create Student
 	student_access := createMockStudent(t, ad.AccessToken)
@@ -197,6 +202,15 @@ func TestListApprovedCompanies(t *testing.T) {
 					c3,
 					c4,
 				},
+			},
+		},
+		"invalidate token": {
+			req: &pbv1.ListApprovedCompaniesRequest{
+				AccessToken: "wrong token",
+			},
+			expect: &pbv1.ListApprovedCompaniesResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
 			},
 		},
 	}
