@@ -31,7 +31,7 @@ func TestGetCompanyMe(t *testing.T) {
 	defer cancel()
 
 	// Craete Admin
-	aa := utils.GenerateRandomString(10) + "@admin.com"
+	aa := utils.GenerateRandomString(11) + "@admin.com"
 	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
 		UserId: 0,
 		Role:   domain.AdminRole,
@@ -49,7 +49,7 @@ func TestGetCompanyMe(t *testing.T) {
 	// Admin Sign In
 	admin_res, err := c.SignIn(ctx, &pbv1.LoginRequest{
 		Email:    aa,
-		Password: admin.Password,
+		Password: "password-test",
 	})
 	require.Equal(t, int64(200), admin_res.Status)
 	require.NoError(t, err)
@@ -57,7 +57,7 @@ func TestGetCompanyMe(t *testing.T) {
 	// Register
 	com := &pbv1.CreateCompanyRequest{
 		Name:            "Mock Company " + utils.GenerateRandomString(3),
-		Email:           utils.GenerateRandomString(10) + "@company.com",
+		Email:           utils.GenerateRandomString(13) + "@company.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
 		Description:     "I am a company",
@@ -159,7 +159,7 @@ func TestGetComapany(t *testing.T) {
 	defer cancel()
 
 	// Craete Admin
-	aa := utils.GenerateRandomString(10) + "@admin.com"
+	aa := utils.GenerateRandomString(12) + "@admin.com"
 	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
 		UserId: 0,
 		Role:   domain.AdminRole,
@@ -177,7 +177,7 @@ func TestGetComapany(t *testing.T) {
 	// Admin Sign In
 	admin_res, err := c.SignIn(ctx, &pbv1.LoginRequest{
 		Email:    aa,
-		Password: admin.Password,
+		Password: "password-test",
 	})
 	require.Equal(t, int64(200), admin_res.Status)
 	require.NoError(t, err)
@@ -185,7 +185,7 @@ func TestGetComapany(t *testing.T) {
 	// Register
 	com := &pbv1.CreateCompanyRequest{
 		Name:            "Mock Company " + utils.GenerateRandomString(3),
-		Email:           utils.GenerateRandomString(10) + "@company.com",
+		Email:           utils.GenerateRandomString(14) + "@company.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
 		Description:     "I am a company",
@@ -285,7 +285,7 @@ func TestUpdateCompany(t *testing.T) {
 	defer cancel()
 
 	// Craete Admin
-	aa := utils.GenerateRandomString(10) + "@admin.com"
+	aa := utils.GenerateRandomString(15) + "@admin.com"
 	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
 		UserId: 0,
 		Role:   domain.AdminRole,
@@ -311,7 +311,7 @@ func TestUpdateCompany(t *testing.T) {
 	// Register
 	com := &pbv1.CreateCompanyRequest{
 		Name:            "Mock Company " + utils.GenerateRandomString(3),
-		Email:           utils.GenerateRandomString(10) + "@company.com",
+		Email:           utils.GenerateRandomString(16) + "@company.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
 		Description:     "I am a company",

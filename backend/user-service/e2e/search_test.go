@@ -42,7 +42,7 @@ func createMockStudent(t *testing.T, admin_access string) string {
 	defer cancel()
 
 	// Register
-	studentEmail := utils.GenerateRandomString(10) + "@student.chula.ac.th"
+	studentEmail := utils.GenerateRandomNumber(10) + "@student.chula.ac.th"
 	student := &pbv1.CreateStudentRequest{
 		Name:            "Mock Student" + utils.GenerateRandomString(3),
 		Email:           studentEmail,
@@ -102,7 +102,7 @@ func TestListApprovedCompanies(t *testing.T) {
 		Role:   domain.AdminRole,
 	})
 	admin := &pbv1.CreateAdminRequest{
-		Email:           utils.GenerateRandomString(10) + "@admin.com",
+		Email:           utils.GenerateRandomString(18) + "@admin.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
 		AccessToken:     admin_access_token,

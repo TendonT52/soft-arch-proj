@@ -181,7 +181,7 @@ func TestCreateCompany(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	companyTestEmail := utils.GenerateRandomString(10) + "@gmail.com"
+	companyTestEmail := utils.GenerateRandomString(5) + "@gmail.com"
 
 	tests := map[string]struct {
 		req    *pbv1.CreateCompanyRequest
@@ -283,7 +283,7 @@ func TestCreateAdmin(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	adminTestEmail := utils.GenerateRandomString(10) + "@gmail.com"
+	adminTestEmail := utils.GenerateRandomString(6) + "@gmail.com"
 	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
 		UserId: 0,
 		Role:   domain.AdminRole,
@@ -417,7 +417,7 @@ func TestSignIn(t *testing.T) {
 		Role:   domain.AdminRole,
 	})
 	a := &pbv1.CreateAdminRequest{
-		Email:           utils.GenerateRandomString(10) + "@gmail.com",
+		Email:           utils.GenerateRandomString(7) + "@gmail.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
 		AccessToken:     admin_access_token,
@@ -493,7 +493,7 @@ func TestRefreshToken(t *testing.T) {
 		UserId: 0,
 		Role:   domain.AdminRole,
 	})
-	mock_email := utils.GenerateRandomString(10) + "@gmail.com"
+	mock_email := utils.GenerateRandomString(8) + "@gmail.com"
 	_, err = c.CreateAdmin(ctx, &pbv1.CreateAdminRequest{
 		Email:           mock_email,
 		Password:        "password-test",
@@ -512,7 +512,7 @@ func TestRefreshToken(t *testing.T) {
 	require.NoError(t, err)
 
 	// Person 2 Already logged out
-	mock_email2 := utils.GenerateRandomString(10) + "@gmail.com"
+	mock_email2 := utils.GenerateRandomString(9) + "@gmail.com"
 	_, err = c.CreateAdmin(ctx, &pbv1.CreateAdminRequest{
 		Email:           mock_email2,
 		Password:        "password-test",

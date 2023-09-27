@@ -188,7 +188,7 @@ func TestGetStudent(t *testing.T) {
 		Role:   domain.AdminRole,
 	})
 	a := &pbv1.CreateAdminRequest{
-		Email:           utils.GenerateRandomString(10) + "@gmail.com",
+		Email:           utils.GenerateRandomString(20) + "@gmail.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
 		AccessToken:     admin_access_token,
