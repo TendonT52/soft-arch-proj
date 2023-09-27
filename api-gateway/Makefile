@@ -51,3 +51,22 @@ k8s-run-prod:
 		"MODE=local make deploy"
 	telepresence connect
 	kubectl wait --for=condition=Ready pods --all --all-namespaces
+
+k8s-run-local:
+	make gen-swagger
+	$(eval DATA_PATH := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/data)
+	DATA_PATH=${DATA_PATH} make -C .. k8s-clear
+
+	@echo "Persistent data will be stored in ${DATA_PATH}"
+	parallel ::: \
+		"telepresence helm install" \
+		"DATA_PATH=${DATA_PATH} make -C ../helm memphis" \
+		"DATA_PATH=${DATA_PATH}/user-service make -C ../backend/user-service dependency" \
+		"DATA_PATH=${DATA_PATH}/post-service make -C ../backend/post-service dependency" \
+		"DATA_PATH=${DATA_PATH}/report-service make -C ../backend/report-service dependency" \
+		"MODE=local make -C ../backend/user-service deploy" \
+		"MODE=local make -C ../backend/post-service deploy" \
+		"MODE=local make -C ../backend/report-service deploy" \
+		"MODE=local make deploy"
+	telepresence connect
+	kubectl wait --for=condition=Ready pods --all --all-namespaces
