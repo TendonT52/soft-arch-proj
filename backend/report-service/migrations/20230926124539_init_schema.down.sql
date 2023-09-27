@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS reports;
+DROP TYPE IF EXISTS reporttype;
