@@ -3,8 +3,10 @@ package mock
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/TikhampornSky/go-post-service/config"
+	"github.com/TikhampornSky/go-post-service/domain"
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 	"github.com/TikhampornSky/go-post-service/utils"
 	"google.golang.org/grpc"
@@ -87,10 +89,15 @@ func CreateMockAdmin(ctx context.Context) (string, error) {
 
 	// Create Admin
 	adminEmail := utils.GenerateRandomString(10) + "@admin.com"
+	admin_access_token, err := GenerateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   "admin",
+	})
 	reqAdmin := &pbv1.CreateAdminRequest{
 		Email:           adminEmail,
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	}
 
 	_, err = client.CreateAdmin(ctx, reqAdmin)
