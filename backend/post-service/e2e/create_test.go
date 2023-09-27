@@ -153,7 +153,7 @@ func TestCreatePost(t *testing.T) {
 				Message: "Please fill all required fields",
 			},
 		},
-		"Unauthorized": {
+		"Not company": {
 			req: &pbv1.CreatePostRequest{
 				Post: &pbv1.Post{
 					Topic:          "Topic Test",
@@ -167,8 +167,26 @@ func TestCreatePost(t *testing.T) {
 				AccessToken: tokenStudent,
 			},
 			expect: &pbv1.CreatePostResponse{
+				Status:  403,
+				Message: "You are not allowed to create post",
+			},
+		},
+		"Invalid token": {
+			req: &pbv1.CreatePostRequest{
+				Post: &pbv1.Post{
+					Topic:          "Topic Test",
+					Description:    lex,
+					Period:         "01/01/2023 - 02/02/2023",
+					HowTo:          lex,
+					OpenPositions:  []string{"OpenPositions Test"},
+					RequiredSkills: []string{"RequiredSkills Test"},
+					Benefits:       []string{"Benefits Test"},
+				},
+				AccessToken: "invalid token",
+			},
+			expect: &pbv1.CreatePostResponse{
 				Status:  401,
-				Message: "Unauthorized",
+				Message: "Your access token is invalid",
 			},
 		},
 	}

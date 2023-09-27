@@ -130,8 +130,8 @@ func TestGetPost(t *testing.T) {
 				Id:          res.Id,
 			},
 			expect: &pbv1.GetPostResponse{
-				Status:  500,
-				Message: "Internal server error",
+				Status:  401,
+				Message: "Your access token is invalid",
 			},
 		},
 		"post not found": {

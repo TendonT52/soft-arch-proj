@@ -105,14 +105,24 @@ func TestGetOpenPositions(t *testing.T) {
 				OpenPositions: []string(nil),
 			},
 		},
-		"unauthorized": {
+		"not company": {
 			req: &pbv1.GetOpenPositionsRequest{
 				AccessToken: tokenStudent,
 				Search:      "Developer",
 			},
 			expect: &pbv1.GetOpenPositionsResponse{
+				Status:  403,
+				Message: "Forbidden",
+			},
+		},
+		"invalid token": {
+			req: &pbv1.GetOpenPositionsRequest{
+				AccessToken: "invalid token",
+				Search:      "Developer",
+			},
+			expect: &pbv1.GetOpenPositionsResponse{
 				Status:  401,
-				Message: "Unauthorized",
+				Message: "Your access token is invalid",
 			},
 		},
 	}
@@ -217,14 +227,24 @@ func TestGetRequiredSkills(t *testing.T) {
 				RequiredSkills: []string(nil),
 			},
 		},
-		"unauthorized": {
+		"not Company": {
 			req: &pbv1.GetRequiredSkillsRequest{
 				AccessToken: tokenStudent,
 				Search:      "Go",
 			},
 			expect: &pbv1.GetRequiredSkillsResponse{
+				Status:  403,
+				Message: "Forbidden",
+			},
+		},
+		"invalid token": {
+			req: &pbv1.GetRequiredSkillsRequest{
+				AccessToken: "invalid token",
+				Search:      "Go",
+			},
+			expect: &pbv1.GetRequiredSkillsResponse{
 				Status:  401,
-				Message: "Unauthorized",
+				Message: "Your access token is invalid",
 			},
 		},
 	}
@@ -329,14 +349,24 @@ func TestGetBenefits(t *testing.T) {
 				Benefits: []string(nil),
 			},
 		},
-		"unauthorized": {
+		"not Company": {
 			req: &pbv1.GetBenefitsRequest{
 				AccessToken: tokenStudent,
 				Search:      "free",
 			},
 			expect: &pbv1.GetBenefitsResponse{
+				Status:  403,
+				Message: "Forbidden",
+			},
+		},
+		"invalid token": {
+			req: &pbv1.GetBenefitsRequest{
+				AccessToken: "invalid token",
+				Search:      "free",
+			},
+			expect: &pbv1.GetBenefitsResponse{
 				Status:  401,
-				Message: "Unauthorized",
+				Message: "Your access token is invalid",
 			},
 		},
 	}

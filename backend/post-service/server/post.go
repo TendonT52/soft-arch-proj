@@ -36,11 +36,18 @@ func (s *PostServer) CreatePost(ctx context.Context, req *pbv1.CreatePostRequest
 			Message: "Please fill all required fields",
 		}, nil
 	}
-	if errors.Is(err, domain.ErrUnauthorized) {
+	if errors.Is(err, domain.ErrForbidden) {
+		log.Println("Create Post: Forbidden")
+		return &pbv1.CreatePostResponse{
+			Status:  http.StatusForbidden,
+			Message: "You are not allowed to create post",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrUnauthorize) {
 		log.Println("Create Post: Unauthorized")
 		return &pbv1.CreatePostResponse{
 			Status:  http.StatusUnauthorized,
-			Message: "Unauthorized",
+			Message: "Your access token is invalid",
 		}, nil
 	}
 	if err != nil {
@@ -60,11 +67,11 @@ func (s *PostServer) CreatePost(ctx context.Context, req *pbv1.CreatePostRequest
 
 func (s *PostServer) GetPost(ctx context.Context, req *pbv1.GetPostRequest) (*pbv1.GetPostResponse, error) {
 	post, err := s.PostService.GetPost(ctx, req.AccessToken, req.Id)
-	if errors.Is(err, domain.ErrUnauthorized) {
+	if errors.Is(err, domain.ErrUnauthorize) {
 		log.Println("Get Post: Unauthorized")
 		return &pbv1.GetPostResponse{
 			Status:  http.StatusUnauthorized,
-			Message: "Unauthorized",
+			Message: "Your access token is invalid",
 		}, nil
 	}
 	if errors.Is(err, domain.ErrPostNotFound) {
@@ -90,6 +97,13 @@ func (s *PostServer) GetPost(ctx context.Context, req *pbv1.GetPostRequest) (*pb
 
 func (s *PostServer) ListPosts(ctx context.Context, req *pbv1.ListPostsRequest) (*pbv1.ListPostsResponse, error) {
 	posts, err := s.PostService.GetPosts(ctx, req.AccessToken, req.SearchOptions)
+	if errors.Is(err, domain.ErrUnauthorize) {
+		log.Println("List Posts: Unauthorized")
+		return &pbv1.ListPostsResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
+		}, nil
+	}
 	if errors.Is(err, domain.ErrPostNotFound) {
 		log.Println("List Posts: Posts not found")
 		return &pbv1.ListPostsResponse{
@@ -121,11 +135,18 @@ func (s *PostServer) UpdatePost(ctx context.Context, req *pbv1.UpdatePostRequest
 			Message: "Please fill all required fields",
 		}, nil
 	}
-	if errors.Is(err, domain.ErrUnauthorized) {
+	if errors.Is(err, domain.ErrForbidden) {
+		log.Println("Update Post: Forbidden")
+		return &pbv1.UpdatePostResponse{
+			Status:  http.StatusForbidden,
+			Message: "You are not allowed to update post",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrUnauthorize) {
 		log.Println("Update Post: Unauthorized")
 		return &pbv1.UpdatePostResponse{
 			Status:  http.StatusUnauthorized,
-			Message: "Unauthorized",
+			Message: "Your access token is invalid",
 		}, nil
 	}
 	if err != nil {
@@ -144,11 +165,18 @@ func (s *PostServer) UpdatePost(ctx context.Context, req *pbv1.UpdatePostRequest
 
 func (s *PostServer) DeletePost(ctx context.Context, req *pbv1.DeletePostRequest) (*pbv1.DeletePostResponse, error) {
 	err := s.PostService.DeletePost(ctx, req.AccessToken, req.Id)
-	if errors.Is(err, domain.ErrUnauthorized) {
+	if errors.Is(err, domain.ErrForbidden) {
+		log.Println("Delete Post: Forbidden")
+		return &pbv1.DeletePostResponse{
+			Status:  http.StatusForbidden,
+			Message: "You are not allowed to delete post",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrUnauthorize) {
 		log.Println("Delete Post: Unauthorized")
 		return &pbv1.DeletePostResponse{
 			Status:  http.StatusUnauthorized,
-			Message: "Unauthorized",
+			Message: "Your access token is invalid",
 		}, nil
 	}
 	if err != nil {
@@ -166,11 +194,18 @@ func (s *PostServer) DeletePost(ctx context.Context, req *pbv1.DeletePostRequest
 
 func (s *PostServer) GetOpenPositions(ctx context.Context, req *pbv1.GetOpenPositionsRequest) (*pbv1.GetOpenPositionsResponse, error) {
 	openPositions, err := s.PostService.GetOpenPositions(ctx, req.AccessToken, req.Search)
-	if errors.Is(err, domain.ErrUnauthorized) {
+	if errors.Is(err, domain.ErrForbidden) {
+		log.Println("Get Open Positions: Forbidden")
+		return &pbv1.GetOpenPositionsResponse{
+			Status:  http.StatusForbidden,
+			Message: "Forbidden",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrUnauthorize) {
 		log.Println("Get Open Positions: Unauthorized")
 		return &pbv1.GetOpenPositionsResponse{
 			Status:  http.StatusUnauthorized,
-			Message: "Unauthorized",
+			Message: "Your access token is invalid",
 		}, nil
 	}
 	if err != nil {
@@ -190,11 +225,18 @@ func (s *PostServer) GetOpenPositions(ctx context.Context, req *pbv1.GetOpenPosi
 
 func (s *PostServer) GetRequiredSkills(ctx context.Context, req *pbv1.GetRequiredSkillsRequest) (*pbv1.GetRequiredSkillsResponse, error) {
 	requiredSkills, err := s.PostService.GetRequiredSkills(ctx, req.AccessToken, req.Search)
-	if errors.Is(err, domain.ErrUnauthorized) {
+	if errors.Is(err, domain.ErrForbidden) {
+		log.Println("Get Required Skills: Forbidden")
+		return &pbv1.GetRequiredSkillsResponse{
+			Status:  http.StatusForbidden,
+			Message: "Forbidden",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrUnauthorize) {
 		log.Println("Get Required Skills: Unauthorized")
 		return &pbv1.GetRequiredSkillsResponse{
 			Status:  http.StatusUnauthorized,
-			Message: "Unauthorized",
+			Message: "Your access token is invalid",
 		}, nil
 	}
 	if err != nil {
@@ -214,11 +256,18 @@ func (s *PostServer) GetRequiredSkills(ctx context.Context, req *pbv1.GetRequire
 
 func (s *PostServer) GetBenefits(ctx context.Context, req *pbv1.GetBenefitsRequest) (*pbv1.GetBenefitsResponse, error) {
 	benefits, err := s.PostService.GetBenefits(ctx, req.AccessToken, req.Search)
-	if errors.Is(err, domain.ErrUnauthorized) {
+	if errors.Is(err, domain.ErrForbidden) {
+		log.Println("Get Benefits: Forbidden")
+		return &pbv1.GetBenefitsResponse{
+			Status:  http.StatusForbidden,
+			Message: "Forbidden",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrUnauthorize) {
 		log.Println("Get Benefits: Unauthorized")
 		return &pbv1.GetBenefitsResponse{
 			Status:  http.StatusUnauthorized,
-			Message: "Unauthorized",
+			Message: "Your access token is invalid",
 		}, nil
 	}
 	if err != nil {
