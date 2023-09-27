@@ -1,0 +1,240 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "v1/report.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "ReportService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/reports": {
+      "get": {
+        "operationId": "ReportService_ListReports",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userListReportsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "accessToken",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ReportService"
+        ]
+      },
+      "post": {
+        "operationId": "ReportService_CreateReport",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userCreateReportResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/userCreateReportRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ReportService"
+        ]
+      }
+    },
+    "/v1/reports/{id}": {
+      "get": {
+        "operationId": "ReportService_GetReport",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userGetReportResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ReportService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "userCreateReportRequest": {
+      "type": "object",
+      "properties": {
+        "report": {
+          "$ref": "#/definitions/userReport"
+        },
+        "accessToken": {
+          "type": "string"
+        }
+      },
+      "title": "Create Report"
+    },
+    "userCreateReportResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "userGetReportResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        },
+        "report": {
+          "$ref": "#/definitions/userReport"
+        }
+      }
+    },
+    "userListReportsResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/userReport"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "userReport": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "userReportHealthCheckResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    }
+  }
+}

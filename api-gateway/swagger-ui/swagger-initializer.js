@@ -6,6 +6,7 @@ window.onload = function () {
     urls: [
       { url: "post-service.swagger.json", name: "Post service" },
       { url: "user-service.swagger.json", name: "User service" },
+      { url: "report-service.swagger.json", name: "Report service" },
     ],
     dom_id: "#swagger-ui",
     deepLinking: true,

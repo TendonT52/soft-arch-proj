@@ -9,6 +9,7 @@ type Config struct {
 	RESTPort       string `mapstructure:"REST_PORT"`
 	UserServiceURL string `mapstructure:"USER_SERVICE_URL"`
 	PostServiceURL string `mapstructure:"POST_SERVICE_URL"`
+	ReportServiceURL string `mapstructure:"REPORT_SERVICE_URL"`
 }
 
 func LoadConfig(path string) (*Config, error) {

@@ -12,8 +12,9 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rakyll/statik/fs"
 	"github.com/tendont52/api-gateway/config"
-	userService "github.com/tendont52/api-gateway/gen/user-service/v1"
 	postService "github.com/tendont52/api-gateway/gen/post-service/v1"
+	reportService "github.com/tendont52/api-gateway/gen/report-service/v1"
+	userService "github.com/tendont52/api-gateway/gen/user-service/v1"
 	_ "github.com/tendont52/api-gateway/statik"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -51,6 +52,10 @@ func Serve(conf *config.Config) error {
 	err = postService.RegisterPostServiceHandlerFromEndpoint(ctx, gwmux, conf.PostServiceURL, opts)
 	if err != nil {
 		log.Fatalf("cannot register post service: %v", err)
+	}
+	err = reportService.RegisterReportServiceHandlerFromEndpoint(ctx, gwmux, conf.ReportServiceURL, opts)
+	if err != nil {
+		log.Fatalf("cannot register report service: %v", err)
 	}
 
 	gwServer := &http.Server{
