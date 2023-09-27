@@ -1,108 +1,105 @@
-# Setup Guide
+# Configuration Instructions
 
-This document provides step-by-step instructions on how to install necessary packages and tools for your system.
+This README provides detailed instructions on how to install the required packages and tools for your system.
 
-## Before You Begin
+## Preparatory Steps
 
-- Ensure [Homebrew](https://brew.sh/) is installed on your system. If not, set it up with the following command:
-    ```bash
-    /bin/bash -c "$(curl -fsSL <https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh>)"
-    ```
+- Make sure [Homebrew](https://brew.sh/) is installed on your system. If not, install it using the following command:
 
-## Installation Procedures
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh>)"
+```
 
-1. **Set Up Parallel**
-   
-    ```bash
-    brew install parallel
-    ```
+## Steps for Installation
 
-3. **Set Up Kubernetes CLI**
-   
-    ```bash
-    brew install kubernetes-cli
-    ```
+1. **Install Parallel**
 
-5. **Set Up Helm**
-   
-    ```bash
-    brew install helm
-    ```
+```bash
+brew install parallel
+```
 
-7. **Set Up Golang Migrate**
-   
-    ```bash
-    brew install golang-migrate
-    ```
+2. **Install Kubernetes CLI**
 
-9. **Set Up psql**
+```bash
+brew install kubernetes-cli
+```
 
-    > Note: If you already have postgresql on your system, you can bypass this step.
+3. **Install Helm**
 
-    Execute the following to force brew to link the binary. By default, brew avoids linking binaries if a link already exists. In this context, libpq (a CLI-only client encompassing psql, pg_dump) is linked similarly to the comprehensive postgresql package, which includes both the server and client. This might lead to complications if postgresql is pre-installed.
-   
-    ```bash
-    brew link --force libpq
-    ```
+```bash
+brew install helm
+```
 
-11. **Set Up Telepresence**
+4. **Install Golang Migrate**
 
-Please avoid from using brew for this installation since it provides the non-open source version, which may prompt for trial expiration. Adhere to the steps below for Telepresence installation:
+```bash
+brew install golang-migrate
+```
 
-- Retrieve and position telepresence within `/usr/local/bin/`:
-  
-     ```bash
-     sudo curl -fL https://app.getambassador.io/download/tel2oss/releases/download/v2.15.1/telepresence-darwin-arm64 -o /usr/local/bin/telepresence
-     ```
-- Grant the required permissions:
-  
-     ```bash
-     sudo chmod a+x /usr/local/bin/telepresence
-     ```
+5. **Install psql**
 
-## Set Up Golang and Associated Tools
+>If you have postgresql pre-installed on your system, you can skip this step.
 
-1. **Install Golang**:
-    First, you'll need to ensure you have Golang installed. If not, install it via Homebrew:
+Run the following command to link the binary forcefully since brew avoids binary links if a link already exists. Here, libpq (a CLI-only client inclusive of psql, pg_dump) is linked the same way as the complete postgresql package. This might create issues if postgresql is already installed.
 
-    ```bash
-    brew install go
-    ```
+```bash
+brew link --force libpq
+```
 
-    After installation, verify that Go is installed correctly:
+6. **Install Telepresence**
 
-    ```bash
-    go version
-    ```
+It's recommended not to use brew for this installation as it provides a non-open source version which might ask for trial expiration. Follow the below steps for Telepresence installation:
 
-2. **Install Protobuf**:
+- Download and place telepresence inside `/usr/local/bin/`:
 
-    ```bash
-    brew install protobuf
-    ```
+```bash
+sudo curl -fL https://app.getambassador.io/download/tel2oss/releases/download/v2.15.1/telepresence-darwin-arm64 -o /usr/local/bin/telepresence
+```
 
-3. **Install Protobuf Go tools and GRPC-Gateway**:
+- Provide necessary permissions:
 
-    ```bash
-    go install \
-        google.golang.org/protobuf/cmd/protoc-gen-go@latest \
-        github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
-        github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
-        google.golang.org/protobuf/cmd/protoc-gen-go \
-        google.golang.org/grpc/cmd/protoc-gen-go-grpc
-    ```
+```bash
+sudo chmod a+x /usr/local/bin/telepresence
+```
 
-4. **Install Statik**:
+## Installation of Golang and its Tools
 
-    ```bash
-    go get github.com/rakyll/statik
-    ```
+1. **Golang Installation**:
+Make sure Golang is installed on your system. If not, install it with Homebrew:
 
-Remember to follow each of the steps sequentially for a seamless setup.
+```bash
+brew install go
+```
 
-## Confirming Your Installation
+Then, confirm the successful installation of Go:
 
-Post installation, validate the setups with these commands:
+```bash
+go version
+```
+
+2. **Protobuf Installation**:
+
+```bash
+brew install protobuf
+```
+
+3. **Installation of Protobuf Go Tools and GRPC-Gateway**:
+
+```bash
+go install \
+    google.golang.org/protobuf/cmd/protoc-gen-go@latest \
+    github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
+    github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
+    google.golang.org/protobuf/cmd/protoc-gen-go \
+    google.golang.org/grpc/cmd/protoc-gen-go-grpc \
+    github.com/rakyll/statik
+```
+
+Ensure you follow these steps sequentially for a smooth setup process.
+
+## Verification of Installation
+
+After installation, verify the setup using these commands:
 
 - `parallel --version`
 - `kubectl version`
