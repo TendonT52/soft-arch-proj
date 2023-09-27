@@ -341,7 +341,7 @@ func TestCreateAdmin(t *testing.T) {
 				AccessToken:     student_access_token,
 			},
 			expect: &pbv1.CreateAdminResponse{
-				Status:  401,
+				Status:  403,
 				Message: "You are not admin",
 			},
 		},
@@ -545,7 +545,7 @@ func TestRefreshToken(t *testing.T) {
 				RefreshToken: u.RefreshToken,
 			},
 			expect: &pbv1.RefreshTokenResponse{
-				Status:  403,
+				Status:  500,
 				Message: "your token has been logged out!",
 			},
 		},

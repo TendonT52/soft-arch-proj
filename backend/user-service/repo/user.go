@@ -90,7 +90,7 @@ func (r *userRepository) CheckIfAdmin(ctx context.Context, id int64) error {
 	var idUser int64
 	err := r.db.QueryRowContext(ctx, query, id).Scan(&idUser)
 	if err == sql.ErrNoRows {
-		return domain.ErrNotAuthorized.With("user not admin")
+		return domain.ErrForbidden.With("user not admin")
 	}
 	if err != nil {
 		return domain.ErrInternal.From(err.Error(), err)

@@ -128,7 +128,7 @@ func TestUpdateCompanyStatus(t *testing.T) {
 				Status:      "verified",
 			},
 			expect: &pbv1.UpdateCompanyStatusResponse{
-				Status:  401,
+				Status:  403,
 				Message: "Only admin can approve",
 			},
 		},
@@ -271,7 +271,7 @@ func TestListCompanies(t *testing.T) {
 				AccessToken: access_token_wrong,
 			},
 			expect: &pbv1.ListCompaniesResponse{
-				Status:  401,
+				Status:  403,
 				Message: "Only admin can view",
 			},
 		},

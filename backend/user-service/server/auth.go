@@ -65,7 +65,7 @@ func (s *AuthServer) CreateStudent(ctx context.Context, req *pbv1.CreateStudentR
 		log.Printf("Error: %v", err)
 		return &pbv1.CreateStudentResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
@@ -97,7 +97,7 @@ func (s *AuthServer) CreateCompany(ctx context.Context, req *pbv1.CreateCompanyR
 		log.Printf("Error: %v", err)
 		return &pbv1.CreateCompanyResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
@@ -114,14 +114,14 @@ func (s *AuthServer) CreateAdmin(ctx context.Context, req *pbv1.CreateAdminReque
 	if err != nil {
 		log.Println("Error in extract userID: ", err)
 		return &pbv1.CreateAdminResponse{
-			Status:  http.StatusBadRequest,
-			Message: err.Error(),
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
 		}, nil
 	}
 	if payload.Role != "admin" {
 		log.Println("Error: ", err)
 		return &pbv1.CreateAdminResponse{
-			Status:  http.StatusUnauthorized,
+			Status:  http.StatusForbidden,
 			Message: "You are not admin",
 		}, nil
 	}
@@ -144,7 +144,7 @@ func (s *AuthServer) CreateAdmin(ctx context.Context, req *pbv1.CreateAdminReque
 		log.Printf("Error: %v", err)
 		return &pbv1.CreateAdminResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
@@ -176,7 +176,7 @@ func (s *AuthServer) SignIn(ctx context.Context, req *pbv1.LoginRequest) (*pbv1.
 		log.Printf("Error: %v", err)
 		return &pbv1.LoginResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
@@ -202,7 +202,7 @@ func (s *AuthServer) RefreshToken(ctx context.Context, req *pbv1.RefreshTokenReq
 	if err != nil {
 		log.Printf("Error: %v", err)
 		return &pbv1.RefreshTokenResponse{
-			Status:  http.StatusForbidden,
+			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 		}, nil
 	}
@@ -221,7 +221,7 @@ func (s *AuthServer) LogOut(ctx context.Context, req *pbv1.LogOutRequest) (*pbv1
 		log.Printf("Error: %v", err)
 		return &pbv1.LogOutResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 

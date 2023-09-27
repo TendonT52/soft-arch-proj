@@ -138,12 +138,12 @@ func TestUpdateStudentUnAuthorized(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockUserServicePort(ctrl)
-	m.EXPECT().UpdateStudentMe(gomock.Any(), int64(33), req.Student).Return(domain.ErrNotAuthorized)
+	m.EXPECT().UpdateStudentMe(gomock.Any(), int64(33), req.Student).Return(domain.ErrForbidden)
 
 	s := server.NewUserServer(m)
 	r, err := s.UpdateStudent(context.Background(), req)
 	require.NoError(t, err)
-	require.Equal(t, int64(401), r.Status)
+	require.Equal(t, int64(403), r.Status)
 }
 
 // Company Zone
@@ -260,12 +260,12 @@ func TestUpdateCompanyUnAuthorized(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockUserServicePort(ctrl)
-	m.EXPECT().UpdateCompanyMe(gomock.Any(), int64(66), req.Company).Return(domain.ErrNotAuthorized)
+	m.EXPECT().UpdateCompanyMe(gomock.Any(), int64(66), req.Company).Return(domain.ErrForbidden)
 
 	s := server.NewUserServer(m)
 	r, err := s.UpdateCompany(context.Background(), req)
 	require.NoError(t, err)
-	require.Equal(t, int64(401), r.Status)
+	require.Equal(t, int64(403), r.Status)
 }
 
 func TestListCompaniesSuccess(t *testing.T) {
@@ -313,12 +313,12 @@ func TestListCompaniesNotAuthorized(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockUserServicePort(ctrl)
-	m.EXPECT().GetAllCompany(gomock.Any(), int64(77)).Return(nil, domain.ErrNotAuthorized)
+	m.EXPECT().GetAllCompany(gomock.Any(), int64(77)).Return(nil, domain.ErrForbidden)
 
 	s := server.NewUserServer(m)
 	r, err := s.ListCompanies(context.Background(), req)
 	require.NoError(t, err)
-	require.Equal(t, int64(401), r.Status)
+	require.Equal(t, int64(403), r.Status)
 }
 
 func TestListApprovedCompaniesSuccess(t *testing.T) {
@@ -407,10 +407,10 @@ func TestUpdateCompanyStatusUnAuthorized(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockUserServicePort(ctrl)
-	m.EXPECT().UpdateCompanyStatus(gomock.Any(), int64(99), int64(9999), "Approve").Return(domain.ErrNotAuthorized)
+	m.EXPECT().UpdateCompanyStatus(gomock.Any(), int64(99), int64(9999), "Approve").Return(domain.ErrForbidden)
 
 	s := server.NewUserServer(m)
 	r, err := s.UpdateCompanyStatus(context.Background(), req)
 	require.NoError(t, err)
-	require.Equal(t, int64(401), r.Status)
+	require.Equal(t, int64(403), r.Status)
 }

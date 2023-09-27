@@ -345,7 +345,7 @@ func TestUpdateCompany(t *testing.T) {
 				Company:     &pbv1.Company{},
 			},
 			expect: &pbv1.UpdateCompanyResponse{
-				Status:  401,
+				Status:  403,
 				Message: "You are not authorized to update this company",
 			},
 		},

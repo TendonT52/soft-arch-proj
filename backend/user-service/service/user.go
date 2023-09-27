@@ -71,7 +71,7 @@ func (s *userService) GetCompanyByID(ctx context.Context, userId, id int64) (*pb
 func (s *userService) GetAllCompany(ctx context.Context, userId int64) ([]*pbv1.Company, error) {
 	err := s.repo.CheckIfAdmin(ctx, userId)
 	if err != nil {
-		return nil, domain.ErrNotAuthorized.With("user not admin")
+		return nil, domain.ErrForbidden.With("user not admin")
 	}
 
 	companies, err := s.repo.GetAllCompany(ctx)
@@ -102,7 +102,7 @@ func (s *userService) UpdateStudentMe(ctx context.Context, id int64, req *pbv1.S
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
 	if role != domain.StudentRole {
-		return domain.ErrNotAuthorized.With("user not student")
+		return domain.ErrForbidden.With("user not student")
 	}
 
 	err = s.repo.UpdateStudentByID(ctx, id, req)
@@ -119,7 +119,7 @@ func (s *userService) UpdateCompanyMe(ctx context.Context, id int64, req *pbv1.C
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
 	if role != domain.CompanyRole {
-		return domain.ErrNotAuthorized.With("user not company")
+		return domain.ErrForbidden.With("user not company")
 	}
 
 	err = s.repo.UpdateCompanyByID(ctx, id, req)
@@ -133,7 +133,7 @@ func (s *userService) UpdateCompanyMe(ctx context.Context, id int64, req *pbv1.C
 func (s *userService) UpdateCompanyStatus(ctx context.Context, userId, id int64, status string) error {
 	err := s.repo.CheckIfAdmin(ctx, userId)
 	if err != nil {
-		return domain.ErrNotAuthorized.With("user not admin")
+		return domain.ErrForbidden.With("user not admin")
 	}
 
 	company, err := s.repo.GetCompanyByID(ctx, id)
@@ -174,7 +174,7 @@ func (s *userService) DeleteStudent(ctx context.Context, userId, id int64) error
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
 	if role != domain.AdminRole {
-		return domain.ErrNotAuthorized.With("user not admin")
+		return domain.ErrForbidden.With("user not admin")
 	}
 
 	err = s.repo.DeleteStudent(ctx, id)
@@ -191,7 +191,7 @@ func (s *userService) DeleteCompany(ctx context.Context, userId, id int64) error
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
 	}
 	if role != domain.AdminRole {
-		return domain.ErrNotAuthorized.With("user not admin")
+		return domain.ErrForbidden.With("user not admin")
 	}
 
 	err = s.repo.DeleteCompany(ctx, id)
@@ -205,7 +205,7 @@ func (s *userService) DeleteCompany(ctx context.Context, userId, id int64) error
 func (s *userService) DeleteCompanies(ctx context.Context, userId int64) error {
 	err := s.repo.CheckIfAdmin(ctx, userId)
 	if err != nil {
-		return domain.ErrNotAuthorized.With("user not admin")
+		return domain.ErrForbidden.With("user not admin")
 	}
 
 	err = s.repo.DeleteCompanies(ctx)
