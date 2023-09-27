@@ -13,7 +13,8 @@ const (
 	NotChulaStudentEmail
 	AlreadyVerified
 	NotVerified
-	NotAuthorized
+	Forbidden
+	Unauthorized
 	RedisNotFound
 	MailNotSent
 	InvalidStatus
@@ -30,7 +31,8 @@ var (
 	ErrNotChulaStudentEmail      = BackEndError{Kind: NotChulaStudentEmail}
 	ErrAlreadyVerified           = BackEndError{Kind: AlreadyVerified}
 	ErrNotVerified               = BackEndError{Kind: NotVerified}
-	ErrNotAuthorized             = BackEndError{Kind: NotAuthorized}
+	ErrForbidden                 = BackEndError{Kind: Forbidden}
+	ErrUnauthorized              = BackEndError{Kind: Unauthorized}
 	ErrRedisNotFound             = BackEndError{Kind: RedisNotFound}
 	ErrMailNotSent               = BackEndError{Kind: MailNotSent}
 	ErrInvalidStatus             = BackEndError{Kind: InvalidStatus}

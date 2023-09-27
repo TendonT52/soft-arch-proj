@@ -177,7 +177,7 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 	config, _ := config.LoadConfig("..")
 	userId, err := utils.ValidateRefreshToken(refreshToken)
 	if err != nil {
-		return "", err
+		return "", domain.ErrUnauthorized
 	}
 
 	role, err := s.repo.CheckUserIDExist(ctx, userId)
@@ -199,7 +199,7 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 func (s *authService) LogOut(ctx context.Context, refreshToken string) error {
 	userId, err := utils.ValidateRefreshToken(refreshToken)
 	if err != nil {
-		return err
+		return domain.ErrUnauthorized
 	}
 
 	_, err = s.repo.CheckUserIDExist(ctx, userId)

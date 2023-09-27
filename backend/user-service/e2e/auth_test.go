@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	"github.com/TikhampornSky/go-auth-verifiedMail/tools"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/stretchr/testify/require"
@@ -180,11 +181,11 @@ func TestCreateCompany(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	companyTestEmail := utils.GenerateRandomString(10) + "@gmail.com"
+	companyTestEmail := utils.GenerateRandomString(5) + "@gmail.com"
 
 	tests := map[string]struct {
 		req    *pbv1.CreateCompanyRequest
-		expect *pbv1.CreateAdminResponse
+		expect *pbv1.CreateCompanyResponse
 	}{
 		"success": {
 			req: &pbv1.CreateCompanyRequest{
@@ -197,7 +198,7 @@ func TestCreateCompany(t *testing.T) {
 				Phone:           "0123456789",
 				Category:        "Technology",
 			},
-			expect: &pbv1.CreateAdminResponse{
+			expect: &pbv1.CreateCompanyResponse{
 				Status:  201,
 				Message: "The Approval process will take 1-2 days. Thank you for your patience",
 			},
@@ -213,7 +214,7 @@ func TestCreateCompany(t *testing.T) {
 				Phone:           "0123456789",
 				Category:        "Technology",
 			},
-			expect: &pbv1.CreateAdminResponse{
+			expect: &pbv1.CreateCompanyResponse{
 				Status:  400,
 				Message: "Email already exists",
 			},
@@ -229,7 +230,7 @@ func TestCreateCompany(t *testing.T) {
 				Phone:           "0123456789",
 				Category:        "Technology",
 			},
-			expect: &pbv1.CreateAdminResponse{
+			expect: &pbv1.CreateCompanyResponse{
 				Status:  400,
 				Message: "Passwords do not match",
 			},
@@ -264,7 +265,7 @@ func TestCreateCompany(t *testing.T) {
 	require.Equal(t, "Bangkok", company.Location)
 	require.Equal(t, "0123456789", company.Phone)
 	require.Equal(t, "Technology", company.Category)
-	require.Equal(t, "Pending", company.Status)
+	require.Equal(t, domain.ComapanyStatusPending, company.Status)
 	require.Equal(t, "company", status.Role)
 	require.Equal(t, false, status.Verified)
 }
@@ -282,7 +283,15 @@ func TestCreateAdmin(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	adminTestEmail := utils.GenerateRandomString(10) + "@gmail.com"
+	adminTestEmail := utils.GenerateRandomString(6) + "@gmail.com"
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
+	student_access_token, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
+		UserId: 0,
+		Role:   domain.StudentRole,
+	})
 
 	tests := map[string]struct {
 		req    *pbv1.CreateAdminRequest
@@ -293,6 +302,7 @@ func TestCreateAdmin(t *testing.T) {
 				Email:           adminTestEmail,
 				Password:        "password-test",
 				PasswordConfirm: "password-test",
+				AccessToken:     admin_access_token,
 			},
 			expect: &pbv1.CreateAdminResponse{
 				Status:  201,
@@ -304,6 +314,7 @@ func TestCreateAdmin(t *testing.T) {
 				Email:           adminTestEmail,
 				Password:        "password-test",
 				PasswordConfirm: "password-test",
+				AccessToken:     admin_access_token,
 			},
 			expect: &pbv1.CreateAdminResponse{
 				Status:  400,
@@ -315,14 +326,39 @@ func TestCreateAdmin(t *testing.T) {
 				Email:           adminTestEmail,
 				Password:        "password-test",
 				PasswordConfirm: "password-test-not-match",
+				AccessToken:     admin_access_token,
 			},
 			expect: &pbv1.CreateAdminResponse{
 				Status:  400,
 				Message: "Passwords do not match",
 			},
 		},
+		"not admin to create": {
+			req: &pbv1.CreateAdminRequest{
+				Email:           adminTestEmail,
+				Password:        "password-test",
+				PasswordConfirm: "password-test",
+				AccessToken:     student_access_token,
+			},
+			expect: &pbv1.CreateAdminResponse{
+				Status:  403,
+				Message: "You are not admin",
+			},
+		},
+		"invalid access token": {
+			req: &pbv1.CreateAdminRequest{
+				Email:           adminTestEmail,
+				Password:        "password-test",
+				PasswordConfirm: "password-test",
+				AccessToken:     "",
+			},
+			expect: &pbv1.CreateAdminResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
+			},
+		},
 	}
-	testOrder := []string{"success", "email already exists", "password and password confirm not match"}
+	testOrder := []string{"success", "email already exists", "password and password confirm not match", "not admin to create", "invalid access token"}
 	adminId := 0
 	for _, testName := range testOrder {
 		tc := tests[testName]
@@ -376,10 +412,15 @@ func TestSignIn(t *testing.T) {
 	_, err = c.CreateStudent(ctx, s)
 	require.NoError(t, err)
 
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	a := &pbv1.CreateAdminRequest{
-		Email:           utils.GenerateRandomString(10) + "@gmail.com",
+		Email:           utils.GenerateRandomString(7) + "@gmail.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	}
 	_, err = c.CreateAdmin(ctx, a)
 	require.NoError(t, err)
@@ -448,11 +489,16 @@ func TestRefreshToken(t *testing.T) {
 	defer cancel()
 
 	// Person 1 OK
-	mock_email := utils.GenerateRandomString(10) + "@gmail.com"
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
+	mock_email := utils.GenerateRandomString(8) + "@gmail.com"
 	_, err = c.CreateAdmin(ctx, &pbv1.CreateAdminRequest{
 		Email:           mock_email,
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	})
 	require.NoError(t, err)
 
@@ -466,11 +512,12 @@ func TestRefreshToken(t *testing.T) {
 	require.NoError(t, err)
 
 	// Person 2 Already logged out
-	mock_email2 := utils.GenerateRandomString(10) + "@gmail.com"
+	mock_email2 := utils.GenerateRandomString(9) + "@gmail.com"
 	_, err = c.CreateAdmin(ctx, &pbv1.CreateAdminRequest{
 		Email:           mock_email2,
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	})
 	u, err := c.SignIn(ctx, &pbv1.LoginRequest{
 		Email:    mock_email2,
@@ -510,12 +557,21 @@ func TestRefreshToken(t *testing.T) {
 				RefreshToken: u.RefreshToken,
 			},
 			expect: &pbv1.RefreshTokenResponse{
-				Status:  403,
+				Status:  500,
 				Message: "your token has been logged out!",
 			},
 		},
+		"refresh token is invalid": {
+			req: &pbv1.RefreshTokenRequest{
+				RefreshToken: "",
+			},
+			expect: &pbv1.RefreshTokenResponse{
+				Status:  401,
+				Message: "Your refresh token is invalid",
+			},
+		},
 	}
-	testOrder := []string{"success", "user not found", "already logged out"}
+	testOrder := []string{"success", "user not found", "already logged out", "refresh token is invalid"}
 
 	for _, testName := range testOrder {
 		tc := tests[testName]
@@ -544,11 +600,16 @@ func TestLogOut(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	mock_email := utils.GenerateRandomString(10) + "@gmail.com"
 	_, err = c.CreateAdmin(ctx, &pbv1.CreateAdminRequest{
 		Email:           mock_email,
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	})
 	require.NoError(t, err)
 
@@ -568,6 +629,15 @@ func TestLogOut(t *testing.T) {
 			expect: &pbv1.LogOutResponse{
 				Status:  200,
 				Message: "Logout success",
+			},
+		},
+		"refresh token is invalid": {
+			req: &pbv1.LogOutRequest{
+				RefreshToken: "",
+			},
+			expect: &pbv1.LogOutResponse{
+				Status:  401,
+				Message: "Your refresh token is invalid",
 			},
 		},
 	}

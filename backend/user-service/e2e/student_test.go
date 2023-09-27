@@ -93,12 +93,22 @@ func TestGetStudentMe(t *testing.T) {
 				},
 			},
 		},
-		"invalid token": {
+		"not correct student": {
 			req: &pbv1.GetStudentMeRequest{
 				AccessToken: access_token_wrong,
 			},
 			expect: &pbv1.GetStudentResponse{
 				Status: 500,
+				Message: "Something went wrong",
+			},
+		},
+		"invalid token": {
+			req: &pbv1.GetStudentMeRequest{
+				AccessToken: "invalid token",
+			},
+			expect: &pbv1.GetStudentResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
 			},
 		},
 	}
@@ -173,10 +183,15 @@ func TestGetStudent(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create Admin
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	a := &pbv1.CreateAdminRequest{
-		Email:           utils.GenerateRandomString(10) + "@gmail.com",
+		Email:           utils.GenerateRandomString(20) + "@gmail.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	}
 	_, err = c.CreateAdmin(ctx, a)
 	require.NoError(t, err)
@@ -217,6 +232,16 @@ func TestGetStudent(t *testing.T) {
 			expect: &pbv1.GetStudentResponse{
 				Status:  404,
 				Message: "user id not found",
+			},
+		},
+		"invalid token": {
+			req: &pbv1.GetStudentRequest{
+				AccessToken: "invalid token",
+				Id:          r.Id,
+			},
+			expect: &pbv1.GetStudentResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
 			},
 		},
 	}
@@ -314,7 +339,7 @@ func TestUpdateStudent(t *testing.T) {
 				Message: "Update data for UPADATED Mock Update Student successfully!",
 			},
 		},
-		"invalid token": {
+		"Not correct student": {
 			req: &pbv1.UpdateStudentRequest{
 				AccessToken: access_token_wrong,
 				Student: &pbv1.Student{
@@ -328,6 +353,16 @@ func TestUpdateStudent(t *testing.T) {
 			expect: &pbv1.UpdateCompanyResponse{
 				Status:  404,
 				Message: "user id not found",
+			},
+		},
+		"invalid token": {
+			req: &pbv1.UpdateStudentRequest{
+				AccessToken: "invalid token",
+				Student: &pbv1.Student{},
+			},
+			expect: &pbv1.UpdateCompanyResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
 			},
 		},
 	}

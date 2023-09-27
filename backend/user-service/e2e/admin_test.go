@@ -36,10 +36,15 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create Admin
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	admin := &pbv1.CreateAdminRequest{
-		Email:           utils.GenerateRandomString(10) + "@admin.com",
+		Email:           utils.GenerateRandomString(2) + "@admin.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	}
 	a, err := c.CreateAdmin(ctx, admin)
 	require.Equal(t, int64(201), a.Status)
@@ -52,7 +57,7 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	})
 
 	// Register
-	companyEmail := utils.GenerateRandomString(10) + "@company.com"
+	companyEmail := utils.GenerateRandomString(3) + "@company.com"
 	company := &pbv1.CreateCompanyRequest{
 		Name:            "Mock Company",
 		Email:           companyEmail,
@@ -68,7 +73,7 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	require.NoError(t, err)
 
 	// Register
-	companyEmail2 := utils.GenerateRandomString(10) + "@company.com"
+	companyEmail2 := utils.GenerateRandomString(4) + "@company.com"
 	company2 := &pbv1.CreateCompanyRequest{
 		Name:            "Mock Company 2",
 		Email:           companyEmail2,
@@ -98,7 +103,7 @@ func TestUpdateCompanyStatus(t *testing.T) {
 			req: &pbv1.UpdateCompanyStatusRequest{
 				AccessToken: ad.AccessToken,
 				Id:          com.Id,
-				Status:      "Approve",
+				Status:      domain.ComapanyStatusApprove,
 			},
 			expect: &pbv1.UpdateCompanyStatusResponse{
 				Status:  200,
@@ -109,7 +114,7 @@ func TestUpdateCompanyStatus(t *testing.T) {
 			req: &pbv1.UpdateCompanyStatusRequest{
 				AccessToken: ad.AccessToken,
 				Id:          com2.Id,
-				Status:      "Reject",
+				Status:      domain.ComapanyStatusReject,
 			},
 			expect: &pbv1.UpdateCompanyStatusResponse{
 				Status:  200,
@@ -120,10 +125,10 @@ func TestUpdateCompanyStatus(t *testing.T) {
 			req: &pbv1.UpdateCompanyStatusRequest{
 				AccessToken: access_token_wrong,
 				Id:          com.Id,
-				Status:      "verified",
+				Status:      domain.ComapanyStatusApprove,
 			},
 			expect: &pbv1.UpdateCompanyStatusResponse{
-				Status:  401,
+				Status:  403,
 				Message: "Only admin can approve",
 			},
 		},
@@ -131,15 +136,26 @@ func TestUpdateCompanyStatus(t *testing.T) {
 			req: &pbv1.UpdateCompanyStatusRequest{
 				AccessToken: ad.AccessToken,
 				Id:          com.Id,
-				Status:      "Reject",
+				Status:      domain.ComapanyStatusReject,
 			},
 			expect: &pbv1.UpdateCompanyStatusResponse{
 				Status:  400,
 				Message: "company already approved or rejected",
 			},
 		},
+		"invalidate status": {
+			req: &pbv1.UpdateCompanyStatusRequest{
+				AccessToken: ad.AccessToken,
+				Id:          com.Id,
+				Status:      "verified",
+			},
+			expect: &pbv1.UpdateCompanyStatusResponse{
+				Status:  400,
+				Message: "status must be Approve or Reject",
+			},
+		},
 	}
-	testOrder := []string{"success approve", "success reject", "fail: not admin", "fail: company already approved"}
+	testOrder := []string{"success approve", "success reject", "fail: not admin", "fail: company already approved", "invalidate status"}
 
 	for _, testName := range testOrder {
 		tc := tests[testName]
@@ -188,7 +204,7 @@ func createMockComapny(t *testing.T, name, email, description, location, phone, 
 		Location:    location,
 		Phone:       phone,
 		Category:    category,
-		Status:      "Pending",
+		Status:      domain.ComapanyStatusPending,
 	}
 }
 
@@ -211,10 +227,15 @@ func TestListCompanies(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create Admin
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	admin := &pbv1.CreateAdminRequest{
-		Email:           utils.GenerateRandomString(10) + "@admin.com",
+		Email:           utils.GenerateRandomString(11) + "@admin.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	}
 	a, err := c.CreateAdmin(ctx, admin)
 	require.Equal(t, int64(201), a.Status)
@@ -234,8 +255,8 @@ func TestListCompanies(t *testing.T) {
 	require.NoError(t, err)
 
 	// name, email, description, location, phone, category
-	mail1 := utils.GenerateRandomString(10) + "@company.com"
-	mail2 := utils.GenerateRandomString(10) + "@company.com"
+	mail1 := utils.GenerateRandomString(12) + "@company.com"
+	mail2 := utils.GenerateRandomString(13) + "@company.com"
 	c1 := createMockComapny(t, "Mock Company 1", mail1, "Company1 desc", "Bangkok", "0123456789", "Technology")
 	c2 := createMockComapny(t, "Mock Company 2", mail2, "Company2 desc", "Bangkok", "0123456789", "Technical Finanace")
 
@@ -261,7 +282,7 @@ func TestListCompanies(t *testing.T) {
 				AccessToken: access_token_wrong,
 			},
 			expect: &pbv1.ListCompaniesResponse{
-				Status:  401,
+				Status:  403,
 				Message: "Only admin can view",
 			},
 		},
