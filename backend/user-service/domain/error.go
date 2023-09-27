@@ -10,7 +10,7 @@ const (
 	UserEmailNotFound
 	UserIDNotFound
 	DuplicateEmail
-	NotChulaStudentEmail
+	NotCorrectEmailFormat
 	AlreadyVerified
 	NotVerified
 	Forbidden
@@ -28,7 +28,7 @@ var (
 	ErrUserEmailNotFound         = BackEndError{Kind: UserEmailNotFound}
 	ErrUserIDNotFound            = BackEndError{Kind: UserIDNotFound}
 	ErrDuplicateEmail            = BackEndError{Kind: DuplicateEmail}
-	ErrNotChulaStudentEmail      = BackEndError{Kind: NotChulaStudentEmail}
+	ErrNotCorrectEmailFormat     = BackEndError{Kind: NotCorrectEmailFormat}
 	ErrAlreadyVerified           = BackEndError{Kind: AlreadyVerified}
 	ErrNotVerified               = BackEndError{Kind: NotVerified}
 	ErrForbidden                 = BackEndError{Kind: Forbidden}

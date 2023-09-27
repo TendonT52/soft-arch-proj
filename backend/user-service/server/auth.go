@@ -47,7 +47,7 @@ func (s *AuthServer) CreateStudent(ctx context.Context, req *pbv1.CreateStudentR
 			Message: "Passwords do not match",
 		}, nil
 	}
-	if errors.Is(err, domain.ErrNotChulaStudentEmail) {
+	if errors.Is(err, domain.ErrNotCorrectEmailFormat) {
 		log.Printf("Email must be studentID with @student.chula.ac.th: %v", err)
 		return &pbv1.CreateStudentResponse{
 			Status:  http.StatusBadRequest,
@@ -84,6 +84,13 @@ func (s *AuthServer) CreateCompany(ctx context.Context, req *pbv1.CreateCompanyR
 		return &pbv1.CreateCompanyResponse{
 			Status:  http.StatusBadRequest,
 			Message: "Passwords do not match",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrNotCorrectEmailFormat) {
+		log.Printf("Email not in correct format: %v", err)
+		return &pbv1.CreateCompanyResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Email not in correct format",
 		}, nil
 	}
 	if errors.Is(err, domain.ErrDuplicateEmail) {
@@ -126,6 +133,13 @@ func (s *AuthServer) CreateAdmin(ctx context.Context, req *pbv1.CreateAdminReque
 		}, nil
 	}
 	id, err := s.AuthService.SignUpAdmin(ctx, req)
+	if errors.Is(err, domain.ErrNotCorrectEmailFormat) {
+		log.Printf("Email not in correct format: %v", err)
+		return &pbv1.CreateAdminResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Email not in correct format",
+		}, nil
+	}
 	if errors.Is(err, domain.ErrPasswordNotMatch) {
 		log.Printf("Passwords do not match: %v", err)
 		return &pbv1.CreateAdminResponse{

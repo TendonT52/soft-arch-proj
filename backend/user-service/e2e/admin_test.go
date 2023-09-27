@@ -246,6 +246,8 @@ func TestListCompanies(t *testing.T) {
 		Email:    admin.Email,
 		Password: admin.Password,
 	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), ad.Status)
 
 	// Generate WRONG token
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{

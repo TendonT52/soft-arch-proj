@@ -78,7 +78,7 @@ func TestCreateStudentNotChulaEmail(t *testing.T) {
 	defer ctrl.Finish()
 
 	m := mock.NewMockAuthServicePort(ctrl)
-	m.EXPECT().SignUpStudent(gomock.Any(), &u).Return(int64(0), domain.ErrNotChulaStudentEmail)
+	m.EXPECT().SignUpStudent(gomock.Any(), &u).Return(int64(0), domain.ErrNotCorrectEmailFormat)
 
 	s := server.NewAuthServer(m)
 	r, err := s.CreateStudent(context.Background(), &u)

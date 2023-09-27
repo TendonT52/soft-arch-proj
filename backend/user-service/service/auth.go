@@ -41,7 +41,7 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 	req.Password = hashedPassword
 
 	if !email.IsChulaStudentEmail(req.Email) {
-		return 0, domain.ErrNotChulaStudentEmail.With("Email must be studentID with @student.chula.ac.th")
+		return 0, domain.ErrNotCorrectEmailFormat.With("Email must be studentID with @student.chula.ac.th")
 	}
 
 	err := s.repo.CheckEmailExist(ctx, req.Email)
@@ -96,6 +96,10 @@ func (s *authService) SignUpCompany(ctx context.Context, req *pbv1.CreateCompany
 		return 0, domain.ErrPasswordNotMatch
 	}
 
+	if !email.IsCorrectEmailFormat(req.Email) {
+		return 0, domain.ErrNotCorrectEmailFormat.With("Email must be correct format")
+	}
+
 	current_time := s.time.Now().Unix()
 	hashedPassword := utils.HashPassword(req.Password, current_time)
 
@@ -118,6 +122,10 @@ func (s *authService) SignUpCompany(ctx context.Context, req *pbv1.CreateCompany
 func (s *authService) SignUpAdmin(ctx context.Context, req *pbv1.CreateAdminRequest) (int64, error) {
 	if req.Password != req.PasswordConfirm {
 		return 0, domain.ErrPasswordNotMatch
+	}
+
+	if !email.IsCorrectEmailFormat(req.Email) {
+		return 0, domain.ErrNotCorrectEmailFormat.With("Email must be correct format")
 	}
 
 	current_time := s.time.Now().Unix()
