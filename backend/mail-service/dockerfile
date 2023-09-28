@@ -10,5 +10,8 @@ RUN apk --no-cache add ca-certificates
 RUN mkdir /app
 WORKDIR /app
 COPY --from=builder /app/main .
+COPY --from=builder /app/templates ./templates
+COPY --from=builder /app/templates-company-approve ./templates-company-approve
+COPY --from=builder /app/templates-company-reject ./templates-company-reject
 EXPOSE 8080
 CMD ["./main"]
