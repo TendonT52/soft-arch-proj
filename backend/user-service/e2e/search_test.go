@@ -48,6 +48,7 @@ func createMockStudent(t *testing.T, admin_access string) string {
 		Email:           studentEmail,
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		Description:     "Mock Student Description",
 		Faculty:         "Medical",
 		Major:           "Doctor",
 		Year:            5,

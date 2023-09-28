@@ -235,8 +235,24 @@ func TestCreateCompany(t *testing.T) {
 				Message: "Passwords do not match",
 			},
 		},
+		"email not in correct format": {
+			req: &pbv1.CreateCompanyRequest{
+				Name:            "Comapany Name Test",
+				Email:           "com@",
+				Password:        "password-test",
+				PasswordConfirm: "password-test",
+				Description:     "I am a company",
+				Location:        "Bangkok",
+				Phone:           "0123456789",
+				Category:        "Technology",
+			},
+			expect: &pbv1.CreateCompanyResponse{
+				Status:  400,
+				Message: "Email not in correct format",
+			},
+		},
 	}
-	testOrder := []string{"success", "email already exists", "password and password confirm not match"}
+	testOrder := []string{"success", "email already exists", "password and password confirm not match", "email not in correct format"}
 
 	companyID := 0
 	for _, testName := range testOrder {
@@ -357,8 +373,20 @@ func TestCreateAdmin(t *testing.T) {
 				Message: "Your access token is invalid",
 			},
 		},
+		"email not in correct format": {
+			req: &pbv1.CreateAdminRequest{
+				Email:           "admin",
+				Password:        "password-test",
+				PasswordConfirm: "password-test",
+				AccessToken:     admin_access_token,
+			},
+			expect: &pbv1.CreateAdminResponse{
+				Status:  400,
+				Message: "Email not in correct format",
+			},
+		},
 	}
-	testOrder := []string{"success", "email already exists", "password and password confirm not match", "not admin to create", "invalid access token"}
+	testOrder := []string{"success", "email already exists", "password and password confirm not match", "not admin to create", "invalid access token", "email not in correct format"}
 	adminId := 0
 	for _, testName := range testOrder {
 		tc := tests[testName]
