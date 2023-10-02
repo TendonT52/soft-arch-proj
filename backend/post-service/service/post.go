@@ -72,6 +72,9 @@ func (s *postService) GetPosts(ctx context.Context, token string, search *pbv1.S
 	if err != nil {
 		return nil, domain.ErrUnauthorize
 	}
+	if search == nil {
+		search = &pbv1.SearchOptions{}
+	}
 
 	u, err := s.UserService.ListApprovedCompanies(ctx, &pbv1.ListApprovedCompaniesRequest{
 		AccessToken: token,

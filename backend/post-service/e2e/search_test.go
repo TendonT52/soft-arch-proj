@@ -181,7 +181,6 @@ func TestSearchPosts(t *testing.T) {
 		"success with NIL empty search options": {
 			req: &pbv1.ListPostsRequest{
 				AccessToken:   token,
-				SearchOptions: &pbv1.SearchOptions{},
 			},
 			expect: &pbv1.ListPostsResponse{
 				Status:  200,
