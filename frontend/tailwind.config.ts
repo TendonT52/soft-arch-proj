@@ -88,6 +88,65 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "dot-elastic": {
+          "0%": {
+            transform: "scale(1, 1)",
+          },
+          "25%": {
+            transform: "scale(1, 1)",
+          },
+          "50%": {
+            transform: "scale(1, 1.5)",
+          },
+          "75%": {
+            transform: "scale(1, 1)",
+          },
+          "100%": {
+            transform: "scale(1, 1)",
+          },
+        },
+        "dot-elastic-before": {
+          "0%": {
+            transform: "scale(1, 1)",
+          },
+          "25%": {
+            transform: "scale(1, 1.5)",
+          },
+          "50%": {
+            transform: "scale(1, 0.67)",
+          },
+          "75%": {
+            transform: "scale(1, 1)",
+          },
+          "100%": {
+            transform: "scale(1, 1)",
+          },
+        },
+        "dot-elastic-after": {
+          "0%": {
+            transform: "scale(1, 1)",
+          },
+          "25%": {
+            transform: "scale(1, 1)",
+          },
+          "50%": {
+            transform: "scale(1, 0.67)",
+          },
+          "75%": {
+            transform: "scale(1, 1.5)",
+          },
+          "100%": {
+            transform: "scale(1, 1)",
+          },
+        },
+        "fade-in": {
+          "0%": {
+            opacity: "0",
+          },
+          "100%": {
+            opacity: "1",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
