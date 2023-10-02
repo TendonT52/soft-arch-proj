@@ -51,8 +51,8 @@ const RegisterStudentForm = () => {
         </div>
         {page === 0 ? (
           <form
-            key="page-0"
             className="flex w-full flex-col items-center gap-4"
+            key="page-0"
           >
             <div className="flex w-full gap-4">
               <Input className="flex-1" placeholder="First name" />
@@ -120,8 +120,8 @@ const RegisterStudentForm = () => {
           </form>
         ) : (
           <form
-            key="page-1"
             className="flex w-full flex-col items-center pb-[2.3125rem]"
+            key="page-1"
           >
             <div className="relative mb-4 flex w-full">
               <Label

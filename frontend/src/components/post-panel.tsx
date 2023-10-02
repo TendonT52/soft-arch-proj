@@ -16,7 +16,7 @@ type PostPanelProps = {
 
 const PostPanel = ({ posts }: PostPanelProps) => {
   return (
-    <div className="grid flex-1 grid-cols-1 gap-6 pb-6 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
       {posts.map((post, idx) => (
         <PostCard key={idx} post={post} />
       ))}

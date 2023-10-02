@@ -128,7 +128,7 @@ type PageProps = {
 };
 
 export default function Page({ searchParams }: PageProps) {
-  const search = {
+  const search: Search = {
     positions: getSearchArray(searchParams.positions),
     skills: getSearchArray(searchParams.skills),
     benefits: getSearchArray(searchParams.benefits),
@@ -138,12 +138,13 @@ export default function Page({ searchParams }: PageProps) {
   const postCount = posts.length;
 
   return (
-    <main className="container relative flex flex-1 items-start gap-8">
-      <SearchPanel
-        className="sticky top-16 h-[calc(100vh-4rem)] w-[16rem]"
-        postCount={postCount}
-      />
-      <PostPanel posts={posts} />
+    <main className="container relative flex flex-1 items-start gap-12">
+      <aside className="sticky top-[5.5rem] h-[calc(100vh-5.5rem)] w-[14rem]">
+        <SearchPanel postCount={postCount} />
+      </aside>
+      <div className="flex-1">
+        <PostPanel posts={posts} />
+      </div>
     </main>
   );
 }

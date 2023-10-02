@@ -77,6 +77,7 @@ const config: Config = {
             fontFeatureSettings: '"cv02", "cv03", "cv04", "cv11"',
           },
         ],
+        mono: ["var(--font-mono)", ...fontFamily.mono],
       },
       keyframes: {
         "accordion-down": {
@@ -96,7 +97,6 @@ const config: Config = {
   },
   plugins: [
     require("tailwindcss-animate"),
-    require("tailwind-gradient-mask-image"),
     require("@tailwindcss/typography"),
     plugin(({ addUtilities }) => {
       addUtilities({

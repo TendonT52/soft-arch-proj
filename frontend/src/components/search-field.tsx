@@ -54,8 +54,8 @@ const SearchField = ({ field, label, placeholder }: SearchFieldProps) => {
           <div className="flex flex-col gap-1 px-1 pt-1">
             {queries.map((query, idx) => (
               <div
-                key={`${field}-${idx}`}
                 className="group flex items-center gap-3 text-sm"
+                key={`${field}-${idx}`}
               >
                 <div className="tabular-nums">{idx + 1}.</div>
                 <div className="flex h-8 flex-1 items-center py-2">{query}</div>
@@ -69,8 +69,8 @@ const SearchField = ({ field, label, placeholder }: SearchFieldProps) => {
               </div>
             ))}
             <form
-              key={`${field}-${queryCount}`}
               className="flex items-center gap-3 text-sm"
+              key={`${field}-${queryCount}`}
               onSubmit={(e) => {
                 e.preventDefault();
                 if (inputRef.current && inputRef.current.value) {

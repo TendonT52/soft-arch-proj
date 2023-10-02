@@ -22,7 +22,7 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { type EditorState } from "lexical";
-import { cn } from "@/lib/utils";
+import TextareaAutosize from "react-textarea-autosize";
 import { CodeHighlightPlugin } from "./code-highlight-plugin";
 import { ListMaxIndentLevelPlugin } from "./list-max-index-level-plugin";
 import { ToolbarPlugin } from "./toolbar-plugin";
@@ -31,14 +31,12 @@ const initialConfig: InitialConfigType = {
   namespace: "Editor",
   // The editor theme
   theme: {
-    ltr: "text-left",
-    rtl: "text-right",
     text: {
       underline: "underline",
       strikethrough: "line-through",
-      underlineStrikethrough: "line-through",
+      italic: "italic",
     },
-    code: "block overflow-x-auto whitespace-pre rounded-sm bg-muted p-3 font-mono text-sm before:content-none after:content-none",
+    code: "block overflow-x-auto whitespace-pre rounded-sm bg-muted p-3 font-mono text-sm scrollbar-hide before:content-none after:content-none",
     quote: "font-normal not-italic text-muted-foreground",
     codeHighlight: {
       atrule: "text-code-attribute",
@@ -93,50 +91,64 @@ const initialConfig: InitialConfigType = {
   ],
 };
 
-export interface EditorProps extends React.ComponentPropsWithoutRef<"div"> {}
+type EditorProps = {
+  title?: string;
+  onTitleChange?: (title: string) => void;
+  defaultTitle?: string;
+};
 
-const Editor = React.forwardRef<HTMLDivElement, EditorProps>(
-  ({ className, ...props }, ref) => {
-    const editorStateRef = useRef<EditorState>();
+const Editor = ({
+  title,
+  onTitleChange,
+  defaultTitle = "Untitled Post",
+}: EditorProps) => {
+  const editorStateRef = useRef<EditorState>();
 
-    return (
-      <LexicalComposer initialConfig={initialConfig}>
-        <div
-          ref={ref}
-          className={cn(
-            "relative flex max-h-[32rem] w-full max-w-3xl flex-col rounded-[8px_8px_0_0] border shadow-md",
-            className
-          )}
-          {...props}
-        >
-          <ToolbarPlugin className="rounded-[inherit] border-b" />
-          <RichTextPlugin
-            contentEditable={
-              <ContentEditable
-                className="prose prose-sky relative min-h-[7.8rem] max-w-none flex-1 overflow-auto bg-background px-8 py-12 focus-visible:outline-none"
-                spellCheck={false}
-              />
-            }
-            placeholder={null}
-            ErrorBoundary={LexicalErrorBoundary}
-          />
+  return (
+    <LexicalComposer initialConfig={initialConfig}>
+      <div className="relative mx-auto flex min-h-[48rem] w-full max-w-3xl flex-col rounded-t-lg border shadow">
+        <div className="sticky top-0 z-10 rounded-t-lg border-b">
+          <ToolbarPlugin />
         </div>
-        <HistoryPlugin />
-        <AutoFocusPlugin />
-        <CodeHighlightPlugin />
-        <ListPlugin />
-        <LinkPlugin />
-        <ListMaxIndentLevelPlugin maxDepth={1} />
-        <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-        <OnChangePlugin
-          onChange={(editorState) => {
-            editorStateRef.current = editorState;
+        <TextareaAutosize
+          className="min-h-0 max-w-none resize-none appearance-none bg-transparent px-8 pt-12 text-4xl font-extrabold text-[#111827] scrollbar-hide focus:outline-none focus-visible:outline-none dark:text-[#ffffff]"
+          value={title}
+          defaultValue={defaultTitle}
+          spellCheck={false}
+          onChange={(e) => {
+            if (onTitleChange) {
+              onTitleChange(e.target.value);
+            }
           }}
+          aria-label="title"
         />
-      </LexicalComposer>
-    );
-  }
-);
+        <RichTextPlugin
+          contentEditable={
+            <ContentEditable
+              className="prose prose-green relative min-h-[6.8rem] max-w-none flex-1 overflow-auto bg-background px-8 pb-12 pt-8 dark:prose-invert focus:outline-none"
+              spellCheck={false}
+              autoFocus={false}
+            />
+          }
+          placeholder={null}
+          ErrorBoundary={LexicalErrorBoundary}
+        />
+      </div>
+      <HistoryPlugin />
+      <AutoFocusPlugin />
+      <CodeHighlightPlugin />
+      <ListPlugin />
+      <LinkPlugin />
+      <ListMaxIndentLevelPlugin maxDepth={1} />
+      <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+      <OnChangePlugin
+        onChange={(editorState) => {
+          editorStateRef.current = editorState;
+        }}
+      />
+    </LexicalComposer>
+  );
+};
 Editor.displayName = "Editor";
 
 export { Editor };

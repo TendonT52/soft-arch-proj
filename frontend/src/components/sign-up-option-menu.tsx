@@ -23,7 +23,7 @@ const SignUpOptionMenu = ({
   children,
 }: SignUpOptionMenuProps) => {
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
       <DropdownMenuContent
         align={align}

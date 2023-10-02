@@ -5,7 +5,7 @@ import { Logo } from "./logo";
 import { SignUpOptionMenu } from "./sign-up-option-menu";
 import { Button } from "./ui/button";
 
-interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
+type HeaderProps = React.HTMLAttributes<HTMLDivElement>;
 
 const Header = React.forwardRef<HTMLDivElement, HeaderProps>(
   ({ className, ...props }, ref) => {
@@ -27,7 +27,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(
         </Link>
         <div className="flex items-center gap-4 text-sm font-medium">
           <Link
-            className="text-foreground transition-colors hover:text-primary"
+            className="text-foreground transition-colors hover:text-foreground/90"
             href="/login"
           >
             Login

@@ -2,7 +2,7 @@ import * as React from "react";
 import { CatIcon, SproutIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface LogoProps extends React.HTMLAttributes<HTMLDivElement> {}
+type LogoProps = React.HTMLAttributes<HTMLDivElement>;
 
 const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
   ({ className, ...props }, ref) => (
