@@ -8,7 +8,7 @@ import (
 )
 
 type PostRepoPort interface {
-	CreatePost(ctx context.Context, userId int64, post *pbv1.Post) (int64, error)
+	CreatePost(ctx context.Context, userId int64, post *pbv1.CreatedPost) (int64, error)
 	GetPost(ctx context.Context, postId int64) (*pbv1.Post, error)
 	GetPosts(ctx context.Context, search *pbv1.SearchOptions, cids *domain.CompanyInfo) ([]*pbv1.Post, error)
 	GetOwner(ctx context.Context, postId int64) (int64, error)

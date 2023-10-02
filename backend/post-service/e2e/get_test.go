@@ -85,7 +85,7 @@ func TestGetPost(t *testing.T) {
 
 	res, err := c.CreatePost(ctx, &pbv1.CreatePostRequest{
 		AccessToken: token,
-		Post: &pbv1.Post{
+		Post: &pbv1.CreatedPost{
 			Topic:          topic,
 			Description:    description,
 			Period:         period,

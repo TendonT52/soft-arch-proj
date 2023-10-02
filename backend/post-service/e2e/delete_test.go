@@ -49,7 +49,7 @@ func TestDeletePost(t *testing.T) {
 
 	CreateRes, err := c.CreatePost(ctx, &pbv1.CreatePostRequest{
 		AccessToken: token,
-		Post: &pbv1.Post{
+		Post: &pbv1.CreatedPost{
 			Topic:          "Topic for delete",
 			Description:    lex,
 			Period:         "04/04/2023 - 04/04/2024",
@@ -64,7 +64,7 @@ func TestDeletePost(t *testing.T) {
 
 	CreateRes2, err := c.CreatePost(ctx, &pbv1.CreatePostRequest{
 		AccessToken: token,
-		Post: &pbv1.Post{
+		Post: &pbv1.CreatedPost{
 			Topic:          "Topic for tetsting",
 			Description:    lex,
 			Period:         "05/05/2023 - 05/05/2024",
@@ -79,7 +79,7 @@ func TestDeletePost(t *testing.T) {
 
 	CreateRes3, err := c.CreatePost(ctx, &pbv1.CreatePostRequest{
 		AccessToken: token,
-		Post: &pbv1.Post{
+		Post: &pbv1.CreatedPost{
 			Topic:          "Topic for delete 2",
 			Description:    lex,
 			Period:         "05/05/2023 - 05/05/2024",

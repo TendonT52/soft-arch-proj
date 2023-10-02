@@ -30,7 +30,7 @@ func NewPostRepository(db DBTX) port.PostRepoPort {
 	return &postRepository{db: db}
 }
 
-func (r *postRepository) CreatePost(ctx context.Context, userId int64, post *pbv1.Post) (int64, error) {
+func (r *postRepository) CreatePost(ctx context.Context, userId int64, post *pbv1.CreatedPost) (int64, error) {
 	current_timestamp := time.Now().Unix()
 
 	// Start a transaction

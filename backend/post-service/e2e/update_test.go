@@ -32,7 +32,7 @@ func TestUpdatePost(t *testing.T) {
 	ad, err := mock.CreateMockAdmin(ctx)
 	require.NoError(t, err)
 
-	_, token, err := mock.CreateMockApprovedCompany(ctx, "Company", ad)
+	_, token, err := mock.CreateMockApprovedCompany(ctx, "Company Name", ad)
 	require.NoError(t, err)
 
 	tokenAdmin, err := mock.CreateMockAdmin(ctx)
@@ -81,7 +81,7 @@ func TestUpdatePost(t *testing.T) {
 
 	CreateRes, err := c.CreatePost(ctx, &pbv1.CreatePostRequest{
 		AccessToken: token,
-		Post: &pbv1.Post{
+		Post: &pbv1.CreatedPost{
 			Topic:          topic,
 			Description:    description,
 			Period:         period,

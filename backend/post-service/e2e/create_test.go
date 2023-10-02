@@ -101,7 +101,7 @@ func TestCreatePost(t *testing.T) {
 	}{
 		"success": {
 			req: &pbv1.CreatePostRequest{
-				Post: &pbv1.Post{
+				Post: &pbv1.CreatedPost{
 					Topic:          "Topic Test",
 					Description:    lex,
 					Period:         "01/01/2023 - 02/02/2023",
@@ -119,7 +119,7 @@ func TestCreatePost(t *testing.T) {
 		},
 		"success with same title": {
 			req: &pbv1.CreatePostRequest{
-				Post: &pbv1.Post{
+				Post: &pbv1.CreatedPost{
 					Topic:          "Topic Test 2",
 					Description:    lex,
 					Period:         "01/01/2023 - 02/02/2023",
@@ -137,7 +137,7 @@ func TestCreatePost(t *testing.T) {
 		},
 		"Some fields are empty": {
 			req: &pbv1.CreatePostRequest{
-				Post: &pbv1.Post{
+				Post: &pbv1.CreatedPost{
 					Topic:          "",
 					Description:    lex,
 					Period:         "01/01/2023 - 02/02/2023",
@@ -155,7 +155,7 @@ func TestCreatePost(t *testing.T) {
 		},
 		"Not company": {
 			req: &pbv1.CreatePostRequest{
-				Post: &pbv1.Post{
+				Post: &pbv1.CreatedPost{
 					Topic:          "Topic Test",
 					Description:    lex,
 					Period:         "01/01/2023 - 02/02/2023",
@@ -173,7 +173,7 @@ func TestCreatePost(t *testing.T) {
 		},
 		"Invalid token": {
 			req: &pbv1.CreatePostRequest{
-				Post: &pbv1.Post{
+				Post: &pbv1.CreatedPost{
 					Topic:          "Topic Test",
 					Description:    lex,
 					Period:         "01/01/2023 - 02/02/2023",

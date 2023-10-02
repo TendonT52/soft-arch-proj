@@ -23,7 +23,7 @@ func NewPostService(postRepo port.PostRepoPort, userService port.UserClientPort)
 	}
 }
 
-func (s *postService) CreatePost(ctx context.Context, token string, post *pbv1.Post) (int64, error) {
+func (s *postService) CreatePost(ctx context.Context, token string, post *pbv1.CreatedPost) (int64, error) {
 	if !domain.CheckRequireFields(post) {
 		return 0, domain.ErrFieldsAreRequired
 	}
