@@ -10,6 +10,7 @@ import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
 import {
   LexicalComposer,
   type InitialConfigType,
+  type InitialEditorStateType,
 } from "@lexical/react/LexicalComposer";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
@@ -23,6 +24,7 @@ import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { type EditorState } from "lexical";
 import TextareaAutosize from "react-textarea-autosize";
+import { cn } from "@/lib/utils";
 import { CodeHighlightPlugin } from "./code-highlight-plugin";
 import { ListMaxIndentLevelPlugin } from "./list-max-index-level-plugin";
 import { ToolbarPlugin } from "./toolbar-plugin";
@@ -95,39 +97,57 @@ type EditorProps = {
   title?: string;
   onTitleChange?: (title: string) => void;
   defaultTitle?: string;
+  editable?: boolean;
+  editorState?: InitialEditorStateType;
 };
 
 const Editor = ({
   title,
   onTitleChange,
   defaultTitle = "Untitled Post",
+  editable = true,
+  editorState,
 }: EditorProps) => {
   const editorStateRef = useRef<EditorState>();
 
   return (
-    <LexicalComposer initialConfig={initialConfig}>
-      <div className="relative mx-auto flex min-h-[48rem] w-full max-w-3xl flex-col rounded-t-lg border shadow">
-        <div className="sticky top-0 z-10 rounded-t-lg border-b">
-          <ToolbarPlugin />
-        </div>
-        <TextareaAutosize
-          className="min-h-0 max-w-none resize-none appearance-none bg-transparent px-8 pt-12 text-4xl font-extrabold text-[#111827] scrollbar-hide focus:outline-none focus-visible:outline-none dark:text-[#ffffff]"
-          value={title}
-          defaultValue={defaultTitle}
-          spellCheck={false}
-          onChange={(e) => {
-            if (onTitleChange) {
-              onTitleChange(e.target.value);
-            }
-          }}
-          aria-label="title"
-        />
+    <LexicalComposer
+      initialConfig={{ ...initialConfig, editorState, editable }}
+    >
+      <div
+        className={cn(
+          "relative mx-auto flex min-h-[48rem] w-full max-w-3xl flex-col rounded-t-lg",
+          editable && "border shadow"
+        )}
+      >
+        {editable && (
+          <div className="sticky top-0 z-10 rounded-t-lg border-b">
+            <ToolbarPlugin />
+          </div>
+        )}
+        {editable ? (
+          <TextareaAutosize
+            className="min-h-0 max-w-none resize-none appearance-none bg-transparent px-8 pt-12 text-4xl font-extrabold text-[#111827] scrollbar-hide focus:outline-none focus-visible:outline-none dark:text-[#ffffff]"
+            value={title}
+            defaultValue={defaultTitle}
+            spellCheck={false}
+            onChange={(e) => {
+              if (onTitleChange) {
+                onTitleChange(e.target.value);
+              }
+            }}
+            aria-label="title"
+          />
+        ) : (
+          <div className="min-h-0 max-w-none resize-none appearance-none bg-transparent px-8 pt-12 text-4xl font-extrabold text-[#111827] scrollbar-hide focus:outline-none focus-visible:outline-none dark:text-[#ffffff]">
+            {title}
+          </div>
+        )}
         <RichTextPlugin
           contentEditable={
             <ContentEditable
               className="prose prose-green relative min-h-[6.8rem] max-w-none flex-1 overflow-auto bg-background px-8 pb-12 pt-8 dark:prose-invert focus:outline-none"
               spellCheck={false}
-              autoFocus={false}
             />
           }
           placeholder={null}

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "./ui/button";
 import {
   Card,
@@ -31,7 +32,9 @@ const PostCard = ({ post }: PostCardProps) => {
         <CardDescription>{skills.join(", ")}</CardDescription>
       </CardContent>
       <CardFooter>
-        <Button size="sm">Contact</Button>
+        <Button size="sm" asChild>
+          <Link href="/posts/1">Contact</Link>
+        </Button>
       </CardFooter>
     </Card>
   );

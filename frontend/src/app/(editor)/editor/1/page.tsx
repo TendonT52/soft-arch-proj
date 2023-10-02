@@ -5,8 +5,8 @@ import { Editor } from "@/components/lexical/editor";
 
 export default function Page() {
   return (
-    <div className="container relative flex min-h-screen gap-6 py-6">
-      <div className="container fixed left-0 right-0 top-6 flex justify-between gap-12">
+    <div className="container relative flex min-h-screen items-start gap-6 py-6">
+      <div className="container fixed left-0 right-0 top-6 z-10 flex justify-between gap-12">
         <Link href="/dashboard/posts">
           <Button variant="ghost">
             <ChevronLeftIcon className="mr-2 h-4 w-4" />
