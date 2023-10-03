@@ -1,0 +1,3 @@
+ALTER TABLE open_positions DROP CONSTRAINT unique_open_positions_title;
+ALTER TABLE required_skills DROP CONSTRAINT unique_required_skills_title;
+ALTER TABLE benefits DROP CONSTRAINT unique_benefits_title;

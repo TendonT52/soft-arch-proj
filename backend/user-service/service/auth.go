@@ -35,13 +35,27 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 	if req.Password != req.PasswordConfirm {
 		return 0, domain.ErrPasswordNotMatch
 	}
+	if !domain.CheckStudentRequiredFields(&pbv1.Student{
+		Name:        req.Name,
+		Email:       req.Email,
+		Description: req.Description,
+		Faculty:     req.Faculty,
+		Major:       req.Major,
+		Year:        req.Year,
+	}) {
+		return 0, domain.ErrFieldsAreRequired
+	}
+	if !domain.CheckPasswordLength(req.Password) {
+		return 0, domain.ErrPasswordLengthMustBeGreaterThanSix
+	}
+
 	current_time := s.time.Now().Unix()
 
 	hashedPassword := utils.HashPassword(req.Password, current_time)
 	req.Password = hashedPassword
 
 	if !email.IsChulaStudentEmail(req.Email) {
-		return 0, domain.ErrNotChulaStudentEmail.With("Email must be studentID with @student.chula.ac.th")
+		return 0, domain.ErrNotCorrectEmailFormat.With("Email must be studentID with @student.chula.ac.th")
 	}
 
 	err := s.repo.CheckEmailExist(ctx, req.Email)
@@ -95,6 +109,22 @@ func (s *authService) SignUpCompany(ctx context.Context, req *pbv1.CreateCompany
 	if req.Password != req.PasswordConfirm {
 		return 0, domain.ErrPasswordNotMatch
 	}
+	if !email.IsCorrectEmailFormat(req.Email) {
+		return 0, domain.ErrNotCorrectEmailFormat.With("Email must be correct format")
+	}
+	if !domain.CheckCompanyRequiredFields(&pbv1.Company{
+		Name:        req.Name,
+		Email:       req.Email,
+		Description: req.Description,
+		Phone:       req.Phone,
+		Category:    req.Category,
+		Location:    req.Location,
+	}) {
+		return 0, domain.ErrFieldsAreRequired
+	}
+	if !domain.CheckPasswordLength(req.Password) {
+		return 0, domain.ErrPasswordLengthMustBeGreaterThanSix
+	}
 
 	current_time := s.time.Now().Unix()
 	hashedPassword := utils.HashPassword(req.Password, current_time)
@@ -118,6 +148,12 @@ func (s *authService) SignUpCompany(ctx context.Context, req *pbv1.CreateCompany
 func (s *authService) SignUpAdmin(ctx context.Context, req *pbv1.CreateAdminRequest) (int64, error) {
 	if req.Password != req.PasswordConfirm {
 		return 0, domain.ErrPasswordNotMatch
+	}
+	if !email.IsCorrectEmailFormat(req.Email) {
+		return 0, domain.ErrNotCorrectEmailFormat.With("Email must be correct format")
+	}
+	if !domain.CheckPasswordLength(req.Password) {
+		return 0, domain.ErrPasswordLengthMustBeGreaterThanSix
 	}
 
 	current_time := s.time.Now().Unix()
@@ -177,7 +213,7 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 	config, _ := config.LoadConfig("..")
 	userId, err := utils.ValidateRefreshToken(refreshToken)
 	if err != nil {
-		return "", err
+		return "", domain.ErrUnauthorized
 	}
 
 	role, err := s.repo.CheckUserIDExist(ctx, userId)
@@ -199,7 +235,7 @@ func (s *authService) RefreshAccessToken(ctx context.Context, refreshToken strin
 func (s *authService) LogOut(ctx context.Context, refreshToken string) error {
 	userId, err := utils.ValidateRefreshToken(refreshToken)
 	if err != nil {
-		return err
+		return domain.ErrUnauthorized
 	}
 
 	_, err = s.repo.CheckUserIDExist(ctx, userId)

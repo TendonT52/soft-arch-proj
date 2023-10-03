@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "github.com/TikhampornSky/report-service/gen";
+import "google/api/annotations.proto";
+
+service ReportService {
+    rpc ReportHealthCheck(ReportHealthCheckRequest) returns (ReportHealthCheckResponse) {} 
+    rpc CreateReport(CreateReportRequest) returns (CreateReportResponse) {
+        option (google.api.http) = {
+            post: "/v1/reports"
+            body: "*"
+        };
+    }
+    rpc ListReports(ListReportsRequest) returns (ListReportsResponse) {
+        option (google.api.http) = {
+            get: "/v1/reports"
+        };
+    }
+    rpc GetReport(GetReportRequest) returns (GetReportResponse) {
+        option (google.api.http) = {
+            get: "/v1/reports/{id}"
+        };
+    }
+}
+
+// Health Check
+message ReportHealthCheckRequest {}
+
+message ReportHealthCheckResponse {
+    int64 status = 1;
+}
+
+message Report {
+    string topic = 2;
+    string type = 3;
+    string description = 4;
+    int64 updated_at = 5;
+}
+
+// Create Report
+message CreateReportRequest {
+    Report report = 1;
+    string access_token = 2;
+}
+
+message CreateReportResponse {
+    int64 status = 1;
+    string message = 2;
+    int64 id = 3;
+}
+
+// List Reports
+message ListReportsRequest {
+    string access_token = 1;
+}
+
+message ListReportsResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated Report reports = 3;
+    int64 total = 4;
+}
+
+// Get Report
+message GetReportRequest {
+    int64 id = 1;
+    string access_token = 2;
+}
+
+message GetReportResponse {
+    int64 status = 1;
+    string message = 2;
+    Report report = 3;
+}

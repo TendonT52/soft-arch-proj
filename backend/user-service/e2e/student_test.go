@@ -2,13 +2,14 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
-	"github.com/TikhampornSky/go-auth-verifiedMail/e2e/mock"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
+	"github.com/TikhampornSky/go-auth-verifiedMail/tools"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -16,7 +17,9 @@ import (
 )
 
 func TestGetStudentMe(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -43,10 +46,13 @@ func TestGetStudentMe(t *testing.T) {
 	require.Equal(t, int64(201), r.Status)
 	require.NoError(t, err)
 
+	timeNow, err := tools.GetCreateTime(r.Id)
+	require.NoError(t, err)
+
 	// Verify Email
 	result, err := c.VerifyEmailCode(ctx, &pbv1.VerifyEmailCodeRequest{
 		StudentId: id_student,
-		Code:      utils.Encode(id_student, mock.NewMockTimeProvider().Now().Unix()),
+		Code:      utils.Encode(id_student, timeNow),
 	})
 	require.Equal(t, int64(200), result.Status)
 	require.NoError(t, err)
@@ -60,7 +66,6 @@ func TestGetStudentMe(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := config.LoadConfig("..")
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: 0,
 		Role:   domain.StudentRole,
@@ -88,12 +93,22 @@ func TestGetStudentMe(t *testing.T) {
 				},
 			},
 		},
-		"invalid token": {
+		"not correct student": {
 			req: &pbv1.GetStudentMeRequest{
 				AccessToken: access_token_wrong,
 			},
 			expect: &pbv1.GetStudentResponse{
 				Status: 500,
+				Message: "Something went wrong",
+			},
+		},
+		"invalid token": {
+			req: &pbv1.GetStudentMeRequest{
+				AccessToken: "invalid token",
+			},
+			expect: &pbv1.GetStudentResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
 			},
 		},
 	}
@@ -119,7 +134,9 @@ func TestGetStudentMe(t *testing.T) {
 }
 
 func TestGetStudent(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -146,10 +163,13 @@ func TestGetStudent(t *testing.T) {
 	require.Equal(t, int64(201), r.Status)
 	require.NoError(t, err)
 
+	timeNow, err := tools.GetCreateTime(r.Id)
+	require.NoError(t, err)
+
 	// Verify Email
 	result, err := c.VerifyEmailCode(ctx, &pbv1.VerifyEmailCodeRequest{
 		StudentId: id_student,
-		Code:      utils.Encode(id_student, mock.NewMockTimeProvider().Now().Unix()),
+		Code:      utils.Encode(id_student, timeNow),
 	})
 	require.Equal(t, int64(200), result.Status)
 	require.NoError(t, err)
@@ -163,10 +183,15 @@ func TestGetStudent(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create Admin
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	a := &pbv1.CreateAdminRequest{
-		Email:           utils.GenerateRandomString(10) + "@gmail.com",
+		Email:           utils.GenerateRandomString(20) + "@gmail.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	}
 	_, err = c.CreateAdmin(ctx, a)
 	require.NoError(t, err)
@@ -209,6 +234,16 @@ func TestGetStudent(t *testing.T) {
 				Message: "user id not found",
 			},
 		},
+		"invalid token": {
+			req: &pbv1.GetStudentRequest{
+				AccessToken: "invalid token",
+				Id:          r.Id,
+			},
+			expect: &pbv1.GetStudentResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
+			},
+		},
 	}
 
 	for name, tc := range tests {
@@ -229,7 +264,9 @@ func TestGetStudent(t *testing.T) {
 }
 
 func TestUpdateStudent(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -256,10 +293,13 @@ func TestUpdateStudent(t *testing.T) {
 	require.Equal(t, int64(201), r.Status)
 	require.NoError(t, err)
 
+	timeNow, err := tools.GetCreateTime(r.Id)
+	require.NoError(t, err)
+
 	// Verify Email
 	result, err := c.VerifyEmailCode(ctx, &pbv1.VerifyEmailCodeRequest{
 		StudentId: id_student,
-		Code:      utils.Encode(id_student, mock.NewMockTimeProvider().Now().Unix()),
+		Code:      utils.Encode(id_student, timeNow),
 	})
 	require.Equal(t, int64(200), result.Status)
 	require.NoError(t, err)
@@ -273,7 +313,6 @@ func TestUpdateStudent(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := config.LoadConfig("..")
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: 0,
 		Role:   domain.StudentRole,
@@ -288,19 +327,19 @@ func TestUpdateStudent(t *testing.T) {
 			req: &pbv1.UpdateStudentRequest{
 				AccessToken: res.AccessToken,
 				Student: &pbv1.Student{
-					Name:        "Mock Update Student",
-					Description: "I am a mock student",
-					Faculty:     "Mock Engineering",
-					Major:       "Mock Computer Engineering",
+					Name:        "UPADATED Mock Update Student",
+					Description: "UPADATED I am a mock student",
+					Faculty:     "UPADATED Mock Engineering",
+					Major:       "UPADATED Mock Computer Engineering",
 					Year:        3,
 				},
 			},
 			expect: &pbv1.UpdateCompanyResponse{
 				Status:  200,
-				Message: "Update data for Mock Update Student successfully!",
+				Message: "Update data for UPADATED Mock Update Student successfully!",
 			},
 		},
-		"invalid token": {
+		"Not correct student": {
 			req: &pbv1.UpdateStudentRequest{
 				AccessToken: access_token_wrong,
 				Student: &pbv1.Student{
@@ -316,6 +355,16 @@ func TestUpdateStudent(t *testing.T) {
 				Message: "user id not found",
 			},
 		},
+		"invalid token": {
+			req: &pbv1.UpdateStudentRequest{
+				AccessToken: "invalid token",
+				Student: &pbv1.Student{},
+			},
+			expect: &pbv1.UpdateCompanyResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
+			},
+		},
 	}
 
 	for name, tc := range tests {
@@ -326,4 +375,13 @@ func TestUpdateStudent(t *testing.T) {
 			require.Equal(t, tc.expect.Message, res.Message)
 		})
 	}
+
+	// Get Student
+	resGet, _, err := tools.GetStudentByID(r.Id)
+	require.NoError(t, err)
+	require.Equal(t, "UPADATED Mock Update Student", resGet.Name)
+	require.Equal(t, "UPADATED I am a mock student", resGet.Description)
+	require.Equal(t, "UPADATED Mock Engineering", resGet.Faculty)
+	require.Equal(t, "UPADATED Mock Computer Engineering", resGet.Major)
+	require.Equal(t, int32(3), resGet.Year)
 }

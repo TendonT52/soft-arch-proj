@@ -2,12 +2,14 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
+	"github.com/TikhampornSky/go-auth-verifiedMail/tools"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -15,7 +17,9 @@ import (
 )
 
 func TestGetCompanyMe(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -27,11 +31,16 @@ func TestGetCompanyMe(t *testing.T) {
 	defer cancel()
 
 	// Craete Admin
-	aa := utils.GenerateRandomString(10) + "@admin.com"
+	aa := utils.GenerateRandomString(11) + "@admin.com"
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	admin := &pbv1.CreateAdminRequest{
 		Email:           aa,
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	}
 	a, err := c.CreateAdmin(ctx, admin)
 	require.Equal(t, int64(201), a.Status)
@@ -40,7 +49,7 @@ func TestGetCompanyMe(t *testing.T) {
 	// Admin Sign In
 	admin_res, err := c.SignIn(ctx, &pbv1.LoginRequest{
 		Email:    aa,
-		Password: admin.Password,
+		Password: "password-test",
 	})
 	require.Equal(t, int64(200), admin_res.Status)
 	require.NoError(t, err)
@@ -48,7 +57,7 @@ func TestGetCompanyMe(t *testing.T) {
 	// Register
 	com := &pbv1.CreateCompanyRequest{
 		Name:            "Mock Company " + utils.GenerateRandomString(3),
-		Email:           utils.GenerateRandomString(10) + "@company.com",
+		Email:           utils.GenerateRandomString(13) + "@company.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
 		Description:     "I am a company",
@@ -64,7 +73,7 @@ func TestGetCompanyMe(t *testing.T) {
 	result, err := u.UpdateCompanyStatus(ctx, &pbv1.UpdateCompanyStatusRequest{
 		AccessToken: admin_res.AccessToken,
 		Id:          r.Id,
-		Status:      "Approve",
+		Status:      domain.ComapanyStatusApprove,
 	})
 	require.Equal(t, int64(200), result.Status)
 
@@ -77,7 +86,6 @@ func TestGetCompanyMe(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := config.LoadConfig("..")
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: 0,
 		Role:   domain.CompanyRole,
@@ -102,16 +110,26 @@ func TestGetCompanyMe(t *testing.T) {
 					Location:    com.Location,
 					Phone:       com.Phone,
 					Category:    com.Category,
-					Status:      "Approve",
+					Status:      domain.ComapanyStatusApprove,
 				},
 			},
 		},
-		"fail: invalid token": {
+		"fail: not correct company": {
 			req: &pbv1.GetCompanyMeRequest{
 				AccessToken: access_token_wrong,
 			},
 			expect: &pbv1.GetCompanyResponse{
 				Status: 500,
+				Message: "Something went wrong",
+			},
+		},
+		"fail: invalid token": {
+			req: &pbv1.GetCompanyMeRequest{
+				AccessToken: "",
+			},
+			expect: &pbv1.GetCompanyResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
 			},
 		},
 	}
@@ -127,7 +145,9 @@ func TestGetCompanyMe(t *testing.T) {
 }
 
 func TestGetComapany(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -139,11 +159,16 @@ func TestGetComapany(t *testing.T) {
 	defer cancel()
 
 	// Craete Admin
-	aa := utils.GenerateRandomString(10) + "@admin.com"
+	aa := utils.GenerateRandomString(12) + "@admin.com"
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	admin := &pbv1.CreateAdminRequest{
 		Email:           aa,
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	}
 	a, err := c.CreateAdmin(ctx, admin)
 	require.Equal(t, int64(201), a.Status)
@@ -152,7 +177,7 @@ func TestGetComapany(t *testing.T) {
 	// Admin Sign In
 	admin_res, err := c.SignIn(ctx, &pbv1.LoginRequest{
 		Email:    aa,
-		Password: admin.Password,
+		Password: "password-test",
 	})
 	require.Equal(t, int64(200), admin_res.Status)
 	require.NoError(t, err)
@@ -160,7 +185,7 @@ func TestGetComapany(t *testing.T) {
 	// Register
 	com := &pbv1.CreateCompanyRequest{
 		Name:            "Mock Company " + utils.GenerateRandomString(3),
-		Email:           utils.GenerateRandomString(10) + "@company.com",
+		Email:           utils.GenerateRandomString(14) + "@company.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
 		Description:     "I am a company",
@@ -176,7 +201,7 @@ func TestGetComapany(t *testing.T) {
 	result, err := u.UpdateCompanyStatus(ctx, &pbv1.UpdateCompanyStatusRequest{
 		AccessToken: admin_res.AccessToken,
 		Id:          r.Id,
-		Status:      "Approve",
+		Status:      domain.ComapanyStatusApprove,
 	})
 	require.Equal(t, int64(200), result.Status)
 
@@ -208,7 +233,7 @@ func TestGetComapany(t *testing.T) {
 					Location:    com.Location,
 					Phone:       com.Phone,
 					Category:    com.Category,
-					Status:      "Approve",
+					Status:      domain.ComapanyStatusApprove,
 				},
 			},
 		},
@@ -220,6 +245,16 @@ func TestGetComapany(t *testing.T) {
 			expect: &pbv1.GetCompanyResponse{
 				Status:  404,
 				Message: "company id not found",
+			},
+		},
+		"fail: invalid token": {
+			req: &pbv1.GetCompanyRequest{
+				Id:          r.Id,
+				AccessToken: "",
+			},
+			expect: &pbv1.GetCompanyResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
 			},
 		},
 	}
@@ -236,7 +271,9 @@ func TestGetComapany(t *testing.T) {
 }
 
 func TestUpdateCompany(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -248,11 +285,16 @@ func TestUpdateCompany(t *testing.T) {
 	defer cancel()
 
 	// Craete Admin
-	aa := utils.GenerateRandomString(10) + "@admin.com"
+	aa := utils.GenerateRandomString(15) + "@admin.com"
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	admin := &pbv1.CreateAdminRequest{
 		Email:           aa,
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	}
 	a, err := c.CreateAdmin(ctx, admin)
 	require.Equal(t, int64(201), a.Status)
@@ -261,7 +303,7 @@ func TestUpdateCompany(t *testing.T) {
 	// Admin Sign In
 	admin_res, err := c.SignIn(ctx, &pbv1.LoginRequest{
 		Email:    aa,
-		Password: admin.Password,
+		Password: "password-test",
 	})
 	require.Equal(t, int64(200), admin_res.Status)
 	require.NoError(t, err)
@@ -269,7 +311,7 @@ func TestUpdateCompany(t *testing.T) {
 	// Register
 	com := &pbv1.CreateCompanyRequest{
 		Name:            "Mock Company " + utils.GenerateRandomString(3),
-		Email:           utils.GenerateRandomString(10) + "@company.com",
+		Email:           utils.GenerateRandomString(16) + "@company.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
 		Description:     "I am a company",
@@ -285,7 +327,7 @@ func TestUpdateCompany(t *testing.T) {
 	result, err := u.UpdateCompanyStatus(ctx, &pbv1.UpdateCompanyStatusRequest{
 		AccessToken: admin_res.AccessToken,
 		Id:          r.Id,
-		Status:      "Approve",
+		Status:      domain.ComapanyStatusApprove,
 	})
 	require.Equal(t, int64(200), result.Status)
 
@@ -323,8 +365,18 @@ func TestUpdateCompany(t *testing.T) {
 				Company:     &pbv1.Company{},
 			},
 			expect: &pbv1.UpdateCompanyResponse{
-				Status:  401,
+				Status:  403,
 				Message: "You are not authorized to update this company",
+			},
+		},
+		"invalide token": {
+			req: &pbv1.UpdateCompanyRequest{
+				AccessToken: "",
+				Company:     &pbv1.Company{},
+			},
+			expect: &pbv1.UpdateCompanyResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
 			},
 		},
 	}
@@ -337,4 +389,15 @@ func TestUpdateCompany(t *testing.T) {
 			require.Equal(t, tc.expect.Message, res.Message)
 		})
 	}
+
+	// Get Company
+	get_res, _, err := tools.GetCompanyByID(r.Id)
+	require.NoError(t, err)
+	require.Equal(t, domain.ComapanyStatusApprove, get_res.Status)
+	require.Equal(t, "Mock Company New Name", get_res.Name)
+	require.Equal(t, "I am a company New", get_res.Description)
+	require.Equal(t, "Bangkok New", get_res.Location)
+	require.Equal(t, "0123456780", get_res.Phone)
+	require.Equal(t, "IT New", get_res.Category)
+	require.Equal(t, domain.ComapanyStatusApprove, get_res.Status)
 }

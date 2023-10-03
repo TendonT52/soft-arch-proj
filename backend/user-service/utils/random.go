@@ -22,13 +22,15 @@ func GenerateRandomNumber(length int) string {
 
 func GenerateRandomString(length int) string {
 	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	rand.Seed(time.Now().UnixNano())
+
+	source := rand.NewSource(time.Now().UnixNano())
+    randomGenerator := rand.New(source)
 
 	var result string
 	charsetLength := len(charset)
 
 	for i := 0; i < length; i++ {
-		randomIndex := rand.Intn(charsetLength)
+		randomIndex := randomGenerator.Intn(charsetLength)
 		result += string(charset[randomIndex])
 	}
 

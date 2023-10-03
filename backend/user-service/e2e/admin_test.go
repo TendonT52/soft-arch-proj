@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"testing"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
+	"github.com/TikhampornSky/go-auth-verifiedMail/tools"
 	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -16,7 +18,9 @@ import (
 )
 
 func TestUpdateCompanyStatus(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -27,11 +31,20 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	// Delete all companies in table
+	err = tools.DeleteAll()
+	require.NoError(t, err)
+
 	// Create Admin
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	admin := &pbv1.CreateAdminRequest{
-		Email:           utils.GenerateRandomString(10) + "@admin.com",
+		Email:           utils.GenerateRandomString(2) + "@admin.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	}
 	a, err := c.CreateAdmin(ctx, admin)
 	require.Equal(t, int64(201), a.Status)
@@ -43,15 +56,8 @@ func TestUpdateCompanyStatus(t *testing.T) {
 		Password: admin.Password,
 	})
 
-	// Delete all companies in table
-	d, err := u.DeleteCompanies(ctx, &pbv1.DeleteCompaniesRequest{
-		AccessToken: ad.AccessToken,
-	})
-	require.Equal(t, int64(200), d.Status)
-	require.NoError(t, err)
-
 	// Register
-	companyEmail := utils.GenerateRandomString(10) + "@company.com"
+	companyEmail := utils.GenerateRandomString(3) + "@company.com"
 	company := &pbv1.CreateCompanyRequest{
 		Name:            "Mock Company",
 		Email:           companyEmail,
@@ -67,7 +73,7 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	require.NoError(t, err)
 
 	// Register
-	companyEmail2 := utils.GenerateRandomString(10) + "@company.com"
+	companyEmail2 := utils.GenerateRandomString(4) + "@company.com"
 	company2 := &pbv1.CreateCompanyRequest{
 		Name:            "Mock Company 2",
 		Email:           companyEmail2,
@@ -83,7 +89,6 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate WRONG token
-	config, _ := config.LoadConfig("..")
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: 0,
 		Role:   domain.CompanyRole,
@@ -98,7 +103,7 @@ func TestUpdateCompanyStatus(t *testing.T) {
 			req: &pbv1.UpdateCompanyStatusRequest{
 				AccessToken: ad.AccessToken,
 				Id:          com.Id,
-				Status:      "Approve",
+				Status:      domain.ComapanyStatusApprove,
 			},
 			expect: &pbv1.UpdateCompanyStatusResponse{
 				Status:  200,
@@ -109,7 +114,7 @@ func TestUpdateCompanyStatus(t *testing.T) {
 			req: &pbv1.UpdateCompanyStatusRequest{
 				AccessToken: ad.AccessToken,
 				Id:          com2.Id,
-				Status:      "Reject",
+				Status:      domain.ComapanyStatusReject,
 			},
 			expect: &pbv1.UpdateCompanyStatusResponse{
 				Status:  200,
@@ -120,10 +125,10 @@ func TestUpdateCompanyStatus(t *testing.T) {
 			req: &pbv1.UpdateCompanyStatusRequest{
 				AccessToken: access_token_wrong,
 				Id:          com.Id,
-				Status:      "verified",
+				Status:      domain.ComapanyStatusApprove,
 			},
 			expect: &pbv1.UpdateCompanyStatusResponse{
-				Status:  401,
+				Status:  403,
 				Message: "Only admin can approve",
 			},
 		},
@@ -131,15 +136,26 @@ func TestUpdateCompanyStatus(t *testing.T) {
 			req: &pbv1.UpdateCompanyStatusRequest{
 				AccessToken: ad.AccessToken,
 				Id:          com.Id,
-				Status:      "Reject",
+				Status:      domain.ComapanyStatusReject,
 			},
 			expect: &pbv1.UpdateCompanyStatusResponse{
 				Status:  400,
 				Message: "company already approved or rejected",
 			},
 		},
+		"invalidate status": {
+			req: &pbv1.UpdateCompanyStatusRequest{
+				AccessToken: ad.AccessToken,
+				Id:          com.Id,
+				Status:      "verified",
+			},
+			expect: &pbv1.UpdateCompanyStatusResponse{
+				Status:  400,
+				Message: "status must be Approve or Reject",
+			},
+		},
 	}
-	testOrder := []string{"success approve", "success reject", "fail: not admin", "fail: company already approved"}
+	testOrder := []string{"success approve", "success reject", "fail: not admin", "fail: company already approved", "invalidate status"}
 
 	for _, testName := range testOrder {
 		tc := tests[testName]
@@ -152,8 +168,10 @@ func TestUpdateCompanyStatus(t *testing.T) {
 	}
 }
 
-func createMockComapny(t *testing.T, name, email, description, location, phone, category string) *pbv1.CreateCompanyResponse {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+func createMockComapny(t *testing.T, name, email, description, location, phone, category string) *pbv1.Company {
+	config, _ := config.LoadConfig("..")
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -178,11 +196,22 @@ func createMockComapny(t *testing.T, name, email, description, location, phone, 
 	require.Equal(t, int64(201), com.Status)
 	require.NoError(t, err)
 
-	return com
+	return &pbv1.Company{
+		Id:          com.Id,
+		Name:        name,
+		Email:       email,
+		Description: description,
+		Location:    location,
+		Phone:       phone,
+		Category:    category,
+		Status:      domain.ComapanyStatusPending,
+	}
 }
 
 func TestListCompanies(t *testing.T) {
-	conn, err := grpc.Dial(":8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	config, _ := config.LoadConfig("..")
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
@@ -193,11 +222,20 @@ func TestListCompanies(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	// Delete all companies in table
+	err = tools.DeleteAll()
+	require.NoError(t, err)
+
 	// Create Admin
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
 	admin := &pbv1.CreateAdminRequest{
-		Email:           utils.GenerateRandomString(10) + "@admin.com",
+		Email:           utils.GenerateRandomString(11) + "@admin.com",
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
 	}
 	a, err := c.CreateAdmin(ctx, admin)
 	require.Equal(t, int64(201), a.Status)
@@ -208,16 +246,10 @@ func TestListCompanies(t *testing.T) {
 		Email:    admin.Email,
 		Password: admin.Password,
 	})
-
-	// Delete all companies in table
-	d, err := u.DeleteCompanies(ctx, &pbv1.DeleteCompaniesRequest{
-		AccessToken: ad.AccessToken,
-	})
-	require.Equal(t, int64(200), d.Status)
 	require.NoError(t, err)
+	require.Equal(t, int64(200), ad.Status)
 
 	// Generate WRONG token
-	config, _ := config.LoadConfig("..")
 	access_token_wrong, err := utils.CreateAccessToken(config.AccessTokenExpiresIn, &domain.Payload{
 		UserId: 0,
 		Role:   domain.AdminRole,
@@ -225,8 +257,8 @@ func TestListCompanies(t *testing.T) {
 	require.NoError(t, err)
 
 	// name, email, description, location, phone, category
-	mail1 := utils.GenerateRandomString(10) + "@company.com"
-	mail2 := utils.GenerateRandomString(10) + "@company.com"
+	mail1 := utils.GenerateRandomString(12) + "@company.com"
+	mail2 := utils.GenerateRandomString(13) + "@company.com"
 	c1 := createMockComapny(t, "Mock Company 1", mail1, "Company1 desc", "Bangkok", "0123456789", "Technology")
 	c2 := createMockComapny(t, "Mock Company 2", mail2, "Company2 desc", "Bangkok", "0123456789", "Technical Finanace")
 
@@ -242,26 +274,8 @@ func TestListCompanies(t *testing.T) {
 				Status:  200,
 				Message: "success",
 				Companies: []*pbv1.Company{
-					{
-						Id:          c1.Id,
-						Name:        "Mock Company 1",
-						Email:       mail1,
-						Description: "Company1 desc",
-						Location:    "Bangkok",
-						Phone:       "0123456789",
-						Category:    "Technology",
-						Status:      "Pending",
-					},
-					{
-						Id:          c2.Id,
-						Name:        "Mock Company 2",
-						Email:       mail2,
-						Description: "Company2 desc",
-						Location:    "Bangkok",
-						Phone:       "0123456789",
-						Category:    "Technical Finanace",
-						Status:      "Pending",
-					},
+					c1,
+					c2,
 				},
 			},
 		},
@@ -270,7 +284,7 @@ func TestListCompanies(t *testing.T) {
 				AccessToken: access_token_wrong,
 			},
 			expect: &pbv1.ListCompaniesResponse{
-				Status:  401,
+				Status:  403,
 				Message: "Only admin can view",
 			},
 		},

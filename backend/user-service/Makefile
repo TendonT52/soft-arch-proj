@@ -5,17 +5,8 @@ create-migrate:
 migrate-up:
 	migrate -database "postgres://postgres:password@user-service-postgresql.default:5432/?sslmode=disable" -path migrations up
 
-migrate-down:
-	migrate -database "postgres://postgres:password@user-service-postgresql.default:5432/?sslmode=disable" -path migrations down
-
-migrate-force:
-	migrate -database "postgres://postgres:password@user-service-postgresql.default:5432/?sslmode=disable" -path migrations force 1
-
-migrate-drop:
-	migrate -database "postgres://postgres:password@user-service-postgresql.default:5432/?sslmode=disable" -path migrations drop
-
-seed:
-	psql postgres://postgres:password@user-service-postgresql.default:5432/?sslmode=disable -a -f ./seed.sql
+clean-db:
+	psql postgres://postgres:password@user-service-postgresql.default:5432/?sslmode=disable -a -f ./cleanup.sql
 
 gen-proto:
 	protoc \
@@ -26,61 +17,54 @@ gen-proto:
     --go-grpc_out=gen \
     --go-grpc_opt=paths=source_relative
 
-server:
-	go run .
-
-test-all:
-	 go test ./...
-
-k8s-get:
-	kubectl get all -A
-
 gomock:
 	mockgen -source=port/service.go -destination=test/mock_port/mock_service.go -package=mock
 
+dependency:
+	mkdir -p ${DATA_PATH}
+	@echo "Persistent data will be stored in ${DATA_PATH}"
+	parallel ::: \
+		"DATA_PATH=${DATA_PATH} make -C ./helm user-service-postgresql" \
+		"DATA_PATH=${DATA_PATH} make -C ./helm user-service-redis"
+
+deploy:
+	@if [ "${MODE}" = "remote" ]; then \
+		kubectl create secret generic user-service --from-file=app.env; \
+		IMAGE=ghcr.io/tendont52/soft-arch-proj-backend-user-service:latest make -C ./helm user-service; \
+	elif [ "${MODE}" = "local" ]; then \
+		docker build -t user-service .; \
+		kubectl create secret generic user-service --from-file=app.env; \
+		IMAGE=user-service make -C ./helm user-service; \
+	else \
+		echo "MODE is not set to main or local"; \
+		exit 1; \
+	fi
+
 k8s-run-dev:
-	helm install user-service-postgresql ./helm/postgresql  \
-	--set global.postgresql.auth.postgresPassword=password \
-	--set master.persistence.size=10Gi \
-	--set master.persistence.path="${PWD}/data/postgresql" \
-	--set primary.persistence.existingClaim=user-service-postgresql-persistent-claim \
-	--set volumePermissions.enabled=true
+	$(eval DATA_PATH := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/data)
+	DATA_PATH=${DATA_PATH} make -C ../.. k8s-clear
 
-	helm install user-service-redis ./helm/redis \
-	--set auth.enabled=true \
-	--set auth.password=password \
-	--set architecture=standalone \
-	--set master.persistence.size=10Gi \
-	--set master.persistence.path="${PWD}/data/redis" \
-	--set master.persistence.existingClaim=user-service-redis-persistent-claim \
-	--set volumePermissions.enabled=true
+	@echo "Persistent data will be stored in ${DATA_PATH}"
+	parallel ::: \
+		"telepresence helm install" \
+		"DATA_PATH=${DATA_PATH}/user-service make dependency" \
+		"DATA_PATH=${DATA_PATH} make -C ../../helm memphis"
+	kubectl wait --for=condition=Ready pods --all --all-namespaces
 
-	helm install memphis ../../helm/memphis \
-	--set memphis.creds.rootPwd=password \
-	--set cluster.replicas=1 \
-	--set master.persistence.size=10Gi \
-	--set master.persistence.path="${PWD}/data/memphis" \
-	--set memphis.storageEngine.fileStorage.existingClaim=memphis-persistent-claim \
-	--set master.metadata.persistence.size=10Gi \
-	--set master.metadata.persistence.path="${PWD}/data/memphis-meta" \
-	--set metadata.persistence.existingClaim=memphis-metadata-persistent-claim \
-	--wait
-
-	telepresence helm install
 	telepresence connect
 	make migrate-up
-	make seed
 
-	# kubectl create secret generic user-service --from-file=app.env
-	# helm install user-service ./helm/user-service
+k8s-run-prod:
+	$(eval DATA_PATH := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/data)
+	DATA_PATH=${DATA_PATH} make -C ../.. k8s-clear
 
+	@echo "Persistent data will be stored in ${DATA_PATH}"
+	parallel ::: \
+		"telepresence helm install" \
+		"DATA_PATH=${DATA_PATH}/user-service make dependency" \
+		"DATA_PATH=${DATA_PATH} make -C ../../helm memphis"
+	MODE=local make deploy
+	kubectl wait --for=condition=Ready pods --all --all-namespaces
 
-k8s-reset:
-	helm uninstall user-service
-	helm uninstall memphis
-	helm uninstall user-service-redis
-	helm uninstall user-service-postgresql
-	kubectl delete secret user-service
-	telepresence quit
-	telepresence helm uninstall
-	rm -rf data/*
+	telepresence connect
+	make migrate-up

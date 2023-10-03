@@ -83,27 +83,44 @@ func (r *userRepository) GetAllCompany(ctx context.Context) ([]*pbv1.Company, er
 func (r *userRepository) GetApprovedCompany(ctx context.Context, search string) ([]*pbv1.Company, error) {
 	parts := strings.Fields(search)
 	tquery := strings.Join(parts, " | ")
-	query :=
-		`	SELECT 
+	var rows *sql.Rows
+	var err error
+	if search == "" {
+		query := `
+			SELECT 
 			users.id, companies.name, users.email, companies.description, companies.location, companies.phone, companies.category 
 			FROM 
-				users INNER JOIN companies ON users.id = companies.cid, 
-				to_tsvector(companies.category || companies.name) document,
-				to_tsquery($1) query,
-				NULLIF(ts_rank(to_tsvector(companies.category), query), 0) rank_category,
-				NULLIF(ts_rank(to_tsvector(companies.name), query), 0) rank_name,
-				SIMILARITY($2, companies.category || companies.name) similarity
+				users INNER JOIN companies ON users.id = companies.cid
 			WHERE 
 				users.verified = true 
-				AND query @@ document 
-				OR similarity > 0
 				AND companies.status = 'Approve'
-			ORDER BY rank_category DESC, rank_name DESC, similarity DESC NULLS LAST
 		`
-
-	rows, err := r.db.QueryContext(ctx, query, tquery, search)
-	if err != nil {
-		return nil, domain.ErrInternal.From(err.Error(), err)
+		rows, err = r.db.QueryContext(ctx, query)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+	} else {
+		query :=
+			`	SELECT 
+				users.id, companies.name, users.email, companies.description, companies.location, companies.phone, companies.category 
+				FROM 
+					users INNER JOIN companies ON users.id = companies.cid, 
+					to_tsvector(companies.category || companies.name) document,
+					to_tsquery($1) query,
+					NULLIF(ts_rank(to_tsvector(companies.category), query), 0) rank_category,
+					NULLIF(ts_rank(to_tsvector(companies.name), query), 0) rank_name,
+					SIMILARITY($2, companies.category || companies.name) similarity
+				WHERE 
+					users.verified = true 
+					AND query @@ document 
+					OR similarity > 0
+					AND companies.status = 'Approve'
+				ORDER BY rank_category DESC, rank_name DESC, similarity DESC NULLS LAST
+			`
+		rows, err = r.db.QueryContext(ctx, query, tquery, search)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
 	}
 	defer rows.Close()
 
@@ -139,7 +156,7 @@ func (r *userRepository) UpdateCompanyStatus(ctx context.Context, id int64, stat
 
 	// Update Table users
 	var verified bool
-	if status == "Approve" {
+	if status == domain.ComapanyStatusApprove {
 		verified = true
 	} else {
 		verified = false

@@ -2,5 +2,8 @@ go 1.20
 
 use (
 	./api-gateway
+	./backend/mail-service
+	./backend/post-service
+	./backend/report-service
 	./backend/user-service
 )

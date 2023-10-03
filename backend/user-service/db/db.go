@@ -24,6 +24,9 @@ func NewDatabase(config *config.Config) (*Database, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := db.Ping(); err != nil {
+		return nil, err
+	}
 	log.Println("Successfully connected to the postgresql database")
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})

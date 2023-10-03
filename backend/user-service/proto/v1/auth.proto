@@ -6,6 +6,7 @@ option go_package = "github.com/TikhampornSky/go-auth-verifiedMail/gen";
 import "google/api/annotations.proto";
 
 service AuthService {
+  rpc AuthHealthCheck(AuthHealthCheckRequest) returns (AuthHealthCheckResponse) {}
   rpc CreateStudent(CreateStudentRequest) returns (CreateStudentResponse) {
     option (google.api.http) = {
       post: "/v1/student"
@@ -52,6 +53,13 @@ service AuthService {
   }
 }
 
+// Health Check
+message AuthHealthCheckRequest {}
+
+message AuthHealthCheckResponse {
+  int64 status = 1;
+}
+
 // Create Student
 message CreateStudentRequest {
   string name = 1;
@@ -93,6 +101,7 @@ message CreateAdminRequest {
   string email = 1;
   string password = 2;
   string password_confirm = 3;
+  string access_token = 4;
 }
 
 message CreateAdminResponse {

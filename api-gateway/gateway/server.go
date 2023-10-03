@@ -12,6 +12,8 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rakyll/statik/fs"
 	"github.com/tendont52/api-gateway/config"
+	postService "github.com/tendont52/api-gateway/gen/post-service/v1"
+	reportService "github.com/tendont52/api-gateway/gen/report-service/v1"
 	userService "github.com/tendont52/api-gateway/gen/user-service/v1"
 	_ "github.com/tendont52/api-gateway/statik"
 	"google.golang.org/grpc"
@@ -47,6 +49,14 @@ func Serve(conf *config.Config) error {
 	if err != nil {
 		log.Fatalf("cannot register user service: %v", err)
 	}
+	err = postService.RegisterPostServiceHandlerFromEndpoint(ctx, gwmux, conf.PostServiceURL, opts)
+	if err != nil {
+		log.Fatalf("cannot register post service: %v", err)
+	}
+	err = reportService.RegisterReportServiceHandlerFromEndpoint(ctx, gwmux, conf.ReportServiceURL, opts)
+	if err != nil {
+		log.Fatalf("cannot register report service: %v", err)
+	}
 
 	gwServer := &http.Server{
 		Addr: conf.RESTPort,
@@ -67,27 +77,6 @@ func Serve(conf *config.Config) error {
 }
 
 func TransformIncomingRequest(w http.ResponseWriter, r *http.Request) {
-
-	// if r.Method != http.MethodGet {
-	// 	accessToken := r.Header.Get("Authorization")
-	// 	if strings.HasPrefix(accessToken, "Bearer ") {
-	// 		body := make(map[string]interface{})
-	// 		err := json.NewDecoder(r.Body).Decode(&body)
-	// 		if !errors.Is(err, io.EOF) && err != nil {
-	// 			w.WriteHeader(http.StatusBadRequest)
-	// 			w.Write([]byte("cannot read body"))
-	// 			return
-	// 		}
-	// 		body["accessToken"] = strings.TrimPrefix(accessToken, "Bearer ")
-	// 		jsonBody, err := json.Marshal(body)
-	// 		if err != nil {
-	// 			w.WriteHeader(http.StatusBadRequest)
-	// 			w.Write([]byte("cannot read body"))
-	// 			return
-	// 		}
-	// 		r.Body = io.NopCloser(strings.NewReader(string(jsonBody)))
-	// 	}
-	// }
 
 	refreshToken, err := r.Cookie("refreshToken")
 	if err == nil {
@@ -111,10 +100,6 @@ func TransformIncomingRequest(w http.ResponseWriter, r *http.Request) {
 
 func TranformOutgoingResponse(ctx context.Context, w http.ResponseWriter, resp proto.Message) error {
 	resp.ProtoReflect().Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
-		// if fd.Name() == "access_token" {
-		// 	resp.ProtoReflect().Clear(fd)
-		// 	w.Header().Set("Authorization", fmt.Sprintf("Bearer %v", v.String()))
-		// }
 		if fd.Name() == "refresh_token" {
 			resp.ProtoReflect().Clear(fd)
 			http.SetCookie(w, &http.Cookie{

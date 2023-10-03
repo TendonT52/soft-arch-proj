@@ -5,6 +5,7 @@ metadata:
 spec:
   ports:
     - port: 8080
+      targetPort: 8080
   selector:
     app: user-service
 
@@ -25,12 +26,12 @@ spec:
         app: user-service
     spec:
       containers:
-      - name: user-service
-        image: tendont52/user-service:{{ .Values.BUILD_VERSION }}
-        imagePullPolicy: IfNotPresent
-        ports:
-          - containerPort: 8080
-        volumeMounts:
+        - name: user-service
+          image: {{ .Values.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          volumeMounts:
             - mountPath: "/app/app.env"
               subPath: app.env
               name: dot-env-file

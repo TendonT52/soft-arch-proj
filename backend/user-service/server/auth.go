@@ -9,6 +9,7 @@ import (
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	"github.com/TikhampornSky/go-auth-verifiedMail/port"
+	"github.com/TikhampornSky/go-auth-verifiedMail/utils"
 )
 
 // Same idea as handler/auth.go but this is for gRPC
@@ -23,6 +24,13 @@ func NewAuthServer(s port.AuthServicePort) *AuthServer {
 	}
 }
 
+func (s *AuthServer) AuthHealthCheck(context.Context, *pbv1.AuthHealthCheckRequest) (*pbv1.AuthHealthCheckResponse, error) {
+	log.Println("Auth HealthCheck success: ", http.StatusOK)
+	return &pbv1.AuthHealthCheckResponse{
+		Status: http.StatusOK,
+	}, nil
+}
+
 func (s *AuthServer) CreateStudent(ctx context.Context, req *pbv1.CreateStudentRequest) (*pbv1.CreateStudentResponse, error) {
 	id, err := s.AuthService.SignUpStudent(ctx, req)
 	if errors.Is(err, domain.ErrYearMustBeGreaterThanZero) {
@@ -32,6 +40,20 @@ func (s *AuthServer) CreateStudent(ctx context.Context, req *pbv1.CreateStudentR
 			Message: "Year must be greater than zero",
 		}, nil
 	}
+	if errors.Is(err, domain.ErrFieldsAreRequired) {
+		log.Printf("Fields are required: %v", err)
+		return &pbv1.CreateStudentResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Some fields are empty",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrPasswordLengthMustBeGreaterThanSix) {
+		log.Printf("Password length must be greater than six: %v", err)
+		return &pbv1.CreateStudentResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Password length must be greater than six",
+		}, nil
+	}
 	if errors.Is(err, domain.ErrPasswordNotMatch) {
 		log.Printf("Passwords do not match: %v", err)
 		return &pbv1.CreateStudentResponse{
@@ -39,7 +61,7 @@ func (s *AuthServer) CreateStudent(ctx context.Context, req *pbv1.CreateStudentR
 			Message: "Passwords do not match",
 		}, nil
 	}
-	if errors.Is(err, domain.ErrNotChulaStudentEmail) {
+	if errors.Is(err, domain.ErrNotCorrectEmailFormat) {
 		log.Printf("Email must be studentID with @student.chula.ac.th: %v", err)
 		return &pbv1.CreateStudentResponse{
 			Status:  http.StatusBadRequest,
@@ -57,7 +79,7 @@ func (s *AuthServer) CreateStudent(ctx context.Context, req *pbv1.CreateStudentR
 		log.Printf("Error: %v", err)
 		return &pbv1.CreateStudentResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
@@ -78,6 +100,27 @@ func (s *AuthServer) CreateCompany(ctx context.Context, req *pbv1.CreateCompanyR
 			Message: "Passwords do not match",
 		}, nil
 	}
+	if errors.Is(err, domain.ErrNotCorrectEmailFormat) {
+		log.Printf("Email not in correct format: %v", err)
+		return &pbv1.CreateCompanyResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Email not in correct format",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrFieldsAreRequired) {
+		log.Printf("Fields are required: %v", err)
+		return &pbv1.CreateCompanyResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Some fields are empty",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrPasswordLengthMustBeGreaterThanSix) {
+		log.Printf("Password length must be greater than six: %v", err)
+		return &pbv1.CreateCompanyResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Password length must be greater than six",
+		}, nil
+	}
 	if errors.Is(err, domain.ErrDuplicateEmail) {
 		log.Printf("Email already exists: %v", err)
 		return &pbv1.CreateCompanyResponse{
@@ -89,7 +132,7 @@ func (s *AuthServer) CreateCompany(ctx context.Context, req *pbv1.CreateCompanyR
 		log.Printf("Error: %v", err)
 		return &pbv1.CreateCompanyResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
@@ -102,7 +145,36 @@ func (s *AuthServer) CreateCompany(ctx context.Context, req *pbv1.CreateCompanyR
 }
 
 func (s *AuthServer) CreateAdmin(ctx context.Context, req *pbv1.CreateAdminRequest) (*pbv1.CreateAdminResponse, error) {
+	payload, err := utils.ValidateAccessToken(req.AccessToken)
+	if err != nil {
+		log.Println("Error in extract userID: ", err)
+		return &pbv1.CreateAdminResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
+		}, nil
+	}
+	if payload.Role != "admin" {
+		log.Println("Error: ", err)
+		return &pbv1.CreateAdminResponse{
+			Status:  http.StatusForbidden,
+			Message: "You are not admin",
+		}, nil
+	}
 	id, err := s.AuthService.SignUpAdmin(ctx, req)
+	if errors.Is(err, domain.ErrNotCorrectEmailFormat) {
+		log.Printf("Email not in correct format: %v", err)
+		return &pbv1.CreateAdminResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Email not in correct format",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrPasswordLengthMustBeGreaterThanSix) {
+		log.Printf("Password length must be greater than six: %v", err)
+		return &pbv1.CreateAdminResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Password length must be greater than six",
+		}, nil
+	}
 	if errors.Is(err, domain.ErrPasswordNotMatch) {
 		log.Printf("Passwords do not match: %v", err)
 		return &pbv1.CreateAdminResponse{
@@ -121,7 +193,7 @@ func (s *AuthServer) CreateAdmin(ctx context.Context, req *pbv1.CreateAdminReque
 		log.Printf("Error: %v", err)
 		return &pbv1.CreateAdminResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
@@ -153,7 +225,7 @@ func (s *AuthServer) SignIn(ctx context.Context, req *pbv1.LoginRequest) (*pbv1.
 		log.Printf("Error: %v", err)
 		return &pbv1.LoginResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
@@ -175,11 +247,18 @@ func (s *AuthServer) RefreshToken(ctx context.Context, req *pbv1.RefreshTokenReq
 			Message: "the user belonging to this token no logger exists",
 		}, nil
 	}
+	if errors.Is(err, domain.ErrUnauthorized) {
+		log.Printf("Your refresh token is invalid: %v", err)
+		return &pbv1.RefreshTokenResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your refresh token is invalid",
+		}, nil
+	}
 
 	if err != nil {
 		log.Printf("Error: %v", err)
 		return &pbv1.RefreshTokenResponse{
-			Status:  http.StatusForbidden,
+			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 		}, nil
 	}
@@ -194,11 +273,18 @@ func (s *AuthServer) RefreshToken(ctx context.Context, req *pbv1.RefreshTokenReq
 
 func (s *AuthServer) LogOut(ctx context.Context, req *pbv1.LogOutRequest) (*pbv1.LogOutResponse, error) {
 	err := s.AuthService.LogOut(ctx, req.RefreshToken)
+	if errors.Is(err, domain.ErrUnauthorized) {
+		log.Printf("Your refresh token is invalid: %v", err)
+		return &pbv1.LogOutResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your refresh token is invalid",
+		}, nil
+	}
 	if err != nil {
 		log.Printf("Error: %v", err)
 		return &pbv1.LogOutResponse{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Something went wrong",
 		}, nil
 	}
 
