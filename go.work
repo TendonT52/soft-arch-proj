@@ -5,5 +5,6 @@ use (
 	./backend/mail-service
 	./backend/post-service
 	./backend/report-service
+	./backend/review-service
 	./backend/user-service
 )
