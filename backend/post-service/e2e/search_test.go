@@ -96,15 +96,15 @@ func TestSearchPosts(t *testing.T) {
 	com3Res, _, err := mock.CreateMockApprovedCompany(ctx, "Grab", ad)
 	require.NoError(t, err)
 
-	post1 := createMockPost(t, ctx, c, com1Res.Id, "Agoda", "Post 1", lex, "1 month", lex,
+	post1 := createMockPost(t, ctx, c, com1Res.Id, "Agoda", "Post 1", lex, "1 month", "Apply via our facebook page",
 		[]string{"Software Engineer", "Data Scientist"}, []string{"Golang", "Python"}, []string{"Free lunch", "Free dinner"})
-	post2 := createMockPost(t, ctx, c, com2Res.Id, "Dime", "Post 2", lex, "2 month", lex,
+	post2 := createMockPost(t, ctx, c, com2Res.Id, "Dime", "Post 2", lex, "2 month", "Apply via our line VOOM page",
 		[]string{"Data Analysts", "Full-Stack Developer"}, []string{"Python", "HTML", "CSS"}, []string{"Free lunch", "Macbook Pro"})
-	post3 := createMockPost(t, ctx, c, com2Res.Id, "Dime", "Post 3", lex, "3 month", lex,
+	post3 := createMockPost(t, ctx, c, com2Res.Id, "Dime", "Post 3", lex, "3 month", "Apply via our TikTok",
 		[]string{"Backend Developer", "Data Scientist"}, []string{"Golang", "Python"}, []string{"Free dinner", "Macbook M1"})
-	post4 := createMockPost(t, ctx, c, com2Res.Id, "Dime", "Post 4", lex, "4 month", lex,
+	post4 := createMockPost(t, ctx, c, com2Res.Id, "Dime", "Post 4", lex, "4 month", "Apply via our facebook page",
 		[]string{"Frontend Developer", "Data Analyst"}, []string{"HTML", "CSS", "Javascript"}, []string{"Free lunch", "Free dinner", "Macbook M1"})
-	post5 := createMockPost(t, ctx, c, com3Res.Id, "Grab", "Post 5", lex, "5 month", lex,
+	post5 := createMockPost(t, ctx, c, com3Res.Id, "Grab", "Post 5", lex, "5 month", "Apply via our facebook page",
 		[]string{"Frontend Developer", "Data Analyst"}, []string{"HTML", "CSS", "Javascript"}, []string{"Free lunch", "Free dinner", "Macbook Pro"})
 
 	_ = post1

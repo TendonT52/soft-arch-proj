@@ -63,7 +63,7 @@ func TestGetPost(t *testing.T) {
 	topic := "What to expect from here on out"
 	description := lex
 	period := "1 month"
-	howTo := lex
+	howTo := "Ypu can apply via our facebook page"
 	openPositions := []string{"Software Engineer", "Data Scientist"}
 	requiredSkills := []string{"Golang", "Python"}
 	benefits := []string{"Free lunch", "Free dinner"}

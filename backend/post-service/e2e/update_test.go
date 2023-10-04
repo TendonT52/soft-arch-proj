@@ -41,8 +41,6 @@ func TestUpdatePost(t *testing.T) {
 	err = tools.DeleteAllPosts()
 	require.NoError(t, err)
 
-	lex := `{ "root": {} }`
-
 	updatedLex := `{
 		"root": {
 		  "children": ["child"]
@@ -51,9 +49,9 @@ func TestUpdatePost(t *testing.T) {
 	`
 
 	topic := "What to expect from here on out"
-	description := lex
+	description := `{ "root": {} }`
 	period := "1 month"
-	howTo := lex
+	howTo := "Apply via our facebook page"
 	openPositions := []string{"Software Engineer", "Data Scientist"}
 	requiredSkills := []string{"Golang", "Python"}
 	benefits := []string{"Free lunch", "Free dinner"}
@@ -61,7 +59,7 @@ func TestUpdatePost(t *testing.T) {
 	updatedTopic := "NEW What to expect from here on out"
 	updatedDescription := updatedLex
 	updatedPeriod := "NEW 1 month"
-	updatedHowTo := updatedLex
+	updatedHowTo := "Apply via LINKIN"
 	updatedOpenPositions := []*pbv1.Element{
 		{Value: "NEW Software Engineer", Action: pbv1.ElementStatus_ADD},
 		{Value: "NEW Data Scientist", Action: pbv1.ElementStatus_ADD},
