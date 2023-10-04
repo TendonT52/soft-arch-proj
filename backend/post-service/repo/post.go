@@ -563,7 +563,7 @@ func (r *postRepository) GetBenefits(ctx context.Context, search string) ([]stri
 }
 
 func (r *postRepository) GetMyPosts(ctx context.Context, userId int64) ([]*pbv1.Post, error) {
-	query := "SELECT pid, topic, description, period, how_to, updated_at FROM posts WHERE uid = $1"
+	query := "SELECT pid, topic, description, period, how_to, updated_at FROM posts WHERE uid = $1 ORDER BY title ASC"
 	rows, err := r.db.QueryContext(ctx, query, userId)
 	if err != nil {
 		return nil, domain.ErrInternal.From(err.Error(), err)

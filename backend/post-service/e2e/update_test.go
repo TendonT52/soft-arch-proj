@@ -32,7 +32,8 @@ func TestUpdatePost(t *testing.T) {
 	ad, err := mock.CreateMockAdmin(ctx)
 	require.NoError(t, err)
 
-	_, token, err := mock.CreateMockApprovedCompany(ctx, "Company Name", ad)
+	comRes, token, err := mock.CreateMockApprovedCompany(ctx, "Company Name", ad)
+	require.Equal(t, int64(201), comRes.Status)
 	require.NoError(t, err)
 
 	tokenAdmin, err := mock.CreateMockAdmin(ctx)
