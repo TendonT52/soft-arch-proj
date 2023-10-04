@@ -80,8 +80,8 @@ func TestGetReport(t *testing.T) {
 				Id:          resCreate.Id,
 			},
 			expect: &pbv1.GetReportResponse{
-				Status:  401,
-				Message: "Unauthorized",
+				Status:  403,
+				Message: "You don't have permission to access this resource",
 			},
 		},
 		"Company get report": {
@@ -90,8 +90,8 @@ func TestGetReport(t *testing.T) {
 				Id:          resCreate.Id,
 			},
 			expect: &pbv1.GetReportResponse{
-				Status:  401,
-				Message: "Unauthorized",
+				Status:  403,
+				Message: "You don't have permission to access this resource",
 			},
 		},
 		"Report not found": {
@@ -102,6 +102,16 @@ func TestGetReport(t *testing.T) {
 			expect: &pbv1.GetReportResponse{
 				Status:  404,
 				Message: "Report not found",
+			},
+		},
+		"Invalid token": {
+			req: &pbv1.GetReportRequest{
+				AccessToken: "",
+				Id:          resCreate.Id,
+			},
+			expect: &pbv1.GetReportResponse{
+				Status:  401,
+				Message: "Your access token is invalid",
 			},
 		},
 	}

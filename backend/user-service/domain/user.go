@@ -1,6 +1,10 @@
 package domain
 
-import "regexp"
+import (
+	"regexp"
+
+	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
+)
 
 const (
 	StudentRole = "student"
@@ -37,4 +41,16 @@ func RemoveSpecialChars(input string) string {
 	result := re.ReplaceAllString(input, "")
 
 	return result
+}
+
+func CheckStudentRequiredFields(student *pbv1.Student) bool {
+	return student.Name != "" && student.Description != "" && student.Faculty != "" && student.Major != "" && student.Year != 0
+}
+
+func CheckCompanyRequiredFields(company *pbv1.Company) bool {
+	return company.Name != "" && company.Description != "" && company.Phone != "" && company.Category != "" && company.Location != ""
+}
+
+func CheckPasswordLength(password string) bool {
+	return len(password) >= 6
 }

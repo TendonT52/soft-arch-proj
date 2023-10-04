@@ -28,7 +28,7 @@ func (s *reportService) CreateReport(ctx context.Context, token string, report *
 
 	payload, err := utils.ValidateAccessToken(token)
 	if err != nil {
-		return 0, err
+		return 0, domain.ErrUnauthorize
 	}
 
 	reportId, err := s.repo.CreateReport(ctx, payload.UserId, report)
@@ -42,11 +42,11 @@ func (s *reportService) CreateReport(ctx context.Context, token string, report *
 func (s *reportService) GetReport(ctx context.Context, token string, reportId int64) (*pbv1.Report, error) {
 	payload, err := utils.ValidateAccessToken(token)
 	if err != nil {
-		return nil, err
+		return nil, domain.ErrUnauthorize
 	}
 
 	if payload.Role != AdminRole {
-		return nil, domain.ErrUnauthorized
+		return nil, domain.ErrForbidden
 	}
 
 	report, err := s.repo.GetReport(ctx, reportId)
@@ -63,11 +63,11 @@ func (s *reportService) GetReport(ctx context.Context, token string, reportId in
 func (s *reportService) GetReports(ctx context.Context, token string) ([]*pbv1.Report, error) {
 	payload, err := utils.ValidateAccessToken(token)
 	if err != nil {
-		return nil, err
+		return nil, domain.ErrUnauthorize
 	}
 
 	if payload.Role != AdminRole {
-		return nil, domain.ErrUnauthorized
+		return nil, domain.ErrForbidden
 	}
 
 	reports, err := s.repo.GetReports(ctx)

@@ -111,6 +111,13 @@ func (s *UserServer) UpdateStudent(ctx context.Context, req *pbv1.UpdateStudentR
 			Message: "user id not found",
 		}, nil
 	}
+	if errors.Is(err, domain.ErrFieldsAreRequired) {
+		log.Println("Error fields are required: ", err)
+		return &pbv1.UpdateStudentResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Some fields are empty",
+		}, nil
+	}
 	if errors.Is(err, domain.ErrForbidden) {
 		log.Println("Error NOT Authorize: ", err)
 		return &pbv1.UpdateStudentResponse{
@@ -220,6 +227,13 @@ func (s *UserServer) UpdateCompany(ctx context.Context, req *pbv1.UpdateCompanyR
 		return &pbv1.UpdateCompanyResponse{
 			Status:  http.StatusForbidden,
 			Message: "You are not authorized to update this company",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrFieldsAreRequired) {
+		log.Println("Error fields are required: ", err)
+		return &pbv1.UpdateCompanyResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Some fields are empty",
 		}, nil
 	}
 	if err != nil {

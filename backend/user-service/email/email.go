@@ -2,12 +2,14 @@ package email
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
 	"github.com/TikhampornSky/go-auth-verifiedMail/port"
-	"google.golang.org/protobuf/proto"
+	"github.com/asaskevich/govalidator"
 	"github.com/memphisdev/memphis.go"
+	"google.golang.org/protobuf/proto"
 )
 
 func SendEmail(conn port.MemphisPort, typeMail, url, subject, name, email string) error {
@@ -54,12 +56,15 @@ func SendEmail(conn port.MemphisPort, typeMail, url, subject, name, email string
 }
 
 func IsChulaStudentEmail(email string) bool {
-	if len(email) < 20 {
-		return false
-	}
-	return email[len(email)-20:] == "@student.chula.ac.th"
+	customEmailPattern := `^\d{10}@student\.chula\.ac\.th$`
+	regex := regexp.MustCompile(customEmailPattern)
+	return regex.MatchString(email)
 }
 
 func GetStudentIDFromEmail(email string) string {
 	return email[:10]
+}
+
+func IsCorrectEmailFormat(email string) bool {
+	return govalidator.IsEmail(email)
 }

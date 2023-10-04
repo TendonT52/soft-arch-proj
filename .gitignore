@@ -3,6 +3,7 @@ provision/.terraform.lock.hcl
 provision/terraform.tfstate
 provision/terraform.tfstate.backup
 provision/secret.tfvars
+install-k8s-cluster/join_command.out
 
 setup/join_command.out
 .DS_Store

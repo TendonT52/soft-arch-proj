@@ -3,6 +3,7 @@ module github.com/TikhampornSky/go-auth-verifiedMail
 go 1.20
 
 require (
+	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/golang/mock v1.4.4
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
