@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/config"
@@ -47,6 +48,8 @@ func VerifyPassword(hashedPassword string, candidatePassword string, current_tim
 
 	// Compare the newly hashed password with the stored hash
 	result := compareHashes(storedHashBytes, hashedCandidatePassword)
+	fmt.Println("---> ", storedHashBytes)
+	fmt.Println("===> ", hashedCandidatePassword)
 	if !result {
 		return errors.New("Password is not correct")
 	}
