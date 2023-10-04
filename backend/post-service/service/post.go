@@ -192,3 +192,20 @@ func (s *postService) GetBenefits(ctx context.Context, token, search string) ([]
 
 	return benefits, nil
 }
+
+func (s *postService) GetMyPosts(ctx context.Context, token string) ([]*pbv1.Post, error) {
+	payload, err := utils.ValidateAccessToken(token)
+	if err != nil {
+		return nil, domain.ErrUnauthorize
+	}
+	if payload.Role != companyRole {
+		return nil, domain.ErrForbidden
+	}
+
+	posts, err := s.PostRepo.GetMyPosts(ctx, payload.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}

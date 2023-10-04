@@ -18,6 +18,11 @@ service PostService {
             get: "/v1/posts/{id}"
         };
     }
+    rpc GetMyPosts(GetMyPostsRequest) returns (GetMyPostsResponse) {
+        option (google.api.http) = {
+            get: "/v1/posts/me"
+        };
+    }
     rpc ListPosts(ListPostsRequest) returns (ListPostsResponse) {
         option (google.api.http) = {
             get: "/v1/posts"
@@ -207,4 +212,16 @@ message GetBenefitsResponse {
     int64 status = 1;
     string message = 2;
     repeated string benefits = 3;
+}
+
+// Get My Posts
+message GetMyPostsRequest {
+    string access_token = 1;
+}
+
+message GetMyPostsResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated Post posts = 3;
+    int64 total = 4;
 }

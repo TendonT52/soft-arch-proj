@@ -561,3 +561,114 @@ func (r *postRepository) GetBenefits(ctx context.Context, search string) ([]stri
 	}
 	return benefits, nil
 }
+
+func (r *postRepository) GetMyPosts(ctx context.Context, userId int64) ([]*pbv1.Post, error) {
+	query := "SELECT pid, topic, description, period, how_to, updated_at FROM posts WHERE uid = $1"
+	rows, err := r.db.QueryContext(ctx, query, userId)
+	if err != nil {
+		return nil, domain.ErrInternal.From(err.Error(), err)
+	}
+	defer rows.Close()
+
+	var posts []*pbv1.Post
+	for rows.Next() {
+		var pid, updated_at int64
+		var topic, description, period, howTo string
+		err = rows.Scan(&pid, &topic, &description, &period, &howTo, &updated_at)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+		posts = append(posts, &pbv1.Post{
+			PostId:      pid,
+			Topic:       topic,
+			Description: description,
+			Period:      period,
+			HowTo:       howTo,
+			UpdatedAt:   updated_at,
+		})
+	}
+
+	// Get open_positions
+	prepare0 := "SELECT title FROM open_positions WHERE oid IN (SELECT oid FROM posts_open_positions WHERE pid = $1)"
+	stmt0, err := r.db.PrepareContext(ctx, prepare0)
+	if err != nil {
+		return nil, domain.ErrInternal.From(err.Error(), err)
+	}
+	defer stmt0.Close()
+
+	for _, post := range posts {
+		rows, err = stmt0.QueryContext(ctx, post.PostId)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+		defer rows.Close()
+
+		var openPositions []string
+		for rows.Next() {
+			var title string
+			err = rows.Scan(&title)
+			if err != nil {
+				return nil, domain.ErrInternal.From(err.Error(), err)
+			}
+			openPositions = append(openPositions, title)
+		}
+		post.OpenPositions = openPositions
+	}
+
+	// Get required_skills
+	prepare1 := "SELECT title FROM required_skills WHERE sid IN (SELECT sid FROM posts_required_skills WHERE pid = $1)"
+	stmt1, err := r.db.PrepareContext(ctx, prepare1)
+	if err != nil {
+		return nil, domain.ErrInternal.From(err.Error(), err)
+	}
+	defer stmt1.Close()
+
+	for _, post := range posts {
+		rows, err = stmt1.QueryContext(ctx, post.PostId)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+		defer rows.Close()
+
+		var requiredSkills []string
+		for rows.Next() {
+			var title string
+			err = rows.Scan(&title)
+			if err != nil {
+				return nil, domain.ErrInternal.From(err.Error(), err)
+			}
+
+			requiredSkills = append(requiredSkills, title)
+		}
+		post.RequiredSkills = requiredSkills
+	}
+
+	// Get benefits
+	prepare2 := "SELECT title FROM benefits WHERE bid IN (SELECT bid FROM posts_benefits WHERE pid = $1)"
+	stmt2, err := r.db.PrepareContext(ctx, prepare2)
+	if err != nil {
+		return nil, domain.ErrInternal.From(err.Error(), err)
+	}
+	defer stmt2.Close()
+
+	for _, post := range posts {
+		rows, err = stmt2.QueryContext(ctx, post.PostId)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+
+		var benefits []string
+		for rows.Next() {
+			var title string
+			err = rows.Scan(&title)
+			if err != nil {
+				return nil, domain.ErrInternal.From(err.Error(), err)
+			}
+			benefits = append(benefits, title)
+		}
+
+		post.Benefits = benefits
+	}
+
+	return posts, nil
+}
