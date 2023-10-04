@@ -161,6 +161,8 @@ func TestGetPost(t *testing.T) {
 				require.Equal(t, tc.expect.Post.RequiredSkills, res.Post.RequiredSkills)
 				require.Equal(t, tc.expect.Post.Benefits, res.Post.Benefits)
 				require.Equal(t, tc.expect.Post.Owner.Name, res.Post.Owner.Name)
+				require.NotEmpty(t, res.Post.Owner.Id)
+				require.NotEmpty(t, res.Post.UpdatedAt)
 			}
 		})
 	}

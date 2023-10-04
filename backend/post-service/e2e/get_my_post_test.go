@@ -68,7 +68,7 @@ func TestGetMyPost(t *testing.T) {
 			},
 			expect: &pbv1.GetMyPostsResponse{
 				Status:  200,
-				Message: "Success",
+				Message: "My posts retrieved successfully",
 				Posts: []*pbv1.Post{
 					post2,
 					post3,
@@ -112,6 +112,7 @@ func TestGetMyPost(t *testing.T) {
 				require.Equal(t, true, utils.CheckArrayEqual(&tc.expect.Posts[i].OpenPositions, &p.OpenPositions))
 				require.Equal(t, true, utils.CheckArrayEqual(&tc.expect.Posts[i].RequiredSkills, &p.RequiredSkills))
 				require.Equal(t, true, utils.CheckArrayEqual(&tc.expect.Posts[i].Benefits, &p.Benefits))
+				require.NotEmpty(t, p.UpdatedAt)
 			}
 		})
 	}

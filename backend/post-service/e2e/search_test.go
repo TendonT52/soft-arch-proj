@@ -180,7 +180,7 @@ func TestSearchPosts(t *testing.T) {
 		},
 		"success with NIL empty search options": {
 			req: &pbv1.ListPostsRequest{
-				AccessToken:   token,
+				AccessToken: token,
 			},
 			expect: &pbv1.ListPostsResponse{
 				Status:  200,
@@ -297,6 +297,9 @@ func TestSearchPosts(t *testing.T) {
 				require.Equal(t, true, utils.CheckArrayEqual(&tc.expect.Posts[i].OpenPositions, &p.OpenPositions))
 				require.Equal(t, true, utils.CheckArrayEqual(&tc.expect.Posts[i].RequiredSkills, &p.RequiredSkills))
 				require.Equal(t, true, utils.CheckArrayEqual(&tc.expect.Posts[i].Benefits, &p.Benefits))
+				require.NotEmpty(t, p.Owner.Id)
+				require.Equal(t, tc.expect.Posts[i].Owner.Name, p.Owner.Name)
+				require.NotEmpty(t, p.UpdatedAt)
 			}
 		})
 	}

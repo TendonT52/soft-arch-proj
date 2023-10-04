@@ -80,10 +80,10 @@ func (r *postRepository) CreatePost(ctx context.Context, userId int64, post *pbv
 }
 
 func (r *postRepository) GetPost(ctx context.Context, postId int64) (*pbv1.Post, error) {
-	query := "SELECT topic, description, period, how_to, uid FROM posts WHERE pid = $1"
+	query := "SELECT topic, description, period, how_to, uid, updated_at FROM posts WHERE pid = $1"
 	var topic, description, period, howTo string
-	var userId int64
-	err := r.db.QueryRowContext(ctx, query, postId).Scan(&topic, &description, &period, &howTo, &userId)
+	var userId, updated_at int64
+	err := r.db.QueryRowContext(ctx, query, postId).Scan(&topic, &description, &period, &howTo, &userId, &updated_at)
 	if err == sql.ErrNoRows {
 		return nil, domain.ErrPostNotFound
 	}
@@ -153,6 +153,7 @@ func (r *postRepository) GetPost(ctx context.Context, postId int64) (*pbv1.Post,
 		Owner: &pbv1.PostOwner{
 			Id: userId,
 		},
+		UpdatedAt: updated_at,
 	}
 
 	return post, nil
@@ -563,7 +564,7 @@ func (r *postRepository) GetBenefits(ctx context.Context, search string) ([]stri
 }
 
 func (r *postRepository) GetMyPosts(ctx context.Context, userId int64) ([]*pbv1.Post, error) {
-	query := "SELECT pid, topic, description, period, how_to, updated_at FROM posts WHERE uid = $1 ORDER BY title ASC"
+	query := "SELECT pid, topic, description, period, how_to, updated_at FROM posts WHERE uid = $1 ORDER BY topic ASC"
 	rows, err := r.db.QueryContext(ctx, query, userId)
 	if err != nil {
 		return nil, domain.ErrInternal.From(err.Error(), err)
