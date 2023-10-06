@@ -87,7 +87,7 @@ brew install protobuf
 
 ```bash
 go install \
-    google.golang.org/protobuf/cmd/protoc-gen-go@latest \
+    google.golang.org/protobuf/cmd/protoc-gen-go \
     github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
     github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
     google.golang.org/protobuf/cmd/protoc-gen-go \
