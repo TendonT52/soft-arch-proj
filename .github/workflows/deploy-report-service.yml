@@ -1,0 +1,70 @@
+name: Deploy report-service
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-report-service:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Deploy report-service-postgresql
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            helm upgrade report-service-postgresql ./backend/report-service/helm/postgresql \
+                --set global.postgresql.auth.postgresPassword=${{ secrets.REPORT_SERVICE_POSTGRES_PASSWORD }} \
+                --set master.persistence.size=25Gi \
+                --set master.persistence.path="/pv/report-service/postgresql" \
+                --set primary.persistence.existingClaim=report-service-postgresql-persistent-claim \
+                --set volumePermissions.enabled=true \
+                --timeout 10m \
+                --install \
+                --wait
+
+      - name: Remove report-service-secret
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            kubectl delete secret report-service --ignore-not-found=true
+
+      - name: Create .env file
+        run: |
+          echo POSTGRES_HOST=${{ vars.REPORT_SERVICE_POSTGRES_HOST }} >> app.env
+          echo POSTGRES_USER=${{ vars.REPORT_SERVICE_POSTGRES_USER }} >> app.env
+          echo POSTGRES_PASSWORD=${{ secrets.REPORT_SERVICE_POSTGRES_PASSWORD }} >> app.env
+          echo POSTGRES_DB=${{ vars.REPORT_SERVICE_POSTGRES_DB }} >> app.env
+          echo POSTGRES_PORT=${{ vars.REPORT_SERVICE_POSTGRES_PORT }} >> app.env
+          echo SERVER_HOST=${{ vars.REPORT_SERVICE_SERVER_HOST }} >> app.env
+          echo SERVER_PORT=${{ vars.REPORT_SERVICE_SERVER_PORT }} >> app.env
+          echo ACCESS_TOKEN_PUBLIC_KEY=${{ secrets.USER_SERVICE_ACCESS_TOKEN_PUBLIC_KEY }} >> app.env
+          echo ACCESS_TOKEN_PRIVATE_KEY_TEST=${{ secrets.REPORT_SERVICE_ACCESS_TOKEN_PRIVATE_KEY_TEST }} >> app.env
+          echo ACCESS_TOKEN_PUBLIC_KEY_TEST=${{ secrets.REPORT_SERVICE_ACCESS_TOKEN_PUBLIC_KEY_TEST }} >> app.env
+          echo ACCESS_TOKEN_EXPIRED_IN_TEST=${{ vars.REPORT_SERVICE_ACCESS_TOKEN_EXPIRED_IN_TEST }} >> app.env
+          echo ACCESS_TOKEN_MAXAGE_TEST=${{ vars.REPORT_SERVICE_ACCESS_TOKEN_MAXAGE_TEST }} >> app.env
+          echo MIGRATION_PATH=${{ vars.REPORT_SERVICE_MIGRATION_PATH }} >> app.env
+
+      - name: Create report-service-secret
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            kubectl create secret generic report-service --from-file=app.env
+
+      - name: Deploy report-service
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            helm upgrade post-service ./backend/report-service/helm/report-service \
+                --set image="ghcr.io/tendont52/soft-arch-proj-backend-report-service:latest" \
+                --timeout 10m \
+                --install \
+                --wait

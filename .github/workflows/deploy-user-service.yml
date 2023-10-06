@@ -1,0 +1,111 @@
+name: Deploy user-service
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-user-service:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Deploy user-service-postgresql
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            helm upgrade user-service-postgresql ./backend/user-service/helm/postgresql \
+                --set global.postgresql.auth.postgresPassword=${{ secrets.USER_SERVICE_POSTGRES_PASSWORD }} \
+                --set master.persistence.size=25Gi \
+                --set master.persistence.path="/pv/user-service/postgresql" \
+                --set primary.persistence.existingClaim=user-service-postgresql-persistent-claim \
+                --set volumePermissions.enabled=true \
+                --timeout 10m \
+                --install \
+                --wait
+
+      - name: Deploy user-service-redis
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            helm upgrade user-service-redis ./backend/user-service/helm/redis \
+                --set auth.enabled=true \
+                --set auth.password=${{ secrets.USER_SERVICE_REDIS_PASSWORD }} \
+                --set architecture=standalone \
+                --set master.persistence.size=10Gi \
+                --set master.persistence.path="/pv/user-service/redis" \
+                --set master.persistence.existingClaim=user-service-redis-persistent-claim \
+                --set volumePermissions.enabled=true \
+                --timeout 10m \
+                --install \
+                --wait
+
+      - name: Remove user-service-secret
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            kubectl delete secret user-service --ignore-not-found=true
+
+      - name: Create .env file
+        run: |
+          echo POSTGRES_HOST=${{ vars.USER_SERVICE_POSTGRES_HOST }} >> app.env
+          echo POSTGRES_USER=${{ vars.USER_SERVICE_POSTGRES_USER }} >> app.env
+          echo POSTGRES_PASSWORD=${{ secrets.USER_SERVICE_POSTGRES_PASSWORD }} >> app.env
+          echo POSTGRES_DB=${{ vars.USER_SERVICE_POSTGRES_DB }} >> app.env
+          echo POSTGRES_PORT=${{ vars.USER_SERVICE_POSTGRES_PORT }} >> app.env
+          echo REDIS_HOST=${{ vars.USER_SERVICE_REDIS_HOST }} >> app.env
+          echo REDIS_PORT=${{ vars.USER_SERVICE_REDIS_PORT }} >> app.env
+          echo REDIS_PASSWORD=${{ secrets.USER_SERVICE_REDIS_PASSWORD }} >> app.env
+          echo REDIS_DB=${{ vars.USER_SERVICE_REDIS_DB }} >> app.env
+          echo REDIS_TIMEOUT=${{ vars.USER_SERVICE_REDIS_TIMEOUT }} >> app.env
+          echo SERVER_HOST=${{ vars.USER_SERVICE_SERVER_HOST }} >> app.env
+          echo SERVER_PORT=${{ vars.USER_SERVICE_SERVER_PORT }} >> app.env
+          echo CLIENT_ORIGIN=${{ vars.USER_SERVICE_CLIENT_ORIGIN }} >> app.env
+          echo ACCESS_TOKEN_PRIVATE_KEY=${{ secrets.USER_SERVICE_ACCESS_TOKEN_PRIVATE_KEY }} >> app.env
+          echo ACCESS_TOKEN_PUBLIC_KEY=${{ secrets.USER_SERVICE_ACCESS_TOKEN_PUBLIC_KEY }} >> app.env
+          echo ACCESS_TOKEN_EXPIRED_IN=${{ vars.USER_SERVICE_ACCESS_TOKEN_EXPIRED_IN }} >> app.env
+          echo ACCESS_TOKEN_MAXAGE=${{ vars.USER_SERVICE_ACCESS_TOKEN_MAXAGE }} >> app.env
+          echo REFRESH_TOKEN_SECRET=${{ secrets.USER_SERVICE_REFRESH_TOKEN_SECRET }} >> app.env
+          echo REFRESH_TOKEN_EXPIRED_IN=${{ vars.USER_SERVICE_REFRESH_TOKEN_EXPIRED_IN }} >> app.env
+          echo REFRESH_TOKEN_MAXAGE=${{ vars.USER_SERVICE_REFRESH_TOKEN_MAXAGE }} >> app.env
+          echo MEMPHIS_HOSTNAME=${{ vars.MEMPHIS_HOSTNAME }} >> app.env
+          echo MEMPHIS_APPLICATION_USER=${{ vars.USER_SERVICE_MEMPHIS_APPLICATION_USER }} >> app.env
+          echo MEMPHIS_PASSWORD=${{ secrets.MEMPHIS_PASSWORD }} >> app.env
+          echo MEMPHIS_ACCOUNT_ID=${{ vars.USER_SERVICE_MEMPHIS_ACCOUNT_ID }} >> app.env
+          echo MEMPHIS_STATION_NAME=${{ vars.USER_SERVICE_MEMPHIS_STATION_NAME }} >> app.env
+          echo MEMPHIS_STATION_NAME_TEST=${{ vars.USER_SERVICE_MEMPHIS_STATION_NAME_TEST }} >> app.env
+          echo MEMPHIS_PRODUCER=${{ vars.USER_SERVICE_MEMPHIS_PRODUCER }} >> app.env
+          echo MEMPHIS_RETENTION_VAL=${{ vars.USER_SERVICE_MEMPHIS_RETENTION_VAL }} >> app.env
+          echo MEMPHIS_RETENTION_VAL_TEST=${{ vars.USER_SERVICE_MEMPHIS_RETENTION_VAL_TEST }} >> app.env
+          echo MEMPHIS_REPLICAS=${{ vars.USER_SERVICE_MEMPHIS_REPLICAS }} >> app.env
+          echo MEMPHIS_IDEMPOTENCY=${{ vars.USER_SERVICE_MEMPHIS_IDEMPOTENCY }} >> app.env
+          echo MEMPHIS_PARTITIONS=${{ vars.USER_SERVICE_MEMPHIS_PARTITIONS }} >> app.env
+          echo MEMPHIS_SCHEMA_NAME=${{ vars.USER_SERVICE_MEMPHIS_SCHEMA_NAME }} >> app.env
+          echo PEPPER=${{ secrets.USER_SERVICE_PEPPER }} >> app.env
+          echo EMAIL_CODE=${{ secrets.USER_SERVICE_EMAIL_CODE }} >> app.env
+          echo MIGRATION_PATH=${{ vars.USER_SERVICE_MIGRATION_PATH }} >> app.env
+
+      - name: Create user-service-secret
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            kubectl create secret generic user-service --from-file=app.env
+
+      - name: Deploy user-service
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            helm upgrade user-service ./backend/user-service/helm/user-service \
+                --set image="ghcr.io/tendont52/soft-arch-proj-backend-user-service:latest" \
+                --timeout 10m \
+                --install \
+                --wait

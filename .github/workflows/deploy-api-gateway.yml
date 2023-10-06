@@ -1,0 +1,48 @@
+name: Deploy api-gateway
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-api-gateway:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Remove api-gateway-secret
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            kubectl delete secret api-gateway --ignore-not-found=true
+
+      - name: Create .env file
+        run: |
+          echo REST_PORT=${{ vars.API_GATEWAY_REST_PORT }} >> app.env
+          echo USER_SERVICE_HOST=${{ vars.USER_SERVICE_SERVER_HOST }} >> app.env
+          echo USER_SERVICE_PORT=${{ vars.USER_SERVICE_SERVER_PORT }} >> app.env
+          echo POST_SERVICE_HOST=${{ vars.POST_SERVICE_SERVER_HOST }} >> app.env
+          echo POST_SERVICE_PORT=${{ vars.POST_SERVICE_SERVER_PORT }} >> app.env
+          echo REPORT_SERVICE_HOST=${{ vars.REPORT_SERVICE_SERVER_HOST }} >> app.env
+          echo REPORT_SERVICE_PORT=${{ vars.REPORT_SERVICE_SERVER_PORT }} >> app.env
+
+      - name: Create api-gateway-secret
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            kubectl create secret generic api-gateway --from-file=app.env
+
+      - name: Deploy api-gateway
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            helm upgrade api-gateway ./api-gateway/helm/api-gateway \
+                --set image="ghcr.io/tendont52/soft-arch-proj-api-gateway:latest" \
+                --timeout 10m \
+                --install \
+                --wait

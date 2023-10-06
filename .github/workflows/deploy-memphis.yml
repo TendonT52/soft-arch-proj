@@ -1,0 +1,30 @@
+name: Deploy memphis
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-memphis:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Deploy memphis
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            helm upgrade memphis ./helm/memphis \
+                --set memphis.creds.rootPwd=${{ secrets.MEMPHIS_PASSWORD }} \
+                --set cluster.replicas=1 \
+                --set master.persistence.size=10Gi \
+                --set master.persistence.path="/pv/memphis" \
+                --set memphis.storageEngine.fileStorage.existingClaim=memphis-persistent-claim \
+                --set master.metadata.persistence.size=10Gi \
+                --set master.metadata.persistence.path="/pv/memphis-meta" \
+                --set metadata.persistence.existingClaim=memphis-metadata-persistent-claim \
+                --set metadata.volumePermissions.enabled=true \
+                --timeout 10m \
+                --install \
+                --wait

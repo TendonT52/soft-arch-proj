@@ -1,0 +1,53 @@
+name: Deploy mail-service
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-mail-service:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Remove mail-service-secret
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            kubectl delete secret mail-service --ignore-not-found=true
+
+      - name: Create .env file
+        run: |
+          echo MEMPHIS_HOSTNAME=${{ vars.MEMPHIS_HOSTNAME }} >> app.env
+          echo MEMPHIS_APPLICATION_USER=${{ vars.MAIL_SERVICE_MEMPHIS_APPLICATION_USER }} >> app.env
+          echo MEMPHIS_PASSWORD=${{ secrets.MEMPHIS_PASSWORD }} >> app.env
+          echo MEMPHIS_ACCOUNT_ID=${{ vars.MAIL_SERVICE_MEMPHIS_ACCOUNT_ID }} >> app.env
+          echo MEMPHIS_STATION_NAME=${{ vars.MAIL_SERVICE_MEMPHIS_STATION_NAME }} >> app.env
+          echo MEMPHIS_STATION_NAME_TEST=${{ vars.MAIL_SERVICE_MEMPHIS_STATION_NAME_TEST }} >> app.env
+          echo MEMPHIS_CONSUMER=${{ vars.MAIL_SERVICE_MEMPHIS_CONSUMER }} >> app.env
+          echo MEMPHIS_PRODUCER_TEST=${{ vars.MAIL_SERVICE_MEMPHIS_PRODUCER_TEST }} >> app.env
+          echo EMAIL_FROM=${{ vars.MAIL_SERVICE_EMAIL_FROM }} >> app.env
+          echo SMTP_HOST=${{ vars.MAIL_SERVICE_SMTP_HOST }} >> app.env
+          echo SMTP_PASS=${{ secrets.MAIL-SERVICE-SMTP_PASS }} >> app.env
+          echo SMTP_PORT=${{ vars.MAIL_SERVICE_SMTP_PORT }} >> app.env
+
+      - name: Create mail-service-secret
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            kubectl create secret generic mail-service --from-file=app.env
+
+      - name: Deploy mail-service
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            helm upgrade mail-service ./backend/mail-service/helm/mail-service \
+                --set image="ghcr.io/tendont52/soft-arch-proj-backend-mail-service:latest" \
+                --timeout 10m \
+                --install \
+                --wait

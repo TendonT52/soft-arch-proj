@@ -1,0 +1,72 @@
+name: Deploy post-service
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-post-service:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Deploy post-service-postgresql
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            helm upgrade post-service-postgresql ./backend/post-service/helm/postgresql \
+                --set global.postgresql.auth.postgresPassword=${{ secrets.POST_SERVICE_POSTGRES_PASSWORD }} \
+                --set master.persistence.size=25Gi \
+                --set master.persistence.path="/pv/post-service/postgresql" \
+                --set primary.persistence.existingClaim=post-service-postgresql-persistent-claim \
+                --set volumePermissions.enabled=true \
+                --timeout 10m \
+                --install \
+                --wait
+
+      - name: Remove post-service-secret
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            kubectl delete secret post-service --ignore-not-found=true
+
+      - name: Create .env file
+        run: |
+          echo POSTGRES_HOST=${{ vars.POST_SERVICE_POSTGRES_HOST }} >> app.env
+          echo POSTGRES_USER=${{ vars.POST_SERVICE_POSTGRES_USER }} >> app.env
+          echo POSTGRES_PASSWORD=${{ secrets.POST_SERVICE_POSTGRES_PASSWORD }} >> app.env
+          echo POSTGRES_DB=${{ vars.POST_SERVICE_POSTGRES_DB }} >> app.env
+          echo POSTGRES_PORT=${{ vars.POST_SERVICE_POSTGRES_PORT }} >> app.env
+          echo SERVER_HOST=${{ vars.POST_SERVICE_SERVER_HOST }} >> app.env
+          echo SERVER_PORT=${{ vars.POST_SERVICE_SERVER_PORT }} >> app.env
+          echo USER_SERVICE_HOST=${{ vars.USER_SERVICE_SERVER_HOST }} >> app.env
+          echo USER_SERVICE_PORT=${{ vars.USER_SERVICE_SERVER_PORT }} >> app.env
+          echo ACCESS_TOKEN_PUBLIC_KEY=${{ secrets.USER_SERVICE_ACCESS_TOKEN_PUBLIC_KEY }} >> app.env
+          echo ACCESS_TOKEN_PRIVATE_KEY_TEST=${{ secrets.POST_SERVICE_ACCESS_TOKEN_PRIVATE_KEY_TEST }} >> app.env
+          echo ACCESS_TOKEN_PUBLIC_KEY_TEST=${{ secrets.POST_SERVICE_ACCESS_TOKEN_PUBLIC_KEY_TEST }} >> app.env
+          echo ACCESS_TOKEN_EXPIRED_IN_TEST=${{ vars.POST_SERVICE_ACCESS_TOKEN_EXPIRED_IN_TEST }} >> app.env
+          echo ACCESS_TOKEN_MAXAGE_TEST=${{ vars.POST_SERVICE_ACCESS_TOKEN_MAXAGE_TEST }} >> app.env
+          echo MIGRATION_PATH=${{ vars.POST_SERVICE_MIGRATION_PATH }} >> app.env
+
+      - name: Create post-service-secret
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            kubectl create secret generic post-service --from-file=app.env
+
+      - name: Deploy post-service
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            helm upgrade post-service ./backend/post-service/helm/post-service \
+                --set image="ghcr.io/tendont52/soft-arch-proj-backend-post-service:latest" \
+                --timeout 10m \
+                --install \
+                --wait
