@@ -9,3 +9,4 @@ setup/join_command.out
 .DS_Store
 *.code-workspace
 **/*.code-workspace
+prod.sh

@@ -41,25 +41,25 @@ func Serve(conf *config.Config) error {
 	)
 
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	err := userService.RegisterUserServiceHandlerFromEndpoint(ctx, gwmux, conf.UserServiceURL, opts)
+	err := userService.RegisterUserServiceHandlerFromEndpoint(ctx, gwmux, fmt.Sprintf("%s:%s", conf.UserServiceHost, conf.UserServicePort), opts)
 	if err != nil {
 		log.Fatalf("cannot register user service: %v", err)
 	}
-	err = userService.RegisterAuthServiceHandlerFromEndpoint(ctx, gwmux, conf.UserServiceURL, opts)
+	err = userService.RegisterAuthServiceHandlerFromEndpoint(ctx, gwmux, fmt.Sprintf("%s:%s", conf.UserServiceHost, conf.UserServicePort), opts)
 	if err != nil {
 		log.Fatalf("cannot register user service: %v", err)
 	}
-	err = postService.RegisterPostServiceHandlerFromEndpoint(ctx, gwmux, conf.PostServiceURL, opts)
+	err = postService.RegisterPostServiceHandlerFromEndpoint(ctx, gwmux, fmt.Sprintf("%s:%s", conf.PostServiceHost, conf.PostServicePort), opts)
 	if err != nil {
 		log.Fatalf("cannot register post service: %v", err)
 	}
-	err = reportService.RegisterReportServiceHandlerFromEndpoint(ctx, gwmux, conf.ReportServiceURL, opts)
+	err = reportService.RegisterReportServiceHandlerFromEndpoint(ctx, gwmux, fmt.Sprintf("%s:%s", conf.ReportServiceHost, conf.ReportServicePort), opts)
 	if err != nil {
 		log.Fatalf("cannot register report service: %v", err)
 	}
 
 	gwServer := &http.Server{
-		Addr: conf.RESTPort,
+		Addr: fmt.Sprintf(":%s", conf.RESTPort),
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 			if strings.HasPrefix(r.URL.Path, "/v") {
@@ -109,8 +109,13 @@ func TranformOutgoingResponse(ctx context.Context, w http.ResponseWriter, resp p
 				Path:     "/",
 			})
 		}
+		if fd.Name() == "status" {
+			resp.ProtoReflect().Clear(fd)
+			w.WriteHeader(int(v.Int()))
+		}
 		return true
 	})
+
 	return nil
 }
 
