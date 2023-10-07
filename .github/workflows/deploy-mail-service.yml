@@ -29,7 +29,7 @@ jobs:
           echo MEMPHIS_PRODUCER_TEST=${{ vars.MAIL_SERVICE_MEMPHIS_PRODUCER_TEST }} >> app.env
           echo EMAIL_FROM=${{ vars.MAIL_SERVICE_EMAIL_FROM }} >> app.env
           echo SMTP_HOST=${{ vars.MAIL_SERVICE_SMTP_HOST }} >> app.env
-          echo SMTP_PASS=${{ secrets.MAIL-SERVICE-SMTP_PASS }} >> app.env
+          echo SMTP_PASS=${{ secrets.MAIL_SERVICE_SMTP_PASS }} >> app.env
           echo SMTP_PORT=${{ vars.MAIL_SERVICE_SMTP_PORT }} >> app.env
 
       - name: Create mail-service-secret
