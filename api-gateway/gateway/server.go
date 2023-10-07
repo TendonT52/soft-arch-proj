@@ -100,6 +100,13 @@ func TransformIncomingRequest(w http.ResponseWriter, r *http.Request) {
 
 func TranformOutgoingResponse(ctx context.Context, w http.ResponseWriter, resp proto.Message) error {
 	resp.ProtoReflect().Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
+		if fd.Name() == "status" {
+			resp.ProtoReflect().Clear(fd)
+			w.WriteHeader(int(v.Int()))
+		}
+		return true
+	})
+	resp.ProtoReflect().Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
 		if fd.Name() == "refresh_token" {
 			resp.ProtoReflect().Clear(fd)
 			http.SetCookie(w, &http.Cookie{
@@ -108,10 +115,6 @@ func TranformOutgoingResponse(ctx context.Context, w http.ResponseWriter, resp p
 				HttpOnly: true,
 				Path:     "/",
 			})
-		}
-		if fd.Name() == "status" {
-			resp.ProtoReflect().Clear(fd)
-			w.WriteHeader(int(v.Int()))
 		}
 		return true
 	})
