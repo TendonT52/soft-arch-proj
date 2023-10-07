@@ -105,9 +105,8 @@ func TranformOutgoingResponse(ctx context.Context, w http.ResponseWriter, resp p
 			http.SetCookie(w, &http.Cookie{
 				Name:     "refreshToken",
 				Value:    v.String(),
-				HttpOnly: true,
+				HttpOnly: false,
 				Path:     "/v1/refresh",
-				MaxAge:  60 * 60 * 24 * 7,
 			})
 		}
 		return true
