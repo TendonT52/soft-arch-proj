@@ -326,7 +326,7 @@ func TestUpdateStudent(t *testing.T) {
 		"success": {
 			req: &pbv1.UpdateStudentRequest{
 				AccessToken: res.AccessToken,
-				Student: &pbv1.Student{
+				Student: &pbv1.UpdatedStudent{
 					Name:        "UPADATED Mock Update Student",
 					Description: "UPADATED I am a mock student",
 					Faculty:     "UPADATED Mock Engineering",
@@ -342,7 +342,7 @@ func TestUpdateStudent(t *testing.T) {
 		"Not correct student": {
 			req: &pbv1.UpdateStudentRequest{
 				AccessToken: access_token_wrong,
-				Student: &pbv1.Student{
+				Student: &pbv1.UpdatedStudent{
 					Name:        "Mock Update Student",
 					Description: "I am a mock student",
 					Faculty:     "Mock Engineering",
@@ -358,7 +358,7 @@ func TestUpdateStudent(t *testing.T) {
 		"invalid token": {
 			req: &pbv1.UpdateStudentRequest{
 				AccessToken: "invalid token",
-				Student: &pbv1.Student{},
+				Student: &pbv1.UpdatedStudent{},
 			},
 			expect: &pbv1.UpdateCompanyResponse{
 				Status:  401,

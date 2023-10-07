@@ -66,7 +66,7 @@ func (r *userRepository) GetStudentByID(ctx context.Context, id int64) (*pbv1.St
 	return &student, nil
 }
 
-func (r *userRepository) UpdateStudentByID(ctx context.Context, id int64, req *pbv1.Student) error {
+func (r *userRepository) UpdateStudentByID(ctx context.Context, id int64, req *pbv1.UpdatedStudent) error {
 	current_timestamp := time.Now().Unix()
 	query := "UPDATE students SET name = $1, description = $2, faculty = $3, major = $4, year = $5, updated_at = $6 WHERE sid = $7"
 	_, err := r.db.ExecContext(ctx, query, req.Name, req.Description, req.Faculty, req.Major, req.Year, current_timestamp, id)

@@ -23,8 +23,8 @@ type UserServicePort interface {
 	GetCompanyByID(ctx context.Context, userId, id int64) (*pbv1.Company, error)
 	GetAllCompany(ctx context.Context, userId int64) ([]*pbv1.Company, error)
 	GetApprovedCompany(ctx context.Context, userId int64, search string) ([]*pbv1.Company, error)
-	UpdateStudentMe(ctx context.Context, id int64, req *pbv1.Student) error
-	UpdateCompanyMe(ctx context.Context, id int64, req *pbv1.Company) error
+	UpdateStudentMe(ctx context.Context, id int64, req *pbv1.UpdatedStudent) error
+	UpdateCompanyMe(ctx context.Context, id int64, req *pbv1.UpdatedCompany) error
 	UpdateCompanyStatus(ctx context.Context, userId, id int64, status string) error
 	DeleteStudent(ctx context.Context, userId, id int64) error
 	DeleteCompany(ctx context.Context, userId, id int64) error

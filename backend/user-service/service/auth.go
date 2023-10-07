@@ -35,9 +35,8 @@ func (s *authService) SignUpStudent(ctx context.Context, req *pbv1.CreateStudent
 	if req.Password != req.PasswordConfirm {
 		return 0, domain.ErrPasswordNotMatch
 	}
-	if !domain.CheckStudentRequiredFields(&pbv1.Student{
+	if !domain.CheckStudentRequiredFields(&pbv1.UpdatedStudent{
 		Name:        req.Name,
-		Email:       req.Email,
 		Description: req.Description,
 		Faculty:     req.Faculty,
 		Major:       req.Major,
@@ -112,9 +111,8 @@ func (s *authService) SignUpCompany(ctx context.Context, req *pbv1.CreateCompany
 	if !email.IsCorrectEmailFormat(req.Email) {
 		return 0, domain.ErrNotCorrectEmailFormat.With("Email must be correct format")
 	}
-	if !domain.CheckCompanyRequiredFields(&pbv1.Company{
+	if !domain.CheckCompanyRequiredFields(&pbv1.UpdatedCompany{
 		Name:        req.Name,
-		Email:       req.Email,
 		Description: req.Description,
 		Phone:       req.Phone,
 		Category:    req.Category,

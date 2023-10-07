@@ -43,11 +43,11 @@ func RemoveSpecialChars(input string) string {
 	return result
 }
 
-func CheckStudentRequiredFields(student *pbv1.Student) bool {
+func CheckStudentRequiredFields(student *pbv1.UpdatedStudent) bool {
 	return student.Name != "" && student.Description != "" && student.Faculty != "" && student.Major != "" && student.Year != 0
 }
 
-func CheckCompanyRequiredFields(company *pbv1.Company) bool {
+func CheckCompanyRequiredFields(company *pbv1.UpdatedCompany) bool {
 	return company.Name != "" && company.Description != "" && company.Phone != "" && company.Category != "" && company.Location != ""
 }
 
