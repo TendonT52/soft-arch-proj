@@ -21,8 +21,8 @@ const (
 	lex = `{"root": {}}`
 )
 
-func createMockPost(t *testing.T, ctx context.Context, c pbv1.PostServiceClient, ownerId int64, topic, description, period, howTo string, ops, rss, bs []string) *pbv1.Post {
-	p := &pbv1.Post{
+func createMockPost(t *testing.T, ctx context.Context, c pbv1.PostServiceClient, ownerId int64, companyName, topic, description, period, howTo string, ops, rss, bs []string) *pbv1.Post {
+	p := &pbv1.CreatedPost{
 		Topic:          topic,
 		Description:    description,
 		Period:         period,
@@ -46,7 +46,21 @@ func createMockPost(t *testing.T, ctx context.Context, c pbv1.PostServiceClient,
 	require.NoError(t, err)
 	require.Equal(t, int64(201), res.Status)
 
-	return p
+	return &pbv1.Post{
+		PostId:         res.Id,
+		Topic:          p.Topic,
+		Description:    p.Description,
+		Period:         p.Period,
+		HowTo:          p.HowTo,
+		OpenPositions:  p.OpenPositions,
+		RequiredSkills: p.RequiredSkills,
+		Benefits:       p.Benefits,
+		Owner: &pbv1.PostOwner{
+			Id:   ownerId,
+			Name: companyName,
+		},
+		UpdatedAt: time.Now().Unix(),
+	}
 }
 
 func TestSearchPosts(t *testing.T) {
@@ -82,15 +96,15 @@ func TestSearchPosts(t *testing.T) {
 	com3Res, _, err := mock.CreateMockApprovedCompany(ctx, "Grab", ad)
 	require.NoError(t, err)
 
-	post1 := createMockPost(t, ctx, c, com1Res.Id, "Post 1", lex, "1 month", lex,
+	post1 := createMockPost(t, ctx, c, com1Res.Id, "Agoda", "Post 1", lex, "1 month", "Apply via our facebook page",
 		[]string{"Software Engineer", "Data Scientist"}, []string{"Golang", "Python"}, []string{"Free lunch", "Free dinner"})
-	post2 := createMockPost(t, ctx, c, com2Res.Id, "Post 2", lex, "2 month", lex,
+	post2 := createMockPost(t, ctx, c, com2Res.Id, "Dime", "Post 2", lex, "2 month", "Apply via our line VOOM page",
 		[]string{"Data Analysts", "Full-Stack Developer"}, []string{"Python", "HTML", "CSS"}, []string{"Free lunch", "Macbook Pro"})
-	post3 := createMockPost(t, ctx, c, com2Res.Id, "Post 3", lex, "3 month", lex,
+	post3 := createMockPost(t, ctx, c, com2Res.Id, "Dime", "Post 3", lex, "3 month", "Apply via our TikTok",
 		[]string{"Backend Developer", "Data Scientist"}, []string{"Golang", "Python"}, []string{"Free dinner", "Macbook M1"})
-	post4 := createMockPost(t, ctx, c, com2Res.Id, "Post 4", lex, "4 month", lex,
+	post4 := createMockPost(t, ctx, c, com2Res.Id, "Dime", "Post 4", lex, "4 month", "Apply via our facebook page",
 		[]string{"Frontend Developer", "Data Analyst"}, []string{"HTML", "CSS", "Javascript"}, []string{"Free lunch", "Free dinner", "Macbook M1"})
-	post5 := createMockPost(t, ctx, c, com3Res.Id, "Post 5", lex, "5 month", lex,
+	post5 := createMockPost(t, ctx, c, com3Res.Id, "Grab", "Post 5", lex, "5 month", "Apply via our facebook page",
 		[]string{"Frontend Developer", "Data Analyst"}, []string{"HTML", "CSS", "Javascript"}, []string{"Free lunch", "Free dinner", "Macbook Pro"})
 
 	_ = post1
@@ -139,6 +153,44 @@ func TestSearchPosts(t *testing.T) {
 					post2,
 					post3,
 					post4,
+				},
+			},
+		},
+		"success with all empty search options": {
+			req: &pbv1.ListPostsRequest{
+				AccessToken: token,
+				SearchOptions: &pbv1.SearchOptions{
+					SearchCompany:       "",
+					SearchOpenPosition:  "",
+					SearchRequiredSkill: "",
+					SearchBenefit:       "",
+				},
+			},
+			expect: &pbv1.ListPostsResponse{
+				Status:  200,
+				Message: "Posts retrieved successfully",
+				Posts: []*pbv1.Post{
+					post1,
+					post2,
+					post3,
+					post4,
+					post5,
+				},
+			},
+		},
+		"success with NIL empty search options": {
+			req: &pbv1.ListPostsRequest{
+				AccessToken: token,
+			},
+			expect: &pbv1.ListPostsResponse{
+				Status:  200,
+				Message: "Posts retrieved successfully",
+				Posts: []*pbv1.Post{
+					post1,
+					post2,
+					post3,
+					post4,
+					post5,
 				},
 			},
 		},
@@ -219,7 +271,7 @@ func TestSearchPosts(t *testing.T) {
 		},
 		"token wrong": {
 			req: &pbv1.ListPostsRequest{
-				AccessToken: "wrong",
+				AccessToken:   "wrong",
 				SearchOptions: &pbv1.SearchOptions{},
 			},
 			expect: &pbv1.ListPostsResponse{
@@ -245,6 +297,9 @@ func TestSearchPosts(t *testing.T) {
 				require.Equal(t, true, utils.CheckArrayEqual(&tc.expect.Posts[i].OpenPositions, &p.OpenPositions))
 				require.Equal(t, true, utils.CheckArrayEqual(&tc.expect.Posts[i].RequiredSkills, &p.RequiredSkills))
 				require.Equal(t, true, utils.CheckArrayEqual(&tc.expect.Posts[i].Benefits, &p.Benefits))
+				require.NotEmpty(t, p.Owner.Id)
+				require.Equal(t, tc.expect.Posts[i].Owner.Name, p.Owner.Name)
+				require.NotEmpty(t, p.UpdatedAt)
 			}
 		})
 	}

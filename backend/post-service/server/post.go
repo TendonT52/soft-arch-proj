@@ -284,3 +284,35 @@ func (s *PostServer) GetBenefits(ctx context.Context, req *pbv1.GetBenefitsReque
 		Benefits: benefits,
 	}, nil
 }
+
+func (s *PostServer) GetMyPosts(ctx context.Context, req *pbv1.GetMyPostsRequest) (*pbv1.GetMyPostsResponse, error) {
+	posts, err := s.PostService.GetMyPosts(ctx, req.AccessToken)
+	if errors.Is(err, domain.ErrForbidden) {
+		log.Println("Get My Posts: Forbidden")
+		return &pbv1.GetMyPostsResponse{
+			Status:  http.StatusForbidden,
+			Message: "Forbidden",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrUnauthorize) {
+		log.Println("Get My Posts: Unauthorized")
+		return &pbv1.GetMyPostsResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
+		}, nil
+	}
+	if err != nil {
+		log.Println("Get My Posts: ", err)
+		return &pbv1.GetMyPostsResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Internal server error",
+		}, nil
+	}
+
+	return &pbv1.GetMyPostsResponse{
+		Status:  http.StatusOK,
+		Message: "My posts retrieved successfully",
+		Posts:   posts,
+		Total:   int64(len(posts)),
+	}, nil
+}

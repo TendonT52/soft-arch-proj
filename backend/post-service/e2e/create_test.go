@@ -101,11 +101,11 @@ func TestCreatePost(t *testing.T) {
 	}{
 		"success": {
 			req: &pbv1.CreatePostRequest{
-				Post: &pbv1.Post{
+				Post: &pbv1.CreatedPost{
 					Topic:          "Topic Test",
 					Description:    lex,
 					Period:         "01/01/2023 - 02/02/2023",
-					HowTo:          lex,
+					HowTo:          "Apply by sending your resume to me!",
 					OpenPositions:  []string{"OpenPositions Test 1", "OpenPositions Test 2", "OpenPositions Test 3"},
 					RequiredSkills: []string{"RequiredSkills Test 1", "RequiredSkills Test 2"},
 					Benefits:       []string{"Benefits Test 1"},
@@ -119,11 +119,11 @@ func TestCreatePost(t *testing.T) {
 		},
 		"success with same title": {
 			req: &pbv1.CreatePostRequest{
-				Post: &pbv1.Post{
+				Post: &pbv1.CreatedPost{
 					Topic:          "Topic Test 2",
 					Description:    lex,
 					Period:         "01/01/2023 - 02/02/2023",
-					HowTo:          lex,
+					HowTo:          "Apply by sending your resume to me!",
 					OpenPositions:  []string{"OpenPositions Test 1", "OpenPositions Test 2", "OpenPositions Test 3"},
 					RequiredSkills: []string{"RequiredSkills Test 1", "RequiredSkills Test 2"},
 					Benefits:       []string{"Benefits Test 2"},
@@ -137,11 +137,11 @@ func TestCreatePost(t *testing.T) {
 		},
 		"Some fields are empty": {
 			req: &pbv1.CreatePostRequest{
-				Post: &pbv1.Post{
+				Post: &pbv1.CreatedPost{
 					Topic:          "",
 					Description:    lex,
 					Period:         "01/01/2023 - 02/02/2023",
-					HowTo:          lex,
+					HowTo:          "Apply by sending your resume to me!",
 					OpenPositions:  []string{"OpenPositions Test"},
 					RequiredSkills: []string{"RequiredSkills Test"},
 					Benefits:       []string{"Benefits Test"},
@@ -155,11 +155,11 @@ func TestCreatePost(t *testing.T) {
 		},
 		"Not company": {
 			req: &pbv1.CreatePostRequest{
-				Post: &pbv1.Post{
+				Post: &pbv1.CreatedPost{
 					Topic:          "Topic Test",
 					Description:    lex,
 					Period:         "01/01/2023 - 02/02/2023",
-					HowTo:          lex,
+					HowTo:          "Apply by sending your resume to me!",
 					OpenPositions:  []string{"OpenPositions Test"},
 					RequiredSkills: []string{"RequiredSkills Test"},
 					Benefits:       []string{"Benefits Test"},
@@ -173,11 +173,11 @@ func TestCreatePost(t *testing.T) {
 		},
 		"Invalid token": {
 			req: &pbv1.CreatePostRequest{
-				Post: &pbv1.Post{
+				Post: &pbv1.CreatedPost{
 					Topic:          "Topic Test",
 					Description:    lex,
 					Period:         "01/01/2023 - 02/02/2023",
-					HowTo:          lex,
+					HowTo:          "Apply by sending your resume to me!",
 					OpenPositions:  []string{"OpenPositions Test"},
 					RequiredSkills: []string{"RequiredSkills Test"},
 					Benefits:       []string{"Benefits Test"},

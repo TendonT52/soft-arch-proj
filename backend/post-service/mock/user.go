@@ -2,6 +2,7 @@ package mock
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -46,6 +47,9 @@ func CreateMockApprovedCompany(ctx context.Context, name, accessToken string) (*
 	if err != nil {
 		return nil, "", err
 	}
+	if res.Status != 201 {
+		return nil, "", errors.New(res.Message)
+	}
 
 	// Approve Company
 	reqApprove := &pbv1.UpdateCompanyStatusRequest{
@@ -54,9 +58,12 @@ func CreateMockApprovedCompany(ctx context.Context, name, accessToken string) (*
 		Status:      "Approve",
 	}
 
-	_, err = clientUser.UpdateCompanyStatus(ctx, reqApprove)
+	resCom, err := clientUser.UpdateCompanyStatus(ctx, reqApprove)
 	if err != nil {
 		return nil, "", err
+	}
+	if resCom.Status != 200 {
+		return nil, "", errors.New(resCom.Message)
 	}
 
 	// SignIn Company
@@ -67,6 +74,9 @@ func CreateMockApprovedCompany(ctx context.Context, name, accessToken string) (*
 	resSignIn, err := client.SignIn(ctx, reqSignIn)
 	if err != nil {
 		return nil, "", err
+	}
+	if resSignIn.Status != 200 {
+		return nil, "", errors.New(resSignIn.Message)
 	}
 
 	return res, resSignIn.AccessToken, nil
@@ -100,9 +110,12 @@ func CreateMockAdmin(ctx context.Context) (string, error) {
 		AccessToken:     admin_access_token,
 	}
 
-	_, err = client.CreateAdmin(ctx, reqAdmin)
+	resAdmin, err := client.CreateAdmin(ctx, reqAdmin)
 	if err != nil {
 		return "", err
+	}
+	if resAdmin.Status != 201 {
+		return "", errors.New(resAdmin.Message)
 	}
 
 	// SignIn Admin
@@ -114,6 +127,9 @@ func CreateMockAdmin(ctx context.Context) (string, error) {
 	resSignIn, err := client.SignIn(ctx, reqSignIn)
 	if err != nil {
 		return "", err
+	}
+	if resSignIn.Status != 200 {
+		return "", errors.New(resSignIn.Message)
 	}
 
 	return resSignIn.AccessToken, nil

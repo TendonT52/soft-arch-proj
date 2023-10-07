@@ -23,7 +23,7 @@ func NewPostService(postRepo port.PostRepoPort, userService port.UserClientPort)
 	}
 }
 
-func (s *postService) CreatePost(ctx context.Context, token string, post *pbv1.Post) (int64, error) {
+func (s *postService) CreatePost(ctx context.Context, token string, post *pbv1.CreatedPost) (int64, error) {
 	if !domain.CheckRequireFields(post) {
 		return 0, domain.ErrFieldsAreRequired
 	}
@@ -71,6 +71,9 @@ func (s *postService) GetPosts(ctx context.Context, token string, search *pbv1.S
 	_, err := utils.ValidateAccessToken(token)
 	if err != nil {
 		return nil, domain.ErrUnauthorize
+	}
+	if search == nil {
+		search = &pbv1.SearchOptions{}
 	}
 
 	u, err := s.UserService.ListApprovedCompanies(ctx, &pbv1.ListApprovedCompaniesRequest{
@@ -188,4 +191,21 @@ func (s *postService) GetBenefits(ctx context.Context, token, search string) ([]
 	}
 
 	return benefits, nil
+}
+
+func (s *postService) GetMyPosts(ctx context.Context, token string) ([]*pbv1.Post, error) {
+	payload, err := utils.ValidateAccessToken(token)
+	if err != nil {
+		return nil, domain.ErrUnauthorize
+	}
+	if payload.Role != companyRole {
+		return nil, domain.ErrForbidden
+	}
+
+	posts, err := s.PostRepo.GetMyPosts(ctx, payload.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	return posts, nil
 }

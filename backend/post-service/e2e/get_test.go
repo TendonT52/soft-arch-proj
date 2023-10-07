@@ -63,7 +63,7 @@ func TestGetPost(t *testing.T) {
 	topic := "What to expect from here on out"
 	description := lex
 	period := "1 month"
-	howTo := lex
+	howTo := "Ypu can apply via our facebook page"
 	openPositions := []string{"Software Engineer", "Data Scientist"}
 	requiredSkills := []string{"Golang", "Python"}
 	benefits := []string{"Free lunch", "Free dinner"}
@@ -85,7 +85,7 @@ func TestGetPost(t *testing.T) {
 
 	res, err := c.CreatePost(ctx, &pbv1.CreatePostRequest{
 		AccessToken: token,
-		Post: &pbv1.Post{
+		Post: &pbv1.CreatedPost{
 			Topic:          topic,
 			Description:    description,
 			Period:         period,
@@ -161,6 +161,8 @@ func TestGetPost(t *testing.T) {
 				require.Equal(t, tc.expect.Post.RequiredSkills, res.Post.RequiredSkills)
 				require.Equal(t, tc.expect.Post.Benefits, res.Post.Benefits)
 				require.Equal(t, tc.expect.Post.Owner.Name, res.Post.Owner.Name)
+				require.NotEmpty(t, res.Post.Owner.Id)
+				require.NotEmpty(t, res.Post.UpdatedAt)
 			}
 		})
 	}

@@ -6,7 +6,7 @@ import (
 	pbv1 "github.com/TikhampornSky/go-post-service/gen/v1"
 )
 
-func CheckRequireFields(post *pbv1.Post) bool {
+func CheckRequireFields(post *pbv1.CreatedPost) bool {
 	return checkFields(post.Topic, post.Description, post.Period, post.HowTo, len(post.OpenPositions), len(post.RequiredSkills), len(post.Benefits))
 }
 

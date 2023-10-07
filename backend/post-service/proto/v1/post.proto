@@ -18,6 +18,11 @@ service PostService {
             get: "/v1/posts/{id}"
         };
     }
+    rpc GetMyPosts(GetMyPostsRequest) returns (GetMyPostsResponse) {
+        option (google.api.http) = {
+            get: "/v1/posts/me"
+        };
+    }
     rpc ListPosts(ListPostsRequest) returns (ListPostsResponse) {
         option (google.api.http) = {
             get: "/v1/posts"
@@ -86,6 +91,16 @@ message Post {
     int64 updated_at = 10;
 }
 
+message CreatedPost {
+    string topic = 1;
+    string description = 2;
+    string period = 3;
+    string how_to = 4;
+    repeated string open_positions = 5;
+    repeated string required_skills = 6;
+    repeated string benefits = 7;
+}
+
 message UpdatedPost {
     string topic = 1;
     string description = 2;
@@ -94,12 +109,11 @@ message UpdatedPost {
     repeated Element open_positions = 5;
     repeated Element required_skills = 6;
     repeated Element benefits = 7;
-    int64 post_id = 8;
 }
 
 // Create Post
 message CreatePostRequest {
-    Post post = 1;
+    CreatedPost post = 1;
     string access_token = 2;
 }
 
@@ -198,4 +212,16 @@ message GetBenefitsResponse {
     int64 status = 1;
     string message = 2;
     repeated string benefits = 3;
+}
+
+// Get My Posts
+message GetMyPostsRequest {
+    string access_token = 1;
+}
+
+message GetMyPostsResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated Post posts = 3;
+    int64 total = 4;
 }

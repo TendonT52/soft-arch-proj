@@ -136,8 +136,7 @@ func (s *authService) SignUpCompany(ctx context.Context, req *pbv1.CreateCompany
 		return 0, domain.ErrDuplicateEmail
 	}
 
-	createAt := s.time.Now().Unix()
-	cid, err := s.repo.CreateCompany(ctx, req, createAt)
+	cid, err := s.repo.CreateCompany(ctx, req, current_time)
 	if err != nil {
 		return 0, err
 	}
@@ -165,8 +164,7 @@ func (s *authService) SignUpAdmin(ctx context.Context, req *pbv1.CreateAdminRequ
 		return 0, domain.ErrDuplicateEmail
 	}
 
-	createAt := s.time.Now().Unix()
-	aid, err := s.repo.CreateAdmin(ctx, req, createAt)
+	aid, err := s.repo.CreateAdmin(ctx, req, current_time)
 	if err != nil {
 		return 0, err
 	}

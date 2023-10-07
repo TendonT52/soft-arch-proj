@@ -22,6 +22,7 @@ const (
 	PostService_PostHealthCheck_FullMethodName   = "/user.PostService/PostHealthCheck"
 	PostService_CreatePost_FullMethodName        = "/user.PostService/CreatePost"
 	PostService_GetPost_FullMethodName           = "/user.PostService/GetPost"
+	PostService_GetMyPosts_FullMethodName        = "/user.PostService/GetMyPosts"
 	PostService_ListPosts_FullMethodName         = "/user.PostService/ListPosts"
 	PostService_UpdatePost_FullMethodName        = "/user.PostService/UpdatePost"
 	PostService_DeletePost_FullMethodName        = "/user.PostService/DeletePost"
@@ -37,6 +38,7 @@ type PostServiceClient interface {
 	PostHealthCheck(ctx context.Context, in *PostHealthCheckRequest, opts ...grpc.CallOption) (*PostHealthCheckResponse, error)
 	CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*CreatePostResponse, error)
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error)
+	GetMyPosts(ctx context.Context, in *GetMyPostsRequest, opts ...grpc.CallOption) (*GetMyPostsResponse, error)
 	ListPosts(ctx context.Context, in *ListPostsRequest, opts ...grpc.CallOption) (*ListPostsResponse, error)
 	UpdatePost(ctx context.Context, in *UpdatePostRequest, opts ...grpc.CallOption) (*UpdatePostResponse, error)
 	DeletePost(ctx context.Context, in *DeletePostRequest, opts ...grpc.CallOption) (*DeletePostResponse, error)
@@ -74,6 +76,15 @@ func (c *postServiceClient) CreatePost(ctx context.Context, in *CreatePostReques
 func (c *postServiceClient) GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error) {
 	out := new(GetPostResponse)
 	err := c.cc.Invoke(ctx, PostService_GetPost_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postServiceClient) GetMyPosts(ctx context.Context, in *GetMyPostsRequest, opts ...grpc.CallOption) (*GetMyPostsResponse, error) {
+	out := new(GetMyPostsResponse)
+	err := c.cc.Invoke(ctx, PostService_GetMyPosts_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -141,6 +152,7 @@ type PostServiceServer interface {
 	PostHealthCheck(context.Context, *PostHealthCheckRequest) (*PostHealthCheckResponse, error)
 	CreatePost(context.Context, *CreatePostRequest) (*CreatePostResponse, error)
 	GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error)
+	GetMyPosts(context.Context, *GetMyPostsRequest) (*GetMyPostsResponse, error)
 	ListPosts(context.Context, *ListPostsRequest) (*ListPostsResponse, error)
 	UpdatePost(context.Context, *UpdatePostRequest) (*UpdatePostResponse, error)
 	DeletePost(context.Context, *DeletePostRequest) (*DeletePostResponse, error)
@@ -162,6 +174,9 @@ func (UnimplementedPostServiceServer) CreatePost(context.Context, *CreatePostReq
 }
 func (UnimplementedPostServiceServer) GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPost not implemented")
+}
+func (UnimplementedPostServiceServer) GetMyPosts(context.Context, *GetMyPostsRequest) (*GetMyPostsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMyPosts not implemented")
 }
 func (UnimplementedPostServiceServer) ListPosts(context.Context, *ListPostsRequest) (*ListPostsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListPosts not implemented")
@@ -244,6 +259,24 @@ func _PostService_GetPost_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PostServiceServer).GetPost(ctx, req.(*GetPostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostService_GetMyPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMyPostsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).GetMyPosts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_GetMyPosts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).GetMyPosts(ctx, req.(*GetMyPostsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -374,6 +407,10 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPost",
 			Handler:    _PostService_GetPost_Handler,
+		},
+		{
+			MethodName: "GetMyPosts",
+			Handler:    _PostService_GetMyPosts_Handler,
 		},
 		{
 			MethodName: "ListPosts",
