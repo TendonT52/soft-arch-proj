@@ -172,6 +172,36 @@
         ]
       }
     },
+    "/v1/posts/me": {
+      "get": {
+        "operationId": "PostService_GetMyPosts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userGetMyPostsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "accessToken",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "PostService"
+        ]
+      }
+    },
     "/v1/posts/{id}": {
       "get": {
         "operationId": "PostService_GetPost",
@@ -360,7 +390,7 @@
       "type": "object",
       "properties": {
         "post": {
-          "$ref": "#/definitions/userPost"
+          "$ref": "#/definitions/userCreatedPost"
         },
         "accessToken": {
           "type": "string"
@@ -381,6 +411,41 @@
         "id": {
           "type": "string",
           "format": "int64"
+        }
+      }
+    },
+    "userCreatedPost": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "period": {
+          "type": "string"
+        },
+        "howTo": {
+          "type": "string"
+        },
+        "openPositions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "requiredSkills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "benefits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -431,6 +496,29 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "userGetMyPostsResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        },
+        "posts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/userPost"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -640,10 +728,6 @@
             "type": "object",
             "$ref": "#/definitions/userElement"
           }
-        },
-        "postId": {
-          "type": "string",
-          "format": "int64"
         }
       }
     }
