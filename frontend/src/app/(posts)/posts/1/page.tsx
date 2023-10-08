@@ -1,5 +1,5 @@
 import { type InitialEditorStateType } from "@lexical/react/LexicalComposer";
-import { Editor } from "@/components/lexical/editor";
+import { PostEditor } from "@/components/post-editor";
 
 /* DUMMY */
 type Post = {
@@ -16,12 +16,9 @@ const post: Post = {
 
 export default function Page() {
   return (
-    <div className="container relative flex min-h-screen gap-6">
-      <Editor
-        title={post.topic}
-        editable={false}
-        editorState={post.description}
-      />
-    </div>
+    <PostEditor
+      post={post}
+      editable={false}
+    />
   );
 }

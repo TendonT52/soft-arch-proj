@@ -31,13 +31,13 @@ const features: Feature[] = [
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
   },
   {
-    Icon: FileTextIcon,
-    title: "Post",
+    Icon: SearchIcon,
+    title: "Search",
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
   },
   {
-    Icon: SearchIcon,
-    title: "Search",
+    Icon: FileTextIcon,
+    title: "Post",
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
   },
   {

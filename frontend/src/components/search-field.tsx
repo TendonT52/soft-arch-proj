@@ -45,7 +45,7 @@ const SearchField = ({ field, label, placeholder }: SearchFieldProps) => {
   );
 
   return (
-    <Accordion type="multiple">
+    <Accordion type="multiple" defaultValue={[field]}>
       <AccordionItem value={field}>
         <AccordionTrigger className="px-1 pb-2 pt-2 text-sm">
           {label}
@@ -73,7 +73,7 @@ const SearchField = ({ field, label, placeholder }: SearchFieldProps) => {
               key={`${field}-${queryCount}`}
               onSubmit={(e) => {
                 e.preventDefault();
-                if (inputRef.current && inputRef.current.value) {
+                if (inputRef.current?.value) {
                   addQuery(inputRef.current.value);
                 }
               }}

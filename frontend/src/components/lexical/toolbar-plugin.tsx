@@ -314,7 +314,7 @@ const LinkEditor = ({ editor }: LinkEditorProps) => {
       {isEditMode ? (
         <input
           ref={inputRef}
-          className="h-10 w-full bg-background px-3 py-2 focus-visible:outline-none"
+          className="h-8 w-full bg-background px-3 py-2 font-medium focus-visible:outline-none"
           value={linkUrl}
           onChange={(e) => {
             setLinkUrl(e.target.value);
@@ -346,20 +346,20 @@ const LinkEditor = ({ editor }: LinkEditorProps) => {
           </Link>
           <div className="flex">
             <Button
+              className="h-8 w-8 p-0"
               variant="ghost"
-              size="icon"
               tabIndex={0}
               onClick={() => void setEditMode(true)}
             >
-              <PencilIcon className="h-5 w-10" strokeWidth={2} />
+              <PencilIcon className="h-4 w-8" strokeWidth={2} />
             </Button>
             <Button
+              className="h-8 w-8 p-0"
               variant="ghost"
-              size="icon"
               tabIndex={0}
               onClick={() => void navigator.clipboard.writeText(linkUrl)}
             >
-              <CopyIcon className="h-5 w-10" strokeWidth={2} />
+              <CopyIcon className="h-4 w-8" strokeWidth={2} />
             </Button>
           </div>
         </>
@@ -385,7 +385,7 @@ const LanguageOptionsSelect = ({
     <Select defaultValue={defaultValue} onValueChange={onValueChange}>
       <Button
         variant="ghost"
-        className="w-[10rem] min-w-[10rem] justify-between border-transparent px-3 py-1.5 font-normal"
+        className="h-8 w-[9.5rem] justify-between border-transparent px-3 py-1.5 text-xs font-normal"
         asChild
       >
         <SelectTrigger>
@@ -393,11 +393,11 @@ const LanguageOptionsSelect = ({
         </SelectTrigger>
       </Button>
       <SelectContent
-        className="h-[14.5rem] w-[10rem]"
+        className="h-[12.875rem] w-[9.5rem]"
         onCloseAutoFocus={() => void editor.focus()}
       >
         {options.map((option) => (
-          <SelectItem key={option} value={option}>
+          <SelectItem className="text-xs" key={option} value={option}>
             {option}
           </SelectItem>
         ))}
@@ -519,45 +519,51 @@ const BlockOptionsDropdownMenu = ({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="w-[10rem] min-w-[10rem] justify-between px-3 py-1.5 font-normal"
+          className="h-8 w-[9.5rem] items-center justify-between px-3 py-1 text-xs font-normal"
         >
-          <div className="flex">
-            <current.Icon className="mr-2 h-5 w-5" strokeWidth={1} />
+          <div className="flex items-center">
+            <current.Icon className="mr-2 h-4 w-4" strokeWidth={1} />
             {current.short}
           </div>
           <ChevronDownIcon className="h-4 w-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-[10rem]"
+        className="h-[12.875rem] w-[9.5rem]"
         onCloseAutoFocus={() => void editor.focus()}
       >
-        <DropdownMenuItem onSelect={formatParagraph}>
-          <paragraph.Icon className="mr-2 h-5 w-5" strokeWidth={1} />
+        <DropdownMenuItem className="text-xs" onSelect={formatParagraph}>
+          <paragraph.Icon className="mr-2 h-4 w-4" strokeWidth={1} />
           {paragraph.name}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => void formatHeading("h2")}>
-          <h2.Icon className="mr-2 h-5 w-5" strokeWidth={1} />
+        <DropdownMenuItem
+          className="text-xs"
+          onSelect={() => void formatHeading("h2")}
+        >
+          <h2.Icon className="mr-2 h-4 w-4" strokeWidth={1} />
           {h2.name}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => void formatHeading("h3")}>
-          <h3.Icon className="mr-2 h-5 w-5" strokeWidth={1} />
+        <DropdownMenuItem
+          className="text-xs"
+          onSelect={() => void formatHeading("h3")}
+        >
+          <h3.Icon className="mr-2 h-4 w-4" strokeWidth={1} />
           {h3.name}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={formatBulletList}>
-          <ul.Icon className="mr-2 h-5 w-5" strokeWidth={1} />
+        <DropdownMenuItem className="text-xs" onSelect={formatBulletList}>
+          <ul.Icon className="mr-2 h-4 w-4" strokeWidth={1} />
           {ul.name}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={formatNumberedList}>
-          <ol.Icon className="mr-2 h-5 w-5" strokeWidth={1} />
+        <DropdownMenuItem className="text-xs" onSelect={formatNumberedList}>
+          <ol.Icon className="mr-2 h-4 w-4" strokeWidth={1} />
           {ol.name}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={formatQuote}>
-          <quote.Icon className="mr-2 h-5 w-5" strokeWidth={1} />
+        <DropdownMenuItem className="text-xs" onSelect={formatQuote}>
+          <quote.Icon className="mr-2 h-4 w-4" strokeWidth={1} />
           {quote.name}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={formatCode}>
-          <code.Icon className="mr-2 h-5 w-5" strokeWidth={1} />
+        <DropdownMenuItem className="text-xs" onSelect={formatCode}>
+          <code.Icon className="mr-2 h-4 w-4" strokeWidth={1} />
           {code.name}
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -565,320 +571,334 @@ const BlockOptionsDropdownMenu = ({
   );
 };
 
-const ToolbarPlugin = () => {
-  const [editor] = useLexicalComposerContext();
-  const [canUndo, setCanUndo] = useState(false);
-  const [canRedo, setCanRedo] = useState(false);
-  const [blockType, setBlockType] = useState<BlockType>("paragraph");
-  const [selectedElementKey, setSelectedElementKey] = useState<string | null>(
-    null
-  );
-  const [elementFormat, setElementFormat] =
-    useState<ElementFormatType>("start");
-  const [isLink, setIsLink] = useState(false);
-  const [isBold, setIsBold] = useState(false);
-  const [isItalic, setIsItalic] = useState(false);
-  const [isUnderline, setIsUnderline] = useState(false);
-  const [isStrikethrough, setIsStrikethrough] = useState(false);
-  const [isCode, setIsCode] = useState(false);
+type ToolbarPluginProps = React.HTMLAttributes<HTMLDivElement>;
 
-  const updateToolbar = useCallback(() => {
-    const selection = $getSelection();
-    if ($isRangeSelection(selection)) {
-      const anchorNode = selection.anchor.getNode() as LexicalNode;
-      let element =
-        anchorNode.getKey() === "root"
-          ? anchorNode
-          : $findMatchingParent(anchorNode, (e) => {
-              const parent = e.getParent<LexicalNode>();
-              return parent !== null && $isRootOrShadowRoot(parent);
-            });
+const ToolbarPlugin = React.forwardRef<HTMLDivElement, ToolbarPluginProps>(
+  ({ className, ...props }, ref) => {
+    const [editor] = useLexicalComposerContext();
+    const [canUndo, setCanUndo] = useState(false);
+    const [canRedo, setCanRedo] = useState(false);
+    const [blockType, setBlockType] = useState<BlockType>("paragraph");
+    const [selectedElementKey, setSelectedElementKey] = useState<string | null>(
+      null
+    );
+    const [elementFormat, setElementFormat] =
+      useState<ElementFormatType>("start");
+    const [isLink, setIsLink] = useState(false);
+    const [isBold, setIsBold] = useState(false);
+    const [isItalic, setIsItalic] = useState(false);
+    const [isUnderline, setIsUnderline] = useState(false);
+    const [isStrikethrough, setIsStrikethrough] = useState(false);
+    const [isCode, setIsCode] = useState(false);
 
-      if (element === null) {
-        element = anchorNode.getTopLevelElementOrThrow() as LexicalNode;
-      }
+    const updateToolbar = useCallback(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        const anchorNode = selection.anchor.getNode() as LexicalNode;
+        let element =
+          anchorNode.getKey() === "root"
+            ? anchorNode
+            : $findMatchingParent(anchorNode, (e) => {
+                const parent = e.getParent<LexicalNode>();
+                return parent !== null && $isRootOrShadowRoot(parent);
+              });
 
-      const elementKey = element.getKey();
-      const elementDOM = editor.getElementByKey(elementKey);
+        if (element === null) {
+          element = anchorNode.getTopLevelElementOrThrow() as LexicalNode;
+        }
 
-      // Update text format
-      setIsBold(selection.hasFormat("bold"));
-      setIsItalic(selection.hasFormat("italic"));
-      setIsUnderline(selection.hasFormat("underline"));
-      setIsStrikethrough(selection.hasFormat("strikethrough"));
-      setIsCode(selection.hasFormat("code"));
+        const elementKey = element.getKey();
+        const elementDOM = editor.getElementByKey(elementKey);
 
-      const node = getSelectedNode(selection);
-      const parent = node.getParent<ElementNode>();
+        // Update text format
+        setIsBold(selection.hasFormat("bold"));
+        setIsItalic(selection.hasFormat("italic"));
+        setIsUnderline(selection.hasFormat("underline"));
+        setIsStrikethrough(selection.hasFormat("strikethrough"));
+        setIsCode(selection.hasFormat("code"));
 
-      // Handle buttons
-      setElementFormat(
-        ($isElementNode(node)
-          ? node.getFormatType()
-          : parent?.getFormatType()) || "start"
-      );
+        const node = getSelectedNode(selection);
+        const parent = node.getParent<ElementNode>();
 
-      // Update links
-      if ($isLinkNode(parent) || $isLinkNode(node)) {
-        setElementFormat("");
-        setIsLink(true);
-      } else {
-        setIsLink(false);
-      }
+        // Handle buttons
+        setElementFormat(
+          ($isElementNode(node)
+            ? node.getFormatType()
+            : parent?.getFormatType()) || "start"
+        );
 
-      if (elementDOM !== null) {
-        setSelectedElementKey(elementKey);
-        if ($isListNode(element)) {
-          const parentList = $getNearestNodeOfType(anchorNode, ListNode);
-          const type = parentList ? parentList.getTag() : element.getTag();
-          setBlockType(type);
+        // Update links
+        if ($isLinkNode(parent) || $isLinkNode(node)) {
+          setElementFormat("");
+          setIsLink(true);
         } else {
-          const type = (
-            $isHeadingNode(element) ? element.getTag() : element.getType()
-          ) as BlockType;
-          setBlockType(type);
+          setIsLink(false);
+        }
+
+        if (elementDOM !== null) {
+          setSelectedElementKey(elementKey);
+          if ($isListNode(element)) {
+            const parentList = $getNearestNodeOfType(anchorNode, ListNode);
+            const type = parentList ? parentList.getTag() : element.getTag();
+            setBlockType(type);
+          } else {
+            const type = (
+              $isHeadingNode(element) ? element.getTag() : element.getType()
+            ) as BlockType;
+            setBlockType(type);
+          }
         }
       }
-    }
-  }, [editor]);
+    }, [editor]);
 
-  useEffect(() => {
-    return editor.registerCommand(
-      SELECTION_CHANGE_COMMAND,
-      () => {
-        updateToolbar();
-        return false;
-      },
-      COMMAND_PRIORITY_CRITICAL
-    );
-  }, [editor, updateToolbar]);
-
-  useEffect(() => {
-    return mergeRegister(
-      editor.registerUpdateListener(({ editorState }) => {
-        editorState.read(() => {
-          updateToolbar();
-        });
-      }),
-      editor.registerCommand(
+    useEffect(() => {
+      return editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
         () => {
           updateToolbar();
           return false;
         },
         COMMAND_PRIORITY_CRITICAL
-      ),
-      editor.registerCommand(
-        CAN_UNDO_COMMAND,
-        (payload) => {
-          setCanUndo(payload);
-          return false;
-        },
-        COMMAND_PRIORITY_CRITICAL
-      ),
-      editor.registerCommand(
-        CAN_REDO_COMMAND,
-        (payload) => {
-          setCanRedo(payload);
-          return false;
-        },
-        COMMAND_PRIORITY_CRITICAL
-      )
-    );
-  }, [editor, updateToolbar]);
+      );
+    }, [editor, updateToolbar]);
 
-  const codeLanguges = useMemo(() => getCodeLanguages(), []);
-  const onCodeLanguageSelect = useCallback(
-    (value: string) => {
-      editor.update(() => {
-        if (selectedElementKey !== null) {
-          const node = $getNodeByKey(selectedElementKey);
-          if ($isCodeNode(node)) {
-            node.setLanguage(value);
+    useEffect(() => {
+      return mergeRegister(
+        editor.registerUpdateListener(({ editorState }) => {
+          editorState.read(() => {
+            updateToolbar();
+          });
+        }),
+        editor.registerCommand(
+          SELECTION_CHANGE_COMMAND,
+          () => {
+            updateToolbar();
+            return false;
+          },
+          COMMAND_PRIORITY_CRITICAL
+        ),
+        editor.registerCommand(
+          CAN_UNDO_COMMAND,
+          (payload) => {
+            setCanUndo(payload);
+            return false;
+          },
+          COMMAND_PRIORITY_CRITICAL
+        ),
+        editor.registerCommand(
+          CAN_REDO_COMMAND,
+          (payload) => {
+            setCanRedo(payload);
+            return false;
+          },
+          COMMAND_PRIORITY_CRITICAL
+        )
+      );
+    }, [editor, updateToolbar]);
+
+    const codeLanguges = useMemo(() => getCodeLanguages(), []);
+    const onCodeLanguageSelect = useCallback(
+      (value: string) => {
+        editor.update(() => {
+          if (selectedElementKey !== null) {
+            const node = $getNodeByKey(selectedElementKey);
+            if ($isCodeNode(node)) {
+              node.setLanguage(value);
+            }
           }
-        }
-      });
-    },
-    [editor, selectedElementKey]
-  );
+        });
+      },
+      [editor, selectedElementKey]
+    );
 
-  const insertLink = useCallback(() => {
-    if (!isLink) {
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, "https://");
-    } else {
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
-    }
-  }, [editor, isLink]);
+    const insertLink = useCallback(() => {
+      if (!isLink) {
+        editor.dispatchCommand(TOGGLE_LINK_COMMAND, "https://");
+      } else {
+        editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+      }
+    }, [editor, isLink]);
 
-  return (
-    <div className="relative flex flex-wrap justify-center gap-1 rounded-[inherit] bg-background p-1">
-      <div className="flex gap-1">
-        <Button
-          disabled={!canUndo}
-          onClick={() => {
-            editor.dispatchCommand(UNDO_COMMAND, undefined);
-          }}
-          variant="ghost"
-          size="icon"
-          aria-label="Undo"
-        >
-          <Undo2Icon className="h-5 w-10" strokeWidth={1} />
-        </Button>
-        <Button
-          disabled={!canRedo}
-          onClick={() => {
-            editor.dispatchCommand(REDO_COMMAND, undefined);
-          }}
-          variant="ghost"
-          size="icon"
-          aria-label="Redo"
-        >
-          <Redo2Icon className="h-5 w-10" strokeWidth={1} />
-        </Button>
-      </div>
-      <Separator orientation="vertical" className="max-lg:hidden" />
-      <div className="flex gap-1">
-        <BlockOptionsDropdownMenu editor={editor} blockType={blockType} />
-      </div>
-      <Separator orientation="vertical" className="max-lg:hidden" />
-
-      {blockType === "code" ? (
+    return (
+      <div
+        className={cn(
+          "relative flex flex-wrap justify-center gap-1 rounded-[inherit] bg-background p-1",
+          className
+        )}
+        ref={ref}
+        {...props}
+      >
         <div className="flex gap-1">
-          <LanguageOptionsSelect
-            editor={editor}
-            options={codeLanguges}
-            defaultValue={getDefaultCodeLanguage()}
-            onValueChange={onCodeLanguageSelect}
-          />
+          <Button
+            className="h-8 w-8 p-0"
+            disabled={!canUndo}
+            onClick={() => {
+              editor.dispatchCommand(UNDO_COMMAND, undefined);
+            }}
+            variant="ghost"
+            aria-label="Undo"
+          >
+            <Undo2Icon className="h-4 w-8" strokeWidth={1} />
+          </Button>
+          <Button
+            className="h-8 w-8 p-0"
+            disabled={!canRedo}
+            onClick={() => {
+              editor.dispatchCommand(REDO_COMMAND, undefined);
+            }}
+            variant="ghost"
+            aria-label="Redo"
+          >
+            <Redo2Icon className="h-4 w-8" strokeWidth={1} />
+          </Button>
         </div>
-      ) : (
-        <>
+        <Separator orientation="vertical" className="hidden md:block" />
+        <div className="flex gap-1">
+          <BlockOptionsDropdownMenu editor={editor} blockType={blockType} />
+        </div>
+        <Separator orientation="vertical" className="hidden md:block" />
+        {blockType === "code" ? (
           <div className="flex gap-1">
-            <Toggle
-              onClick={() => {
-                editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
-              }}
-              size="icon"
-              pressed={isBold}
-              aria-label="Format Bold"
-            >
-              <BoldIcon className="h-5 w-10" strokeWidth={isBold ? 2 : 1} />
-            </Toggle>
-            <Toggle
-              onClick={() => {
-                editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
-              }}
-              size="icon"
-              pressed={isItalic}
-              aria-label="Format Italics"
-            >
-              <ItalicIcon className="h-5 w-10" strokeWidth={isItalic ? 2 : 1} />
-            </Toggle>
-            <Toggle
-              onClick={() => {
-                editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
-              }}
-              size="icon"
-              pressed={isUnderline}
-              aria-label="Format Underline"
-            >
-              <UnderlineIcon
-                className="h-5 w-10"
-                strokeWidth={isUnderline ? 2 : 1}
-              />
-            </Toggle>
-            <Toggle
-              onClick={() => {
-                editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough");
-              }}
-              size="icon"
-              pressed={isStrikethrough}
-              aria-label="Format Strikethrough"
-            >
-              <StrikethroughIcon
-                className="h-5 w-10"
-                strokeWidth={isStrikethrough ? 2 : 1}
-              />
-            </Toggle>
-            <Toggle
-              onClick={() => {
-                editor.dispatchCommand(FORMAT_TEXT_COMMAND, "code");
-              }}
-              size="icon"
-              pressed={isCode}
-              aria-label="Insert Code"
-            >
-              <CodeIcon className="h-5 w-10" strokeWidth={isCode ? 2 : 1} />
-            </Toggle>
-            <Toggle
-              onClick={insertLink}
-              size="icon"
-              pressed={isLink}
-              aria-label="Insert Link"
-            >
-              <LinkIcon className="h-5 w-10" strokeWidth={isLink ? 2 : 1} />
-            </Toggle>
-            {isLink && <LinkEditor editor={editor} />}
+            <LanguageOptionsSelect
+              editor={editor}
+              options={codeLanguges}
+              defaultValue={getDefaultCodeLanguage()}
+              onValueChange={onCodeLanguageSelect}
+            />
           </div>
-          <Separator orientation="vertical" className="max-lg:hidden" />
-          <div className="flex gap-1">
-            <Toggle
-              onClick={() => {
-                editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "start");
-              }}
-              size="icon"
-              pressed={elementFormat === "start"}
-              aria-label="Left Align"
-            >
-              <AlignLeftIcon
-                className="h-5 w-10"
-                strokeWidth={elementFormat === "start" ? 2 : 1}
-              />
-            </Toggle>
-            <Toggle
-              onClick={() => {
-                editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center");
-              }}
-              size="icon"
-              pressed={elementFormat === "center"}
-              aria-label="Center Align"
-            >
-              <AlignCenterIcon
-                className="h-5 w-10"
-                strokeWidth={elementFormat === "center" ? 2 : 1}
-              />
-            </Toggle>
-            <Toggle
-              onClick={() => {
-                editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "end");
-              }}
-              size="icon"
-              pressed={elementFormat === "end"}
-              aria-label="Right Align"
-            >
-              <AlignRightIcon
-                className="h-5 w-10"
-                strokeWidth={elementFormat === "end" ? 2 : 1}
-              />
-            </Toggle>
-            <Toggle
-              onClick={() => {
-                editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "justify");
-              }}
-              size="icon"
-              pressed={elementFormat === "justify"}
-              aria-label="Justify Align"
-            >
-              <AlignJustifyIcon
-                className="h-5 w-10"
-                strokeWidth={elementFormat === "justify" ? 2 : 1}
-              />
-            </Toggle>
-          </div>
-        </>
-      )}
-    </div>
-  );
-};
+        ) : (
+          <>
+            <div className="flex gap-1">
+              <Toggle
+                className="h-8 w-8 p-0"
+                onClick={() => {
+                  editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
+                }}
+                pressed={isBold}
+                aria-label="Format Bold"
+              >
+                <BoldIcon className="h-4 w-8" strokeWidth={isBold ? 2 : 1} />
+              </Toggle>
+              <Toggle
+                className="h-8 w-8 p-0"
+                onClick={() => {
+                  editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
+                }}
+                pressed={isItalic}
+                aria-label="Format Italics"
+              >
+                <ItalicIcon
+                  className="h-4 w-8"
+                  strokeWidth={isItalic ? 2 : 1}
+                />
+              </Toggle>
+              <Toggle
+                className="h-8 w-8 p-0"
+                onClick={() => {
+                  editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
+                }}
+                pressed={isUnderline}
+                aria-label="Format Underline"
+              >
+                <UnderlineIcon
+                  className="h-4 w-8"
+                  strokeWidth={isUnderline ? 2 : 1}
+                />
+              </Toggle>
+              <Toggle
+                className="h-8 w-8 p-0"
+                onClick={() => {
+                  editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough");
+                }}
+                pressed={isStrikethrough}
+                aria-label="Format Strikethrough"
+              >
+                <StrikethroughIcon
+                  className="h-4 w-8"
+                  strokeWidth={isStrikethrough ? 2 : 1}
+                />
+              </Toggle>
+              <Toggle
+                className="h-8 w-8 p-0"
+                onClick={() => {
+                  editor.dispatchCommand(FORMAT_TEXT_COMMAND, "code");
+                }}
+                pressed={isCode}
+                aria-label="Insert Code"
+              >
+                <CodeIcon className="h-4 w-8" strokeWidth={isCode ? 2 : 1} />
+              </Toggle>
+              <Toggle
+                className="h-8 w-8 p-0"
+                onClick={insertLink}
+                pressed={isLink}
+                aria-label="Insert Link"
+              >
+                <LinkIcon className="h-4 w-8" strokeWidth={isLink ? 2 : 1} />
+              </Toggle>
+              {isLink && <LinkEditor editor={editor} />}
+            </div>
+            <Separator orientation="vertical" className="hidden md:block" />
+            <div className="flex gap-1">
+              <Toggle
+                className="h-8 w-8 p-0"
+                onClick={() => {
+                  editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "start");
+                }}
+                pressed={elementFormat === "start"}
+                aria-label="Left Align"
+              >
+                <AlignLeftIcon
+                  className="h-4 w-8"
+                  strokeWidth={elementFormat === "start" ? 2 : 1}
+                />
+              </Toggle>
+              <Toggle
+                className="h-8 w-8 p-0"
+                onClick={() => {
+                  editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center");
+                }}
+                pressed={elementFormat === "center"}
+                aria-label="Center Align"
+              >
+                <AlignCenterIcon
+                  className="h-4 w-8"
+                  strokeWidth={elementFormat === "center" ? 2 : 1}
+                />
+              </Toggle>
+              <Toggle
+                className="h-8 w-8 p-0"
+                onClick={() => {
+                  editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "end");
+                }}
+                pressed={elementFormat === "end"}
+                aria-label="Right Align"
+              >
+                <AlignRightIcon
+                  className="h-4 w-8"
+                  strokeWidth={elementFormat === "end" ? 2 : 1}
+                />
+              </Toggle>
+              <Toggle
+                className="h-8 w-8 p-0"
+                onClick={() => {
+                  editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "justify");
+                }}
+                pressed={elementFormat === "justify"}
+                aria-label="Justify Align"
+              >
+                <AlignJustifyIcon
+                  className="h-4 w-8"
+                  strokeWidth={elementFormat === "justify" ? 2 : 1}
+                />
+              </Toggle>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+);
+ToolbarPlugin.displayName = "ToolbarPlugin";
 
 export { ToolbarPlugin };
