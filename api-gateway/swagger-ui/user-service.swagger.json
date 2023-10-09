@@ -943,7 +943,7 @@
           "type": "string"
         },
         "company": {
-          "$ref": "#/definitions/userCompany"
+          "$ref": "#/definitions/userUpdatedCompany"
         }
       },
       "title": "Update Company"
@@ -995,7 +995,7 @@
           "type": "string"
         },
         "student": {
-          "$ref": "#/definitions/userStudent"
+          "$ref": "#/definitions/userUpdatedStudent"
         }
       },
       "title": "Update Student"
@@ -1009,6 +1009,47 @@
         },
         "message": {
           "type": "string"
+        }
+      }
+    },
+    "userUpdatedCompany": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        }
+      }
+    },
+    "userUpdatedStudent": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "faculty": {
+          "type": "string"
+        },
+        "major": {
+          "type": "string"
+        },
+        "year": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
