@@ -136,7 +136,7 @@ func (r *userRepository) GetApprovedCompany(ctx context.Context, search string) 
 	return companies, nil
 }
 
-func (r *userRepository) UpdateCompanyByID(ctx context.Context, id int64, req *pbv1.Company) error {
+func (r *userRepository) UpdateCompanyByID(ctx context.Context, id int64, req *pbv1.UpdatedCompany) error {
 	current_timestamp := time.Now().Unix()
 	query := "UPDATE companies SET name = $1, description = $2, location = $3, phone = $4, category = $5, updated_at = $6 WHERE cid = $7"
 	_, err := r.db.ExecContext(ctx, query, req.Name, req.Description, req.Location, req.Phone, req.Category, current_timestamp, id)

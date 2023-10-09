@@ -97,10 +97,8 @@ func TestGetStudentIDNotFound(t *testing.T) {
 func TestUpdateStudentSuccess(t *testing.T) {
 	req := &pbv1.UpdateStudentRequest{
 		AccessToken: createMockToken(t, 3, domain.StudentRole),
-		Student: &pbv1.Student{
-			Id:          3,
+		Student: &pbv1.UpdatedStudent{
 			Name:        "mock-student-name-3",
-			Email:       "mock-student-email-3",
 			Description: "mock-student-description-3",
 			Faculty:     "mock-student-faculty-3",
 			Major:       "mock-student-major-3",
@@ -123,10 +121,8 @@ func TestUpdateStudentSuccess(t *testing.T) {
 func TestUpdateStudentUnAuthorized(t *testing.T) {
 	req := &pbv1.UpdateStudentRequest{
 		AccessToken: createMockToken(t, 33, domain.StudentRole),
-		Student: &pbv1.Student{
-			Id:          33,
+		Student: &pbv1.UpdatedStudent{
 			Name:        "mock-student-name-33",
-			Email:       "mock-student-email-33",
 			Description: "mock-student-description-33",
 			Faculty:     "mock-student-faculty-33",
 			Major:       "mock-student-major-33",
@@ -219,10 +215,8 @@ func TestGetCompanyIDNotFound(t *testing.T) {
 func TestUpdateCompanySuccess(t *testing.T) {
 	req := &pbv1.UpdateCompanyRequest{
 		AccessToken: createMockToken(t, 6, domain.CompanyRole),
-		Company: &pbv1.Company{
-			Id:          6,
+		Company: &pbv1.UpdatedCompany{
 			Name:        "mock-company-name-3",
-			Email:       "mock-company-email-3",
 			Description: "mock-company-description-3",
 			Location:    "mock-company-location-3",
 			Phone:       "mock-company-phone-3",
@@ -245,10 +239,8 @@ func TestUpdateCompanySuccess(t *testing.T) {
 func TestUpdateCompanyUnAuthorized(t *testing.T) {
 	req := &pbv1.UpdateCompanyRequest{
 		AccessToken: createMockToken(t, 66, domain.CompanyRole),
-		Company: &pbv1.Company{
-			Id:          66,
+		Company: &pbv1.UpdatedCompany{
 			Name:        "mock-company-name-33",
-			Email:       "mock-company-email-33",
 			Description: "mock-company-description-33",
 			Location:    "mock-company-location-33",
 			Phone:       "mock-company-phone-33",

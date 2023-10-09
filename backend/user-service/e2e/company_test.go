@@ -346,7 +346,7 @@ func TestUpdateCompany(t *testing.T) {
 		"success": {
 			req: &pbv1.UpdateCompanyRequest{
 				AccessToken: res.AccessToken,
-				Company: &pbv1.Company{
+				Company: &pbv1.UpdatedCompany{
 					Name:        "Mock Company New Name",
 					Description: "I am a company New",
 					Location:    "Bangkok New",
@@ -362,7 +362,7 @@ func TestUpdateCompany(t *testing.T) {
 		"not authorize": {
 			req: &pbv1.UpdateCompanyRequest{
 				AccessToken: admin_res.AccessToken,
-				Company:     &pbv1.Company{},
+				Company:     &pbv1.UpdatedCompany{},
 			},
 			expect: &pbv1.UpdateCompanyResponse{
 				Status:  403,
@@ -372,7 +372,7 @@ func TestUpdateCompany(t *testing.T) {
 		"invalide token": {
 			req: &pbv1.UpdateCompanyRequest{
 				AccessToken: "",
-				Company:     &pbv1.Company{},
+				Company:     &pbv1.UpdatedCompany{},
 			},
 			expect: &pbv1.UpdateCompanyResponse{
 				Status:  401,

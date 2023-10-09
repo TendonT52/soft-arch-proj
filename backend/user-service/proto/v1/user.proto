@@ -113,10 +113,18 @@ message GetStudentResponse {
     Student student = 3;
 }
 
+message UpdatedStudent {
+    string name = 1;
+    string description = 2;
+    string faculty = 3;
+    string major = 4;
+    int32 year = 5;
+}
+
 // Update Student
 message UpdateStudentRequest {
     string access_token = 1;  
-    Student student = 2;
+    UpdatedStudent student = 2;
 }
 
 message UpdateStudentResponse {
@@ -141,10 +149,18 @@ message GetCompanyResponse {
     Company company = 3;
 }
 
+message UpdatedCompany {
+    string name = 1;
+    string description = 2;
+    string location = 3;
+    string phone = 4;
+    string category = 5;
+}
+
 // Update Company
 message UpdateCompanyRequest {
     string access_token = 1;  
-    Company company = 2;
+    UpdatedCompany company = 2;
 }
 
 message UpdateCompanyResponse {

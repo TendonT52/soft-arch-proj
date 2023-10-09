@@ -22,8 +22,8 @@ type UserRepoPort interface {
 	GetAllCompany(ctx context.Context) ([]*pbv1.Company, error)
 	GetApprovedCompany(ctx context.Context, search string) ([]*pbv1.Company, error)
 
-	UpdateStudentByID(ctx context.Context, id int64, req *pbv1.Student) error
-	UpdateCompanyByID(ctx context.Context, id int64, req *pbv1.Company) error
+	UpdateStudentByID(ctx context.Context, id int64, req *pbv1.UpdatedStudent) error
+	UpdateCompanyByID(ctx context.Context, id int64, req *pbv1.UpdatedCompany) error
 
 	UpdateStudentStatus(ctx context.Context, email string, verified bool) error
 	UpdateCompanyStatus(ctx context.Context, id int64, status string) error

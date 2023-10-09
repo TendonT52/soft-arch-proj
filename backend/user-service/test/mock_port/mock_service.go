@@ -295,7 +295,7 @@ func (mr *MockUserServicePortMockRecorder) GetStudentMe(ctx, id interface{}) *go
 }
 
 // UpdateCompanyMe mocks base method.
-func (m *MockUserServicePort) UpdateCompanyMe(ctx context.Context, id int64, req *gen.Company) error {
+func (m *MockUserServicePort) UpdateCompanyMe(ctx context.Context, id int64, req *gen.UpdatedCompany) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateCompanyMe", ctx, id, req)
 	ret0, _ := ret[0].(error)
@@ -323,7 +323,7 @@ func (mr *MockUserServicePortMockRecorder) UpdateCompanyStatus(ctx, userId, id, 
 }
 
 // UpdateStudentMe mocks base method.
-func (m *MockUserServicePort) UpdateStudentMe(ctx context.Context, id int64, req *gen.Student) error {
+func (m *MockUserServicePort) UpdateStudentMe(ctx context.Context, id int64, req *gen.UpdatedStudent) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateStudentMe", ctx, id, req)
 	ret0, _ := ret[0].(error)

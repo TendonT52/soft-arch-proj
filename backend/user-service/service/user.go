@@ -96,7 +96,7 @@ func (s *userService) GetApprovedCompany(ctx context.Context, userId int64, sear
 	return companies, nil
 }
 
-func (s *userService) UpdateStudentMe(ctx context.Context, id int64, req *pbv1.Student) error {
+func (s *userService) UpdateStudentMe(ctx context.Context, id int64, req *pbv1.UpdatedStudent) error {
 	role, err := s.repo.CheckUserIDExist(ctx, id)
 	if err != nil {
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
@@ -119,7 +119,7 @@ func (s *userService) UpdateStudentMe(ctx context.Context, id int64, req *pbv1.S
 	return nil
 }
 
-func (s *userService) UpdateCompanyMe(ctx context.Context, id int64, req *pbv1.Company) error {
+func (s *userService) UpdateCompanyMe(ctx context.Context, id int64, req *pbv1.UpdatedCompany) error {
 	role, err := s.repo.CheckUserIDExist(ctx, id)
 	if err != nil {
 		return domain.ErrUserIDNotFound.With("the user belonging to this token no logger exists")
