@@ -14,7 +14,6 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  { Icon: UserIcon, title: "Profile", href: "/dashboard/profile" },
   {
     Icon: FileTextIcon,
     title: "Posts",
@@ -22,6 +21,7 @@ const navItems: NavItem[] = [
     type: "company",
   },
   { Icon: StarIcon, title: "Reviews", href: "/dashboard/reviews" },
+  { Icon: UserIcon, title: "Account", href: "/dashboard/account" },
 ];
 
 const DashboardNav = () => {
