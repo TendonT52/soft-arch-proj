@@ -7,7 +7,7 @@ jobs:
   clean-deployment:
     runs-on: 'ubuntu-latest'
     steps:
-      - uses: Boostport/setup-cloudflare-warp@v1
+      - uses: Boostport/setup-cloudflare-warp@v1.3.1
         with:
           organization: tendont52
           auth_client_id: ${{ secrets.CLOUDFLARE_AUTH_CLIENT_ID }}
