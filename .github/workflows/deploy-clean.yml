@@ -7,6 +7,11 @@ jobs:
   clean-deployment:
     runs-on: 'ubuntu-latest'
     steps:
+      - uses: Boostport/setup-cloudflare-warp@v1
+        with:
+          organization: tendont52
+          auth_client_id: ${{ secrets.CLOUDFLARE_AUTH_CLIENT_ID }}
+          auth_client_secret: ${{ secrets.CLOUDFLARE_AUTH_CLIENT_SECRET }}
       - uses: actions/checkout@v3
       - name: Test kubectl
         uses: wahyd4/kubectl-helm-action@master

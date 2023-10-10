@@ -4,6 +4,8 @@ provision/terraform.tfstate
 provision/terraform.tfstate.backup
 provision/secret.tfvars
 install-k8s-cluster/join_command.out
+install-k8s-cluster/*.key
+install-k8s-cluster/*.pem
 
 setup/join_command.out
 .DS_Store
