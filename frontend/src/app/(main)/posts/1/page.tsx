@@ -1,10 +1,9 @@
-import { type InitialEditorStateType } from "@lexical/react/LexicalComposer";
-import { PostEditor } from "@/components/post-editor";
+import { PostViewer } from "@/components/post-viewer";
 
 /* DUMMY */
 type Post = {
   topic: string;
-  description: InitialEditorStateType;
+  description: string; // use string to prevent TS false positive
 };
 
 // prettier-ignore
@@ -15,10 +14,5 @@ const post: Post = {
 /* DUMMY */
 
 export default function Page() {
-  return (
-    <PostEditor
-      post={post}
-      editable={false}
-    />
-  );
+  return <PostViewer post={post} />;
 }

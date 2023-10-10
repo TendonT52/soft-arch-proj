@@ -176,7 +176,7 @@ export default function Page({ searchParams }: PageProps) {
             <SearchField
               field="positions"
               label="Open positions"
-              placeholder="Social Engineer"
+              placeholder="Social engineer"
             />
             <SearchField
               field="skills"
@@ -185,7 +185,7 @@ export default function Page({ searchParams }: PageProps) {
             />
             <SearchField
               field="benefits"
-              label="Expected benefits"
+              label="Benefits"
               placeholder="Millions"
             />
           </div>
