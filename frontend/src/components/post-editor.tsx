@@ -41,7 +41,7 @@ const PostEditor = () => {
           </Link>
         </Button>
       </div>
-      <LexicalComposer initialConfig={{ ...initialConfig }}>
+      <LexicalComposer initialConfig={initialConfig}>
         <div className="relative mx-auto flex w-full max-w-3xl flex-col items-start">
           <div className="pointer-events-none sticky top-0 z-10 flex w-full justify-center bg-background pt-4">
             <ToolbarPlugin className="pointer-events-auto rounded-full border bg-background px-4 shadow-sm" />
@@ -92,6 +92,5 @@ const PostEditor = () => {
     </div>
   );
 };
-PostEditor.displayName = "PostEditor";
 
 export { PostEditor };

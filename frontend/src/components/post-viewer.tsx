@@ -32,6 +32,15 @@ const PostViewer = ({
       }}
     >
       <div className="relative mx-auto flex w-full max-w-3xl flex-col items-start">
+        <div className="flex gap-6 px-8 pt-6">
+          <div className="h-14 w-14 rounded-full bg-muted"></div>
+          <div className="flex flex-col justify-end gap-2">
+            <p className="text-muted-foreground">Umbrella Corporation</p>
+            <p className="text-sm leading-none text-muted-foreground">
+              October 13, 2023
+            </p>
+          </div>
+        </div>
         <div className="w-full max-w-none bg-transparent px-8 pb-0.5 pt-12 text-4xl font-extrabold text-[#111827] scrollbar-hide focus:outline-none focus-visible:outline-none dark:text-[#ffffff]">
           {title}
         </div>
@@ -61,6 +70,5 @@ const PostViewer = ({
     </LexicalComposer>
   );
 };
-PostViewer.displayName = "PostViewer";
 
 export { PostViewer };

@@ -191,7 +191,7 @@ export default function Page({ searchParams }: PageProps) {
           </div>
         </div>
       </aside>
-      <div className="grid flex-1 grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="flex flex-1 flex-col gap-6">
         {posts.map((post, idx) => (
           <PostCard key={idx} post={post} />
         ))}
