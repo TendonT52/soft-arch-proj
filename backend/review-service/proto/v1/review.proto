@@ -1,0 +1,147 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "github.com/JinnnDamanee/review-service/gen";
+import "google/api/annotations.proto";
+
+service ReportService {
+    rpc ReviewHealthCheck(ReviewHealthCheckRequest) returns (ReviewHealthCheckResponse) {}
+    rpc CreateReview(CreateReviewRequest) returns (CreateReviewResponse) {
+        option (google.api.http) = {
+            post: "/v1/reviews"
+            body: "*"
+        };
+    }
+    rpc ListReviewsByCompany(ListReviewsByCompanyRequest) returns (ListReviewsByCompanyResponse) {
+        option (google.api.http) = {
+            get: "/v1/reviews/{cid}"
+        };
+    }
+    rpc ListReviewsByUser(ListReviewsByUserRequest) returns (ListReviewsByUserResponse) {
+        option (google.api.http) = {
+            get: "/v1/reviews"
+        };
+    }
+    rpc GetReview(GetReviewRequest) returns (GetReviewResponse) {
+        option (google.api.http) = {
+            get: "/v1/reviews/{id}"
+        };
+    }
+    rpc UpdateReview(UpdateReviewRequest) returns (UpdateReviewResponse) {
+        option (google.api.http) = {
+            put: "/v1/reviews/{id}"
+            body: "*"
+        };
+    }
+    rpc DeleteReview(DeleteReviewRequest) returns (DeleteReviewResponse) {
+        option (google.api.http) = {
+            delete: "/v1/reviews/{id}"
+        };
+    }
+}
+
+message ReviewHealthCheckRequest {}
+
+message ReviewHealthCheckResponse {
+    int64 status = 1;
+}
+
+// Create Review
+message CreatedReview {
+    string title = 1;
+    string description = 2;
+    int32 rating = 3;
+    int64 cid = 4;
+    bool is_anonymous = 5;
+}
+
+message CreateReviewRequest {
+    CreatedReview review = 1;
+    string access_token = 2;
+}
+
+message CreateReviewResponse {
+    int64 status = 1;
+    string message = 2;
+    int64 id = 3;
+}
+
+// List Reviews By Company
+message ReviewOwner {
+    int64 id = 1;
+    string name = 2;
+}
+
+message Review {
+    int64 id = 1;
+    string title = 2;
+    string description = 3;
+    int32 rating = 4;
+    int64 updated_at = 5;
+    ReviewOwner owner = 6;
+}
+
+message ListReviewsByCompanyRequest {
+    string access_token = 1;
+    int64 cid = 2;
+}
+
+message ListReviewsByCompanyResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated Review reviews = 3;
+}
+
+// List Reviews By User
+message ListReviewsByUserRequest {
+    string access_token = 1;
+}
+
+message ListReviewsByUserResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated Review reviews = 3;
+}
+
+// Get Review
+message GetReviewRequest {
+    string access_token = 1;
+    int64 id = 2;
+}
+
+message GetReviewResponse {
+    int64 status = 1;
+    string message = 2;
+    Review review = 3;
+}
+
+// Update Review
+message UpdatedReview {
+    string title = 1;
+    string description = 2;
+    int32 rating = 3;
+    bool is_anonymous = 4;
+}
+
+message UpdateReviewRequest {
+    string access_token = 1;
+    int64 id = 2;
+    UpdatedReview review = 3;
+}
+
+message UpdateReviewResponse {
+    int64 status = 1;
+    string message = 2;
+}
+
+// Delete Review
+message DeleteReviewRequest {
+    string access_token = 1;
+    int64 id = 2;
+}
+
+message DeleteReviewResponse {
+    int64 status = 1;
+    string message = 2;
+}

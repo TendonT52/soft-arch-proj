@@ -3,77 +3,48 @@ package service
 import (
 	"context"
 
-	"github.com/JinnnDamanee/review-service/domain"
 	pbv1 "github.com/JinnnDamanee/review-service/gen/v1"
 	"github.com/JinnnDamanee/review-service/port"
-	"github.com/JinnnDamanee/review-service/utils"
 )
 
 const (
 	AdminRole = "admin"
 )
 
-type reportService struct {
-	repo port.ReportRepoPort
+type reviewService struct {
+	repo port.ReviewRepoPort
 }
 
-func NewReportService(repo port.ReportRepoPort) port.ReportServicePort {
-	return &reportService{repo: repo}
+func NewReviewService(repo port.ReviewRepoPort) port.ReviewServicePort {
+	return &reviewService{repo: repo}
 }
 
-func (s *reportService) CreateReport(ctx context.Context, token string, report *pbv1.Report) (int64, error) {
-	if !domain.CheckRequireFields(report) {
-		return 0, domain.ErrFieldsAreRequired
-	}
-
-	payload, err := utils.ValidateAccessToken(token)
-	if err != nil {
-		return 0, domain.ErrUnauthorize
-	}
-
-	reportId, err := s.repo.CreateReport(ctx, payload.UserId, report)
-	if err != nil {
-		return 0, err
-	}
-
-	return reportId, nil
+// CreateReview implements port.ReviewServicePort.
+func (*reviewService) CreateReview(ctx context.Context, token string, review *pbv1.CreatedReview) (int64, error) {
+	panic("unimplemented")
 }
 
-func (s *reportService) GetReport(ctx context.Context, token string, reportId int64) (*pbv1.Report, error) {
-	payload, err := utils.ValidateAccessToken(token)
-	if err != nil {
-		return nil, domain.ErrUnauthorize
-	}
-
-	if payload.Role != AdminRole {
-		return nil, domain.ErrForbidden
-	}
-
-	report, err := s.repo.GetReport(ctx, reportId)
-	if report == nil {
-		return nil, domain.ErrReportNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	return report, nil
+// DeleteReview implements port.ReviewServicePort.
+func (*reviewService) DeleteReview(ctx context.Context, token string, reviewID int64) error {
+	panic("unimplemented")
 }
 
-func (s *reportService) GetReports(ctx context.Context, token string) ([]*pbv1.Report, error) {
-	payload, err := utils.ValidateAccessToken(token)
-	if err != nil {
-		return nil, domain.ErrUnauthorize
-	}
+// GetReviewByID implements port.ReviewServicePort.
+func (*reviewService) GetReviewByID(ctx context.Context, token string, reviewID int64) (*pbv1.Review, error) {
+	panic("unimplemented")
+}
 
-	if payload.Role != AdminRole {
-		return nil, domain.ErrForbidden
-	}
+// GetReviewsByCompany implements port.ReviewServicePort.
+func (*reviewService) GetReviewsByCompany(ctx context.Context, token string, companyID int64) ([]*pbv1.Review, error) {
+	panic("unimplemented")
+}
 
-	reports, err := s.repo.GetReports(ctx)
-	if err != nil {
-		return nil, err
-	}
+// GetReviewsByUser implements port.ReviewServicePort.
+func (*reviewService) GetReviewsByUser(ctx context.Context, token string, userID int64) ([]*pbv1.Review, error) {
+	panic("unimplemented")
+}
 
-	return reports, nil
+// UpdateReview implements port.ReviewServicePort.
+func (*reviewService) UpdateReview(ctx context.Context, token string, review *pbv1.UpdatedReview) (*pbv1.Review, error) {
+	panic("unimplemented")
 }

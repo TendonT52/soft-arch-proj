@@ -11,7 +11,7 @@ import (
 )
 
 func GenerateAccessToken(ttl time.Duration, payload *domain.Payload) (string, error) {
-	config, err := config.LoadConfig("..")
+	config, err := config.LoadConfigTest("..")
 	if err != nil {
 		return "", fmt.Errorf("create: load config: %w", err)
 	}
