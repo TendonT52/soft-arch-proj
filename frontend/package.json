@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.3.2",
     "@lexical/code": "^0.12.2",
     "@lexical/link": "^0.12.2",
     "@lexical/list": "^0.12.2",
@@ -27,20 +28,25 @@
     "@radix-ui/react-popover": "^1.0.6",
     "@radix-ui/react-select": "^1.2.2",
     "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-toggle": "^1.0.3",
     "@radix-ui/react-tooltip": "^1.0.6",
+    "@t3-oss/env-nextjs": "^0.7.0",
     "cva": "npm:class-variance-authority@^0.7.0",
     "date-fns": "^2.30.0",
     "lexical": "^0.12.2",
     "lucide-react": "^0.277.0",
     "next": "13.5.4",
+    "next-auth": "^4.23.2",
     "next-themes": "^0.2.1",
     "react": "18.2.0",
     "react-day-picker": "^8.8.2",
     "react-dom": "18.2.0",
+    "react-hook-form": "^7.47.0",
     "react-textarea-autosize": "^8.5.3",
     "tailwind-merge": "^1.14.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.1.0",

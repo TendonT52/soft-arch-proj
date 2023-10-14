@@ -32,7 +32,8 @@
     ".eslintrc.js",
     "next.config.js",
     "postcss.config.js",
-    "prettier.config.js"
+    "prettier.config.js",
+    "env.mjs"
   ],
   "exclude": ["node_modules"]
 }

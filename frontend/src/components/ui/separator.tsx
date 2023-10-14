@@ -12,7 +12,7 @@ const Separator = React.forwardRef<HTMLDivElement, SeparatorProps>(
     <div
       ref={ref}
       className={cn(
-        orientation === "horizontal" ? "h-0 border-b" : "w-0 border-l",
+        orientation === "horizontal" ? "h-px border-b" : "w-px border-l",
         className
       )}
       {...props}

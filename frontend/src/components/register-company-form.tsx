@@ -1,91 +1,211 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createCompany } from "@/actions/create-company";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   BriefcaseIcon,
   CheckCircleIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   KeyIcon,
+  Loader2Icon,
   MailIcon,
 } from "lucide-react";
+import { useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
+import { cn } from "@/lib/utils";
+import { FormErrorTooltip } from "./form-error-tooltip";
 import { Logo } from "./logo";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 import { Separator } from "./ui/separator";
 import { Textarea } from "./ui/textarea";
+import { useToast } from "./ui/toaster";
 
-/* DUMMY */
-const categories = [
-  "E-commerce",
-  "Financial Services",
-  "Energy and Utilities",
-  "Manufacturing and Heavy Industry",
-  "Entertainment and Media",
-];
-/* DUMMY */
+const firstPageSchema = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  category: z.string().min(1, { message: "Category is required" }),
+  location: z.string().min(1, { message: "Location is required" }),
+  phone: z
+    .string()
+    .min(1, { message: "Phone number is required" })
+    .regex(/^\d+$/, { message: "Phone number must be numerical" }),
+  description: z.string().min(1, { message: "Description is required" }),
+});
+
+const secondPageSchema = z.object({
+  email: z
+    .string()
+    .min(1, { message: "Email is required" })
+    .email({ message: "Invalid email" }),
+  password: z.string().min(1, { message: "Password is required" }),
+  passwordConfirm: z
+    .string()
+    .min(1, { message: "Please confirm your password" }),
+  terms: z.boolean(),
+});
+
+const formDataSchema = firstPageSchema
+  .merge(secondPageSchema)
+  .refine((data) => data.password === data.passwordConfirm, {
+    message: "Passwords do not match",
+    path: ["passwordConfirm"],
+  })
+  .refine((data) => data.terms, {
+    message: "ACCEPT IT NOW!",
+    path: ["terms"],
+  });
+
+type FormData = z.infer<typeof formDataSchema>;
 
 const RegisterCompanyForm = () => {
+  const router = useRouter();
+  const { toast } = useToast();
+  const {
+    register,
+    formState: { isSubmitting, errors },
+    handleSubmit,
+    setValue,
+    trigger,
+    control,
+  } = useForm<FormData>({
+    mode: "onChange",
+    resolver: zodResolver(formDataSchema),
+    defaultValues: {
+      passwordConfirm: "",
+      terms: false,
+    },
+  });
+
+  const { terms } = useWatch({ control });
   const [page, setPage] = useState(0);
+
+  const goPreviousPage = () => void setPage(0);
+
+  const goNextPage = async () => {
+    const validationResult = await trigger(firstPageSchema.keyof().options, {
+      shouldFocus: true,
+    });
+    if (validationResult) {
+      setPage(1);
+    }
+  };
+
+  const onSubmit = async ({ terms, ...data }: FormData) => {
+    const response = await createCompany(data);
+    if (response.status === "201") {
+      toast({
+        title: "Success",
+        description: response.message,
+      });
+      router.push("/");
+    } else {
+      toast({
+        title: "Error",
+        description: response.message,
+      });
+    }
+  };
+
+  useEffect(() => {
+    void trigger("terms");
+  }, [trigger, terms]);
 
   return (
     <div className="relative flex flex-1 items-center justify-center">
-      <div className="mx-auto flex w-full max-w-lg flex-col items-center justify-center p-8 lg:max-w-sm lg:p-0">
-        <div className="mb-6 flex w-full flex-col items-center gap-6">
+      <form
+        className="mx-auto flex w-full max-w-lg flex-col items-center justify-center p-8 lg:max-w-sm lg:p-0"
+        onSubmit={(...a) => void handleSubmit(onSubmit)(...a)}
+      >
+        <div className="mb-6 flex w-full flex-col items-center gap-2">
           <Logo />
-          <h1 className="max-w-[85%] text-center text-2xl font-semibold leading-none tracking-tight sm:max-w-none">
+          <h1 className="max-w-[85%] text-center text-2xl font-semibold tracking-tight sm:max-w-none">
             Create a company account
           </h1>
-          <p className="max-w-[85%] text-center text-muted-foreground sm:max-w-none">
+          <p className="max-w-[85%] text-center text-sm text-muted-foreground sm:max-w-none">
             {page === 0
               ? "Enter your company information to continue"
               : "Enter your credentials to create your account"}
           </p>
         </div>
         {page === 0 ? (
-          <form
-            key="page-0"
-            className="flex w-full flex-col items-center gap-4"
-          >
-            <div className="flex w-full gap-4">
-              <Input className="flex-1" placeholder="Company name" />
-              <Select>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex w-full gap-4">
-              <Input className="flex-[1.5]" placeholder="Location" />
+          <div key="first" className="flex w-full flex-col items-center gap-4">
+            <fieldset className="flex w-full items-center gap-4">
               <Input
-                className="flex-1 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                placeholder="Phone"
+                {...register("name")}
+                className={cn(
+                  "flex-1",
+                  errors.name &&
+                    "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                )}
+                placeholder="Company name"
+              />
+              <Input
+                {...register("category")}
+                className={cn(
+                  "flex-1",
+                  errors.category &&
+                    "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                )}
+                placeholder="Category"
+              />
+              <FormErrorTooltip
+                message={
+                  errors.name
+                    ? errors.name.message
+                    : errors.category
+                    ? errors.category.message
+                    : undefined
+                }
+              />
+            </fieldset>
+            <fieldset className="flex w-full items-center gap-4">
+              <Input
+                {...register("location")}
+                className={cn(
+                  "flex-[1.5]",
+                  errors.location &&
+                    "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                )}
+                placeholder="Location"
+              />
+              <Input
+                {...register("phone")}
+                className={cn(
+                  "flex-1 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+                  errors.phone &&
+                    "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                )}
+                placeholder="Phone number"
                 type="number"
               />
-            </div>
-            <div className="mb-12 flex w-full">
-              <Textarea className="resize-none" placeholder="Description" />
-            </div>
+              <FormErrorTooltip
+                message={
+                  errors.location
+                    ? errors.location.message
+                    : errors.phone
+                    ? errors.phone.message
+                    : undefined
+                }
+              />
+            </fieldset>
+            <fieldset className="mb-12 flex w-full items-center gap-4">
+              <Textarea
+                {...register("description")}
+                className={cn(
+                  "flex-1 resize-none",
+                  errors.description &&
+                    "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                )}
+                placeholder="Description"
+              />
+              <FormErrorTooltip message={errors.description?.message} />
+            </fieldset>
             <div className="flex flex-col items-center gap-4">
               <Separator className="w-full" />
               <p className="text-center text-sm text-muted-foreground">
@@ -98,22 +218,32 @@ const RegisterCompanyForm = () => {
                 </Link>
               </p>
             </div>
-          </form>
+          </div>
         ) : (
-          <form
-            key="page-1"
+          <div
+            key="second"
             className="flex w-full flex-col items-center pb-[2.3125rem]"
           >
-            <div className="relative mb-4 flex w-full">
+            <fieldset className="relative mb-4 flex w-full items-center gap-4">
               <Label
                 className="absolute flex h-full w-10 items-center justify-center"
                 htmlFor="email"
               >
                 <MailIcon className="h-4 w-4 opacity-50" />
               </Label>
-              <Input className="flex-1 pl-10" placeholder="Email" id="email" />
-            </div>
-            <div className="relative mb-4 flex w-full">
+              <Input
+                {...register("email")}
+                className={cn(
+                  "flex-1 pl-10",
+                  errors.email &&
+                    "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                )}
+                id="email"
+                placeholder="Company email"
+              />
+              <FormErrorTooltip message={errors.email?.message} />
+            </fieldset>
+            <fieldset className="relative mb-4 flex w-full items-center gap-4">
               <Label
                 className="absolute flex h-full w-10 items-center justify-center"
                 htmlFor="password"
@@ -121,44 +251,71 @@ const RegisterCompanyForm = () => {
                 <KeyIcon className="h-4 w-4 opacity-50" />
               </Label>
               <Input
-                className="flex-1 pl-10"
+                {...register("password")}
+                className={cn(
+                  "flex-1 pl-10",
+                  errors.password &&
+                    "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                )}
+                id="password"
                 placeholder="Password"
                 type="password"
-                id="password"
               />
-            </div>
-            <div className="relative mb-6 flex w-full">
+              <FormErrorTooltip message={errors.password?.message} />
+            </fieldset>
+            <fieldset className="relative mb-6 flex w-full items-center gap-4">
               <Label
                 className="absolute flex h-full w-10 items-center justify-center"
-                htmlFor="confirm"
+                htmlFor="passwordConfirm"
               >
                 <CheckCircleIcon className="h-4 w-4 opacity-50" />
               </Label>
               <Input
-                className="flex-1 pl-10"
+                {...register("passwordConfirm")}
+                className={cn(
+                  "flex-1 pl-10",
+                  errors.passwordConfirm &&
+                    "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                )}
+                id="passwordConfirm"
                 placeholder="Confirm password"
                 type="password"
-                id="confirm"
               />
-            </div>
-            <div className="mb-6 flex items-center gap-2">
-              <Checkbox id="terms" />
-              <Label htmlFor="terms">Accept terms and conditions</Label>
-            </div>
+              <FormErrorTooltip message={errors.passwordConfirm?.message} />
+            </fieldset>
+            <fieldset className="mb-5 flex h-5 items-center">
+              <Checkbox
+                className="mr-2"
+                id="terms"
+                checked={terms}
+                onCheckedChange={(checked: boolean) => {
+                  setValue("terms", checked);
+                }}
+              />
+              <Label className="mr-4 flex h-5 items-center" htmlFor="terms">
+                Accept the terms and conditions
+              </Label>
+              <FormErrorTooltip message={errors.terms?.message} />
+            </fieldset>
             <div className="flex items-center">
-              <Button type="button">
-                <BriefcaseIcon className="mr-2 h-4 w-4" />
+              <Button disabled={isSubmitting} type="submit">
+                {isSubmitting ? (
+                  <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <BriefcaseIcon className="mr-2 h-4 w-4" />
+                )}
                 Create account
               </Button>
             </div>
-          </form>
+          </div>
         )}
-      </div>
+      </form>
       {page === 0 ? (
         <Button
           className="absolute bottom-4 right-4 lg:bottom-12 lg:right-12"
           variant="ghost"
-          onClick={() => void setPage(1)}
+          type="button"
+          onClick={() => void goNextPage()}
         >
           Next
           <ChevronRightIcon className="ml-2 h-4 w-4 opacity-50" />
@@ -167,7 +324,8 @@ const RegisterCompanyForm = () => {
         <Button
           className="absolute bottom-4 left-4 lg:bottom-12 lg:left-12"
           variant="ghost"
-          onClick={() => void setPage(0)}
+          type="button"
+          onClick={goPreviousPage}
         >
           <ChevronLeftIcon className="mr-2 h-4 w-4 opacity-50" />
           Back
