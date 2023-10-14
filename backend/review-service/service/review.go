@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/JinnnDamanee/review-service/domain"
 	pbv1 "github.com/JinnnDamanee/review-service/gen/v1"
@@ -153,11 +154,11 @@ func (s *reviewService) UpdateReview(ctx context.Context, token string, review *
 	// Check review owner
 	ownerID := payload.UserId
 	uid, err := s.repo.GetReviewOwner(ctx, rid)
+	if err == sql.ErrNoRows && ownerID != uid {
+		return domain.ErrForbidden
+	}
 	if err != nil {
 		return err
-	}
-	if ownerID != uid {
-		return domain.ErrForbidden
 	}
 
 	err = s.repo.UpdateReview(ctx, review, rid)
