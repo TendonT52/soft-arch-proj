@@ -67,6 +67,7 @@ func (r *reportRepository) GetReports(ctx context.Context) ([]*pbv1.Report, erro
 	if err != nil {
 		return nil, err
 	}
+	defer stmt.Close()
 
 	rows, err := stmt.QueryContext(ctx)
 	if err != nil {
