@@ -9,7 +9,7 @@ const (
 	Internal
 	Unauthorize
 	Forbidden
-	ReportNotFound
+	ReviewNotFound
 	FieldsAreRequired
 )
 
@@ -17,7 +17,7 @@ var (
 	ErrInternal          = BackEndError{Kind: Internal}
 	ErrUnauthorize       = BackEndError{Kind: Unauthorize}
 	ErrForbidden         = BackEndError{Kind: Forbidden}
-	ErrReportNotFound    = BackEndError{Kind: ReportNotFound}
+	ErrReviewNotFound    = BackEndError{Kind: ReviewNotFound}
 	ErrFieldsAreRequired = BackEndError{Kind: FieldsAreRequired}
 )
 

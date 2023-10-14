@@ -67,19 +67,24 @@ message CreateReviewResponse {
     int64 id = 3;
 }
 
-// List Reviews By Company
-message ReviewOwner {
+message Owner {
     int64 id = 1;
     string name = 2;
 }
 
-message Review {
+message ReviewdCompany {
+    int64 id = 1;
+    string name = 2;
+}
+
+// List Reviews By Company
+message ReviewCompany {
     int64 id = 1;
     string title = 2;
     string description = 3;
     int32 rating = 4;
     int64 updated_at = 5;
-    ReviewOwner owner = 6;
+    Owner owner = 6;
 }
 
 message ListReviewsByCompanyRequest {
@@ -90,10 +95,19 @@ message ListReviewsByCompanyRequest {
 message ListReviewsByCompanyResponse {
     int64 status = 1;
     string message = 2;
-    repeated Review reviews = 3;
+    repeated ReviewCompany reviews = 3;
 }
 
 // List Reviews By User
+message MyReview {
+    int64 id = 1;
+    string title = 2;
+    string description = 3;
+    int32 rating = 4;
+    int64 updated_at = 5;
+    ReviewdCompany company = 6;
+}
+
 message ListReviewsByUserRequest {
     string access_token = 1;
 }
@@ -101,10 +115,20 @@ message ListReviewsByUserRequest {
 message ListReviewsByUserResponse {
     int64 status = 1;
     string message = 2;
-    repeated Review reviews = 3;
+    repeated MyReview reviews = 3;
 }
 
 // Get Review
+message Review {
+    int64 id = 1;
+    string title = 2;
+    string description = 3;
+    int32 rating = 4;
+    int64 updated_at = 5;
+    Owner owner = 6;
+    ReviewdCompany company = 7;
+}
+
 message GetReviewRequest {
     string access_token = 1;
     int64 id = 2;

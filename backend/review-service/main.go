@@ -23,7 +23,8 @@ func main() {
 	defer db.Close()
 
 	reviewRepo := repo.NewReviewRepository(db.GetPostgresqlDB())
-	reviewService := service.NewReviewService(reviewRepo)
+	userClientService := service.NewUserClientService()
+	reviewService := service.NewReviewService(reviewRepo, userClientService)
 
 	server.NewServer(config.ServerPort, reviewService)
 }
