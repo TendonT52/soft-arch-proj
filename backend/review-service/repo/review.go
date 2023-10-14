@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/JinnnDamanee/review-service/domain"
 	pbv1 "github.com/JinnnDamanee/review-service/gen/v1"
 	"github.com/JinnnDamanee/review-service/port"
 	_ "github.com/lib/pq"
@@ -46,13 +47,15 @@ func (r *reviewRepository) CreateReview(ctx context.Context, userID int64, revie
 
 func (r *reviewRepository) GetReviewByID(ctx context.Context, reviewID int64) (*pbv1.Review, error) {
 	query := `SELECT uid, cid, title, description, rating, anonymous, updated_at FROM reviews WHERE rid = $1`
-	row := r.db.QueryRowContext(ctx, query, reviewID)
 
 	var uid int64
 	var cid int64
 	var IsAnonymous bool
 	var review pbv1.Review
-	err := row.Scan(&uid, &cid, &review.Title, &review.Description, &review.Rating, &IsAnonymous, &review.UpdatedAt)
+	err := r.db.QueryRowContext(ctx, query, reviewID).Scan(&uid, &cid, &review.Title, &review.Description, &review.Rating, &IsAnonymous, &review.UpdatedAt)
+	if err == sql.ErrNoRows {
+		return nil, domain.ErrReviewNotFound
+	}
 	if err != nil {
 		return nil, err
 	}

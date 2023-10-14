@@ -112,6 +112,13 @@ func (s *ReviewServer) GetReview(ctx context.Context, req *pbv1.GetReviewRequest
 			Message: "Your access token is invalid",
 		}, nil
 	}
+	if errors.Is(err, domain.ErrReviewNotFound) {
+		log.Println("Get Review: Review not found")
+		return &pbv1.GetReviewResponse{
+			Status:  http.StatusNotFound,
+			Message: "Review not found",
+		}, nil
+	}
 	if err != nil {
 		log.Println("Get Review: ", err)
 		return &pbv1.GetReviewResponse{

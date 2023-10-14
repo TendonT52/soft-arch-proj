@@ -71,3 +71,37 @@ func CreateMockCompany(name, email, password, description, location, phone, cate
 
 	return res.Id, nil
 }
+
+func CreateMockStudent(name, email, password, description, faculty, major string, year int32) (int64, error) {
+	config, err := config.LoadConfig("../")
+	if err != nil {
+		return 0, err
+	}
+
+	target := fmt.Sprintf("%s:%s", config.UserServiceHost, config.UserServicePort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return 0, err
+	}
+	defer conn.Close()
+
+	client := pbv1.NewAuthServiceClient(conn)
+	res, err := client.CreateStudent(context.Background(), &pbv1.CreateStudentRequest{
+		Name:            name,
+		Email:           email,
+		Password:        password,
+		PasswordConfirm: password,
+		Description:     description,
+		Faculty:         faculty,
+		Major:           major,
+		Year:            year,
+	})
+	if err != nil {
+		return 0, err
+	}
+	if res.Status != 201 {
+		return 0, fmt.Errorf("status code: %d", res.Status)
+	}
+
+	return res.Id, nil
+}
