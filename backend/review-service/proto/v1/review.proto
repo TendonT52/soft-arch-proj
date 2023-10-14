@@ -96,6 +96,7 @@ message ListReviewsByCompanyResponse {
     int64 status = 1;
     string message = 2;
     repeated ReviewCompany reviews = 3;
+    int32 total = 4;
 }
 
 // List Reviews By User
@@ -116,6 +117,7 @@ message ListReviewsByUserResponse {
     int64 status = 1;
     string message = 2;
     repeated MyReview reviews = 3;
+    int32 total = 4;
 }
 
 // Get Review

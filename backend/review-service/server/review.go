@@ -100,6 +100,7 @@ func (s *ReviewServer) ListReviewsByCompany(ctx context.Context, req *pbv1.ListR
 		Status:  http.StatusOK,
 		Message: "List reviews by company successfully",
 		Reviews: res,
+		Total:  int32(len(res)),
 	}, nil
 }
 
