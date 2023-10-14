@@ -1475,7 +1475,7 @@ var file_v1_review_proto_rawDesc = []byte{
 	0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12,
 	0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
 	0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x32, 0xc8, 0x05, 0x0a, 0x0d, 0x52, 0x65,
-	0x70, 0x6f, 0x72, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x56, 0x0a, 0x11, 0x52,
+	0x76, 0x69, 0x65, 0x77, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x56, 0x0a, 0x11, 0x52,
 	0x65, 0x76, 0x69, 0x65, 0x77, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x43, 0x68, 0x65, 0x63, 0x6b,
 	0x12, 0x1e, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x52, 0x65, 0x76, 0x69, 0x65, 0x77, 0x48, 0x65,
 	0x61, 0x6c, 0x74, 0x68, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
@@ -1571,20 +1571,20 @@ var file_v1_review_proto_depIdxs = []int32{
 	6,  // 6: user.Review.company:type_name -> user.ReviewdCompany
 	13, // 7: user.GetReviewResponse.review:type_name -> user.Review
 	16, // 8: user.UpdateReviewRequest.review:type_name -> user.UpdatedReview
-	0,  // 9: user.ReportService.ReviewHealthCheck:input_type -> user.ReviewHealthCheckRequest
-	3,  // 10: user.ReportService.CreateReview:input_type -> user.CreateReviewRequest
-	8,  // 11: user.ReportService.ListReviewsByCompany:input_type -> user.ListReviewsByCompanyRequest
-	11, // 12: user.ReportService.ListReviewsByUser:input_type -> user.ListReviewsByUserRequest
-	14, // 13: user.ReportService.GetReview:input_type -> user.GetReviewRequest
-	17, // 14: user.ReportService.UpdateReview:input_type -> user.UpdateReviewRequest
-	19, // 15: user.ReportService.DeleteReview:input_type -> user.DeleteReviewRequest
-	1,  // 16: user.ReportService.ReviewHealthCheck:output_type -> user.ReviewHealthCheckResponse
-	4,  // 17: user.ReportService.CreateReview:output_type -> user.CreateReviewResponse
-	9,  // 18: user.ReportService.ListReviewsByCompany:output_type -> user.ListReviewsByCompanyResponse
-	12, // 19: user.ReportService.ListReviewsByUser:output_type -> user.ListReviewsByUserResponse
-	15, // 20: user.ReportService.GetReview:output_type -> user.GetReviewResponse
-	18, // 21: user.ReportService.UpdateReview:output_type -> user.UpdateReviewResponse
-	20, // 22: user.ReportService.DeleteReview:output_type -> user.DeleteReviewResponse
+	0,  // 9: user.ReviewService.ReviewHealthCheck:input_type -> user.ReviewHealthCheckRequest
+	3,  // 10: user.ReviewService.CreateReview:input_type -> user.CreateReviewRequest
+	8,  // 11: user.ReviewService.ListReviewsByCompany:input_type -> user.ListReviewsByCompanyRequest
+	11, // 12: user.ReviewService.ListReviewsByUser:input_type -> user.ListReviewsByUserRequest
+	14, // 13: user.ReviewService.GetReview:input_type -> user.GetReviewRequest
+	17, // 14: user.ReviewService.UpdateReview:input_type -> user.UpdateReviewRequest
+	19, // 15: user.ReviewService.DeleteReview:input_type -> user.DeleteReviewRequest
+	1,  // 16: user.ReviewService.ReviewHealthCheck:output_type -> user.ReviewHealthCheckResponse
+	4,  // 17: user.ReviewService.CreateReview:output_type -> user.CreateReviewResponse
+	9,  // 18: user.ReviewService.ListReviewsByCompany:output_type -> user.ListReviewsByCompanyResponse
+	12, // 19: user.ReviewService.ListReviewsByUser:output_type -> user.ListReviewsByUserResponse
+	15, // 20: user.ReviewService.GetReview:output_type -> user.GetReviewResponse
+	18, // 21: user.ReviewService.UpdateReview:output_type -> user.UpdateReviewResponse
+	20, // 22: user.ReviewService.DeleteReview:output_type -> user.DeleteReviewResponse
 	16, // [16:23] is the sub-list for method output_type
 	9,  // [9:16] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name

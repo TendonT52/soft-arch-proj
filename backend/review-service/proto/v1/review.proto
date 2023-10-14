@@ -5,7 +5,7 @@ package user;
 option go_package = "github.com/JinnnDamanee/review-service/gen";
 import "google/api/annotations.proto";
 
-service ReportService {
+service ReviewService {
     rpc ReviewHealthCheck(ReviewHealthCheckRequest) returns (ReviewHealthCheckResponse) {}
     rpc CreateReview(CreateReviewRequest) returns (CreateReviewResponse) {
         option (google.api.http) = {

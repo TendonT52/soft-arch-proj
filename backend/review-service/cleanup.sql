@@ -1,1 +1,1 @@
-DELETE FROM reports;
+DELETE FROM reviews;

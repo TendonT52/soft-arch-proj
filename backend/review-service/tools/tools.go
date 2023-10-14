@@ -26,7 +26,7 @@ func DeleteAllRecords() error {
 	}
 	defer db.Close()
 
-	_, err = db.Exec("DELETE FROM reports")
+	_, err = db.Exec("DELETE FROM reviews")
 	if err != nil {
 		return err
 	}

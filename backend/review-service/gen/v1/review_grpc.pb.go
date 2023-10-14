@@ -19,19 +19,19 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	ReportService_ReviewHealthCheck_FullMethodName    = "/user.ReportService/ReviewHealthCheck"
-	ReportService_CreateReview_FullMethodName         = "/user.ReportService/CreateReview"
-	ReportService_ListReviewsByCompany_FullMethodName = "/user.ReportService/ListReviewsByCompany"
-	ReportService_ListReviewsByUser_FullMethodName    = "/user.ReportService/ListReviewsByUser"
-	ReportService_GetReview_FullMethodName            = "/user.ReportService/GetReview"
-	ReportService_UpdateReview_FullMethodName         = "/user.ReportService/UpdateReview"
-	ReportService_DeleteReview_FullMethodName         = "/user.ReportService/DeleteReview"
+	ReviewService_ReviewHealthCheck_FullMethodName    = "/user.ReviewService/ReviewHealthCheck"
+	ReviewService_CreateReview_FullMethodName         = "/user.ReviewService/CreateReview"
+	ReviewService_ListReviewsByCompany_FullMethodName = "/user.ReviewService/ListReviewsByCompany"
+	ReviewService_ListReviewsByUser_FullMethodName    = "/user.ReviewService/ListReviewsByUser"
+	ReviewService_GetReview_FullMethodName            = "/user.ReviewService/GetReview"
+	ReviewService_UpdateReview_FullMethodName         = "/user.ReviewService/UpdateReview"
+	ReviewService_DeleteReview_FullMethodName         = "/user.ReviewService/DeleteReview"
 )
 
-// ReportServiceClient is the client API for ReportService service.
+// ReviewServiceClient is the client API for ReviewService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type ReportServiceClient interface {
+type ReviewServiceClient interface {
 	ReviewHealthCheck(ctx context.Context, in *ReviewHealthCheckRequest, opts ...grpc.CallOption) (*ReviewHealthCheckResponse, error)
 	CreateReview(ctx context.Context, in *CreateReviewRequest, opts ...grpc.CallOption) (*CreateReviewResponse, error)
 	ListReviewsByCompany(ctx context.Context, in *ListReviewsByCompanyRequest, opts ...grpc.CallOption) (*ListReviewsByCompanyResponse, error)
@@ -41,81 +41,81 @@ type ReportServiceClient interface {
 	DeleteReview(ctx context.Context, in *DeleteReviewRequest, opts ...grpc.CallOption) (*DeleteReviewResponse, error)
 }
 
-type reportServiceClient struct {
+type reviewServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewReportServiceClient(cc grpc.ClientConnInterface) ReportServiceClient {
-	return &reportServiceClient{cc}
+func NewReviewServiceClient(cc grpc.ClientConnInterface) ReviewServiceClient {
+	return &reviewServiceClient{cc}
 }
 
-func (c *reportServiceClient) ReviewHealthCheck(ctx context.Context, in *ReviewHealthCheckRequest, opts ...grpc.CallOption) (*ReviewHealthCheckResponse, error) {
+func (c *reviewServiceClient) ReviewHealthCheck(ctx context.Context, in *ReviewHealthCheckRequest, opts ...grpc.CallOption) (*ReviewHealthCheckResponse, error) {
 	out := new(ReviewHealthCheckResponse)
-	err := c.cc.Invoke(ctx, ReportService_ReviewHealthCheck_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, ReviewService_ReviewHealthCheck_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *reportServiceClient) CreateReview(ctx context.Context, in *CreateReviewRequest, opts ...grpc.CallOption) (*CreateReviewResponse, error) {
+func (c *reviewServiceClient) CreateReview(ctx context.Context, in *CreateReviewRequest, opts ...grpc.CallOption) (*CreateReviewResponse, error) {
 	out := new(CreateReviewResponse)
-	err := c.cc.Invoke(ctx, ReportService_CreateReview_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, ReviewService_CreateReview_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *reportServiceClient) ListReviewsByCompany(ctx context.Context, in *ListReviewsByCompanyRequest, opts ...grpc.CallOption) (*ListReviewsByCompanyResponse, error) {
+func (c *reviewServiceClient) ListReviewsByCompany(ctx context.Context, in *ListReviewsByCompanyRequest, opts ...grpc.CallOption) (*ListReviewsByCompanyResponse, error) {
 	out := new(ListReviewsByCompanyResponse)
-	err := c.cc.Invoke(ctx, ReportService_ListReviewsByCompany_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, ReviewService_ListReviewsByCompany_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *reportServiceClient) ListReviewsByUser(ctx context.Context, in *ListReviewsByUserRequest, opts ...grpc.CallOption) (*ListReviewsByUserResponse, error) {
+func (c *reviewServiceClient) ListReviewsByUser(ctx context.Context, in *ListReviewsByUserRequest, opts ...grpc.CallOption) (*ListReviewsByUserResponse, error) {
 	out := new(ListReviewsByUserResponse)
-	err := c.cc.Invoke(ctx, ReportService_ListReviewsByUser_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, ReviewService_ListReviewsByUser_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *reportServiceClient) GetReview(ctx context.Context, in *GetReviewRequest, opts ...grpc.CallOption) (*GetReviewResponse, error) {
+func (c *reviewServiceClient) GetReview(ctx context.Context, in *GetReviewRequest, opts ...grpc.CallOption) (*GetReviewResponse, error) {
 	out := new(GetReviewResponse)
-	err := c.cc.Invoke(ctx, ReportService_GetReview_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, ReviewService_GetReview_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *reportServiceClient) UpdateReview(ctx context.Context, in *UpdateReviewRequest, opts ...grpc.CallOption) (*UpdateReviewResponse, error) {
+func (c *reviewServiceClient) UpdateReview(ctx context.Context, in *UpdateReviewRequest, opts ...grpc.CallOption) (*UpdateReviewResponse, error) {
 	out := new(UpdateReviewResponse)
-	err := c.cc.Invoke(ctx, ReportService_UpdateReview_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, ReviewService_UpdateReview_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *reportServiceClient) DeleteReview(ctx context.Context, in *DeleteReviewRequest, opts ...grpc.CallOption) (*DeleteReviewResponse, error) {
+func (c *reviewServiceClient) DeleteReview(ctx context.Context, in *DeleteReviewRequest, opts ...grpc.CallOption) (*DeleteReviewResponse, error) {
 	out := new(DeleteReviewResponse)
-	err := c.cc.Invoke(ctx, ReportService_DeleteReview_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, ReviewService_DeleteReview_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ReportServiceServer is the server API for ReportService service.
-// All implementations must embed UnimplementedReportServiceServer
+// ReviewServiceServer is the server API for ReviewService service.
+// All implementations must embed UnimplementedReviewServiceServer
 // for forward compatibility
-type ReportServiceServer interface {
+type ReviewServiceServer interface {
 	ReviewHealthCheck(context.Context, *ReviewHealthCheckRequest) (*ReviewHealthCheckResponse, error)
 	CreateReview(context.Context, *CreateReviewRequest) (*CreateReviewResponse, error)
 	ListReviewsByCompany(context.Context, *ListReviewsByCompanyRequest) (*ListReviewsByCompanyResponse, error)
@@ -123,207 +123,207 @@ type ReportServiceServer interface {
 	GetReview(context.Context, *GetReviewRequest) (*GetReviewResponse, error)
 	UpdateReview(context.Context, *UpdateReviewRequest) (*UpdateReviewResponse, error)
 	DeleteReview(context.Context, *DeleteReviewRequest) (*DeleteReviewResponse, error)
-	mustEmbedUnimplementedReportServiceServer()
+	mustEmbedUnimplementedReviewServiceServer()
 }
 
-// UnimplementedReportServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedReportServiceServer struct {
+// UnimplementedReviewServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedReviewServiceServer struct {
 }
 
-func (UnimplementedReportServiceServer) ReviewHealthCheck(context.Context, *ReviewHealthCheckRequest) (*ReviewHealthCheckResponse, error) {
+func (UnimplementedReviewServiceServer) ReviewHealthCheck(context.Context, *ReviewHealthCheckRequest) (*ReviewHealthCheckResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReviewHealthCheck not implemented")
 }
-func (UnimplementedReportServiceServer) CreateReview(context.Context, *CreateReviewRequest) (*CreateReviewResponse, error) {
+func (UnimplementedReviewServiceServer) CreateReview(context.Context, *CreateReviewRequest) (*CreateReviewResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateReview not implemented")
 }
-func (UnimplementedReportServiceServer) ListReviewsByCompany(context.Context, *ListReviewsByCompanyRequest) (*ListReviewsByCompanyResponse, error) {
+func (UnimplementedReviewServiceServer) ListReviewsByCompany(context.Context, *ListReviewsByCompanyRequest) (*ListReviewsByCompanyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListReviewsByCompany not implemented")
 }
-func (UnimplementedReportServiceServer) ListReviewsByUser(context.Context, *ListReviewsByUserRequest) (*ListReviewsByUserResponse, error) {
+func (UnimplementedReviewServiceServer) ListReviewsByUser(context.Context, *ListReviewsByUserRequest) (*ListReviewsByUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListReviewsByUser not implemented")
 }
-func (UnimplementedReportServiceServer) GetReview(context.Context, *GetReviewRequest) (*GetReviewResponse, error) {
+func (UnimplementedReviewServiceServer) GetReview(context.Context, *GetReviewRequest) (*GetReviewResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetReview not implemented")
 }
-func (UnimplementedReportServiceServer) UpdateReview(context.Context, *UpdateReviewRequest) (*UpdateReviewResponse, error) {
+func (UnimplementedReviewServiceServer) UpdateReview(context.Context, *UpdateReviewRequest) (*UpdateReviewResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateReview not implemented")
 }
-func (UnimplementedReportServiceServer) DeleteReview(context.Context, *DeleteReviewRequest) (*DeleteReviewResponse, error) {
+func (UnimplementedReviewServiceServer) DeleteReview(context.Context, *DeleteReviewRequest) (*DeleteReviewResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteReview not implemented")
 }
-func (UnimplementedReportServiceServer) mustEmbedUnimplementedReportServiceServer() {}
+func (UnimplementedReviewServiceServer) mustEmbedUnimplementedReviewServiceServer() {}
 
-// UnsafeReportServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ReportServiceServer will
+// UnsafeReviewServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ReviewServiceServer will
 // result in compilation errors.
-type UnsafeReportServiceServer interface {
-	mustEmbedUnimplementedReportServiceServer()
+type UnsafeReviewServiceServer interface {
+	mustEmbedUnimplementedReviewServiceServer()
 }
 
-func RegisterReportServiceServer(s grpc.ServiceRegistrar, srv ReportServiceServer) {
-	s.RegisterService(&ReportService_ServiceDesc, srv)
+func RegisterReviewServiceServer(s grpc.ServiceRegistrar, srv ReviewServiceServer) {
+	s.RegisterService(&ReviewService_ServiceDesc, srv)
 }
 
-func _ReportService_ReviewHealthCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ReviewService_ReviewHealthCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReviewHealthCheckRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ReportServiceServer).ReviewHealthCheck(ctx, in)
+		return srv.(ReviewServiceServer).ReviewHealthCheck(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ReportService_ReviewHealthCheck_FullMethodName,
+		FullMethod: ReviewService_ReviewHealthCheck_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReportServiceServer).ReviewHealthCheck(ctx, req.(*ReviewHealthCheckRequest))
+		return srv.(ReviewServiceServer).ReviewHealthCheck(ctx, req.(*ReviewHealthCheckRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ReportService_CreateReview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ReviewService_CreateReview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateReviewRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ReportServiceServer).CreateReview(ctx, in)
+		return srv.(ReviewServiceServer).CreateReview(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ReportService_CreateReview_FullMethodName,
+		FullMethod: ReviewService_CreateReview_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReportServiceServer).CreateReview(ctx, req.(*CreateReviewRequest))
+		return srv.(ReviewServiceServer).CreateReview(ctx, req.(*CreateReviewRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ReportService_ListReviewsByCompany_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ReviewService_ListReviewsByCompany_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListReviewsByCompanyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ReportServiceServer).ListReviewsByCompany(ctx, in)
+		return srv.(ReviewServiceServer).ListReviewsByCompany(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ReportService_ListReviewsByCompany_FullMethodName,
+		FullMethod: ReviewService_ListReviewsByCompany_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReportServiceServer).ListReviewsByCompany(ctx, req.(*ListReviewsByCompanyRequest))
+		return srv.(ReviewServiceServer).ListReviewsByCompany(ctx, req.(*ListReviewsByCompanyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ReportService_ListReviewsByUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ReviewService_ListReviewsByUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListReviewsByUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ReportServiceServer).ListReviewsByUser(ctx, in)
+		return srv.(ReviewServiceServer).ListReviewsByUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ReportService_ListReviewsByUser_FullMethodName,
+		FullMethod: ReviewService_ListReviewsByUser_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReportServiceServer).ListReviewsByUser(ctx, req.(*ListReviewsByUserRequest))
+		return srv.(ReviewServiceServer).ListReviewsByUser(ctx, req.(*ListReviewsByUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ReportService_GetReview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ReviewService_GetReview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetReviewRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ReportServiceServer).GetReview(ctx, in)
+		return srv.(ReviewServiceServer).GetReview(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ReportService_GetReview_FullMethodName,
+		FullMethod: ReviewService_GetReview_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReportServiceServer).GetReview(ctx, req.(*GetReviewRequest))
+		return srv.(ReviewServiceServer).GetReview(ctx, req.(*GetReviewRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ReportService_UpdateReview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ReviewService_UpdateReview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateReviewRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ReportServiceServer).UpdateReview(ctx, in)
+		return srv.(ReviewServiceServer).UpdateReview(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ReportService_UpdateReview_FullMethodName,
+		FullMethod: ReviewService_UpdateReview_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReportServiceServer).UpdateReview(ctx, req.(*UpdateReviewRequest))
+		return srv.(ReviewServiceServer).UpdateReview(ctx, req.(*UpdateReviewRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ReportService_DeleteReview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ReviewService_DeleteReview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteReviewRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ReportServiceServer).DeleteReview(ctx, in)
+		return srv.(ReviewServiceServer).DeleteReview(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ReportService_DeleteReview_FullMethodName,
+		FullMethod: ReviewService_DeleteReview_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReportServiceServer).DeleteReview(ctx, req.(*DeleteReviewRequest))
+		return srv.(ReviewServiceServer).DeleteReview(ctx, req.(*DeleteReviewRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// ReportService_ServiceDesc is the grpc.ServiceDesc for ReportService service.
+// ReviewService_ServiceDesc is the grpc.ServiceDesc for ReviewService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var ReportService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "user.ReportService",
-	HandlerType: (*ReportServiceServer)(nil),
+var ReviewService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "user.ReviewService",
+	HandlerType: (*ReviewServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "ReviewHealthCheck",
-			Handler:    _ReportService_ReviewHealthCheck_Handler,
+			Handler:    _ReviewService_ReviewHealthCheck_Handler,
 		},
 		{
 			MethodName: "CreateReview",
-			Handler:    _ReportService_CreateReview_Handler,
+			Handler:    _ReviewService_CreateReview_Handler,
 		},
 		{
 			MethodName: "ListReviewsByCompany",
-			Handler:    _ReportService_ListReviewsByCompany_Handler,
+			Handler:    _ReviewService_ListReviewsByCompany_Handler,
 		},
 		{
 			MethodName: "ListReviewsByUser",
-			Handler:    _ReportService_ListReviewsByUser_Handler,
+			Handler:    _ReviewService_ListReviewsByUser_Handler,
 		},
 		{
 			MethodName: "GetReview",
-			Handler:    _ReportService_GetReview_Handler,
+			Handler:    _ReviewService_GetReview_Handler,
 		},
 		{
 			MethodName: "UpdateReview",
-			Handler:    _ReportService_UpdateReview_Handler,
+			Handler:    _ReviewService_UpdateReview_Handler,
 		},
 		{
 			MethodName: "DeleteReview",
-			Handler:    _ReportService_DeleteReview_Handler,
+			Handler:    _ReviewService_DeleteReview_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
