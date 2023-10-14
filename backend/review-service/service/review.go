@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	StudentRole = "student"
+	StudentRole   = "student"
+	AnonymousName = "Anonymous"
 )
 
 type reviewService struct {
@@ -26,6 +27,9 @@ func (s *reviewService) CreateReview(ctx context.Context, token string, review *
 	if !domain.CheckCreatedRequireField(review) {
 		return 0, domain.ErrFieldsAreRequired
 	}
+	if !domain.CheckRatingRange(review.Rating) {
+		return 0, domain.ErrRatingRange
+	}
 
 	payload, err := utils.ValidateAccessToken(token)
 	if err != nil {
@@ -34,6 +38,19 @@ func (s *reviewService) CreateReview(ctx context.Context, token string, review *
 
 	if payload.Role != StudentRole {
 		return 0, domain.ErrForbidden
+	}
+
+	// Check company exist
+	reqCompany := &pbv1.GetCompanyRequest{
+		AccessToken: token,
+		Id:          review.Cid,
+	}
+	result, err := s.userService.GetCompanyProfile(ctx, reqCompany)
+	if err != nil {
+		return 0, err
+	}
+	if result.Status == 404 {
+		return 0, domain.ErrCompanyNotFound
 	}
 
 	userID := payload.UserId
@@ -69,7 +86,7 @@ func (s *reviewService) GetReviewByID(ctx context.Context, token string, reviewI
 
 	// Get user info
 	if review.Owner.Id == 0 {
-		review.Owner.Name = "Anonymous"
+		review.Owner.Name = AnonymousName
 		return review, nil
 	}
 
@@ -99,7 +116,7 @@ func (s *reviewService) GetReviewsByCompany(ctx context.Context, token string, c
 	for _, review := range reviews {
 		// Get user info
 		if review.Owner.Id == 0 {
-			review.Owner.Name = "Anonymous"
+			review.Owner.Name = AnonymousName
 			continue
 		}
 		reqStudent := &pbv1.GetStudentRequest{
@@ -119,6 +136,9 @@ func (s *reviewService) GetReviewsByCompany(ctx context.Context, token string, c
 func (s *reviewService) UpdateReview(ctx context.Context, token string, review *pbv1.UpdatedReview, rid int64) error {
 	if !domain.CheckUpdatedRequireField(review) {
 		return domain.ErrFieldsAreRequired
+	}
+	if !domain.CheckRatingRange(review.Rating) {
+		return domain.ErrRatingRange
 	}
 
 	payload, err := utils.ValidateAccessToken(token)

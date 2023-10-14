@@ -11,6 +11,8 @@ const (
 	Forbidden
 	ReviewNotFound
 	FieldsAreRequired
+	RatingRangeMustBe1To5
+	CompanyIDNotFound
 )
 
 var (
@@ -19,6 +21,8 @@ var (
 	ErrForbidden         = BackEndError{Kind: Forbidden}
 	ErrReviewNotFound    = BackEndError{Kind: ReviewNotFound}
 	ErrFieldsAreRequired = BackEndError{Kind: FieldsAreRequired}
+	ErrRatingRange       = BackEndError{Kind: RatingRangeMustBe1To5}
+	ErrCompanyNotFound   = BackEndError{Kind: CompanyIDNotFound}
 )
 
 type BackEndError struct {

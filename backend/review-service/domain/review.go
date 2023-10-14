@@ -5,7 +5,7 @@ import (
 )
 
 func CheckCreatedRequireField(review *pbv1.CreatedReview) bool {
-	if review.Cid <= 0 || review.Rating == 0 || review.Title == "" || review.Description == "" {
+	if review.Rating == 0 || review.Title == "" || review.Description == "" {
 		return false
 	}
 	return true
@@ -13,6 +13,13 @@ func CheckCreatedRequireField(review *pbv1.CreatedReview) bool {
 
 func CheckUpdatedRequireField(review *pbv1.UpdatedReview) bool {
 	if review.Rating == 0 || review.Title == "" || review.Description == "" {
+		return false
+	}
+	return true
+}
+
+func CheckRatingRange(rating int32) bool {
+	if rating < 1 || rating > 5 {
 		return false
 	}
 	return true

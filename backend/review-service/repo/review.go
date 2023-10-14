@@ -56,6 +56,8 @@ func (r *reviewRepository) GetReviewByID(ctx context.Context, reviewID int64) (*
 	if err != nil {
 		return nil, err
 	}
+	review.Owner = &pbv1.Owner{}
+	review.Company = &pbv1.ReviewdCompany{}
 
 	if IsAnonymous {
 		review.Owner.Id = 0
@@ -64,6 +66,7 @@ func (r *reviewRepository) GetReviewByID(ctx context.Context, reviewID int64) (*
 	}
 
 	review.Company.Id = cid
+	review.Id = reviewID
 	return &review, nil
 }
 
@@ -115,7 +118,7 @@ func (r *reviewRepository) GetReviewOwner(ctx context.Context, reviewID int64) (
 
 	return uid, nil
 }
-	
+
 func (r *reviewRepository) UpdateReview(ctx context.Context, review *pbv1.UpdatedReview, rid int64) error {
 	query := `UPDATE reviews SET title = $1, description = $2, rating = $3, anonymous = $4, updated_at = $5 WHERE rid = $6`
 	_, err := r.db.ExecContext(ctx, query, review.Title, review.Description, review.Rating, review.IsAnonymous, time.Now().Unix(), rid)
