@@ -182,4 +182,17 @@ func TestUpdateReview(t *testing.T) {
 			require.Equal(t, tc.res.Message, res.Message)
 		})
 	}
+
+	// Check updated review
+	result, err := c.GetReview(ctx, &pbv1.GetReviewRequest{
+		AccessToken: tokenStudent,
+		Id:          res.Id,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(200), result.Status)
+	require.Equal(t, u.Title, result.Review.Title)
+	require.Equal(t, u.Description, result.Review.Description)
+	require.Equal(t, u.Rating, result.Review.Rating)
+	require.Equal(t, int64(0), result.Review.Owner.Id)
+	require.Equal(t, "Anonymous", result.Review.Owner.Name)
 }
