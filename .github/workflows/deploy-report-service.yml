@@ -63,7 +63,7 @@ jobs:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
           args: |
-            helm upgrade post-service ./backend/report-service/helm/report-service \
+            helm upgrade report-service ./backend/report-service/helm/report-service \
                 --set image="ghcr.io/tendont52/soft-arch-proj-backend-report-service:latest" \
                 --timeout 10m \
                 --install \
