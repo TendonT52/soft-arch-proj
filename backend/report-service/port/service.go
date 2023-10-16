@@ -7,7 +7,7 @@ import (
 )
 
 type ReportServicePort interface {
-	CreateReport(ctx context.Context, token string, report *pbv1.Report) (int64, error)
+	CreateReport(ctx context.Context, token string, report *pbv1.CreatedReport) (int64, error)
 	GetReport(ctx context.Context, token string, reportId int64) (*pbv1.Report, error)
 	GetReports(ctx context.Context, token string) ([]*pbv1.Report, error)
 }

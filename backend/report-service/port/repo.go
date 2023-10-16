@@ -7,7 +7,7 @@ import (
 )
 
 type ReportRepoPort interface {
-	CreateReport(ctx context.Context, userId int64, report *pbv1.Report) (int64, error)
+	CreateReport(ctx context.Context, userId int64, report *pbv1.CreatedReport) (int64, error)
 	GetReport(ctx context.Context, reportId int64) (*pbv1.Report, error)
 	GetReports(ctx context.Context) ([]*pbv1.Report, error)
 }
