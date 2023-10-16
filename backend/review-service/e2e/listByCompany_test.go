@@ -98,11 +98,11 @@ func TestListReviewByCompany(t *testing.T) {
 		"root": {
 		}
 	}`
-	r1, err := createMockReviews(c, companyId1, studentId1, "Test Student for List Review By Company - 1", "Test Title for List Review By Company - 1", lex, 3, true)
+	r1, err := createMockReviews(c, companyId1, studentId1, "Test Student for List Review By Company - 1", "Test Title for List Review By Company - 1", lex, 5, true)
 	require.NoError(t, err)
 	r2, err := createMockReviews(c, companyId1, studentId2, "Test Student for List Review By Company - 2", "Test Title for List Review By Company - 2", lex, 4, false)
 	require.NoError(t, err)
-	r3, err := createMockReviews(c, companyId1, studentId1, "Test Student for List Review By Company - 1", "Test Title for List Review By Company - 3", lex, 5, true)
+	r3, err := createMockReviews(c, companyId1, studentId1, "Test Student for List Review By Company - 1", "Test Title for List Review By Company - 3", lex, 3, true)
 	require.NoError(t, err)
 	r4, err := createMockReviews(c, companyId2, studentId1, "Test Student for List Review By Company - 1", "Test Title for List Review By Company - 4", lex, 2, false)
 	require.NoError(t, err)
