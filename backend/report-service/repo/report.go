@@ -26,7 +26,7 @@ func NewReportRepository(db DBTX) port.ReportRepoPort {
 	return &reportRepository{db: db}
 }
 
-func (r *reportRepository) CreateReport(ctx context.Context, userId int64, report *pbv1.Report) (int64, error) {
+func (r *reportRepository) CreateReport(ctx context.Context, userId int64, report *pbv1.CreatedReport) (int64, error) {
 	current_timestamp := time.Now().Unix()
 
 	stmt, err := r.db.PrepareContext(ctx, "INSERT INTO reports (uid, topic, type, description, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id")

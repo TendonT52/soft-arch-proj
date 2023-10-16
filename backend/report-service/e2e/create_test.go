@@ -52,32 +52,32 @@ func TestCreateReport(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	report_scam_list := &pbv1.Report{
+	report_scam_list := &pbv1.CreatedReport{
 		Topic:       "test-report-scam",
 		Type:        domain.REPORT_TYPE_SCAM_LIST,
 		Description: "This post is fake and should be deleted",
 	}
-	report_fake_review := &pbv1.Report{
+	report_fake_review := &pbv1.CreatedReport{
 		Topic:       "test-report-fake-review",
 		Type:        domain.REPORT_TYPE_FAKE_REVIEW,
 		Description: "This review is fake and should be deleted",
 	}
-	report_suspicious_user := &pbv1.Report{
+	report_suspicious_user := &pbv1.CreatedReport{
 		Topic:       "test-report-suspicious-user",
 		Type:        domain.REPORT_TYPE_SUSPICIOUS_USER,
 		Description: "This user is suspicious and should be deleted",
 	}
-	report_website_bugs := &pbv1.Report{
+	report_website_bugs := &pbv1.CreatedReport{
 		Topic:       "test-report-website-bugs",
 		Type:        domain.REPORT_TYPE_WEBSITE_BUGS,
 		Description: "This website has bugs and should be fixed",
 	}
-	report_suggestion := &pbv1.Report{
+	report_suggestion := &pbv1.CreatedReport{
 		Topic:       "test-report-suggestion",
 		Type:        domain.REPORT_TYPE_SUGGESTION,
 		Description: "This is a suggestion",
 	}
-	report_other := &pbv1.Report{
+	report_other := &pbv1.CreatedReport{
 		Topic:       "test-report-other",
 		Type:        domain.REPORT_TYPE_OTHER,
 		Description: "This report is fake and should be deleted",
@@ -150,7 +150,7 @@ func TestCreateReport(t *testing.T) {
 		"topic is empty": {
 			req: &pbv1.CreateReportRequest{
 				AccessToken: token,
-				Report: &pbv1.Report{
+				Report: &pbv1.CreatedReport{
 					Topic:       "",
 					Type:        domain.REPORT_TYPE_OTHER,
 					Description: "This report is fake and should be deleted",
@@ -164,7 +164,7 @@ func TestCreateReport(t *testing.T) {
 		"type is empty": {
 			req: &pbv1.CreateReportRequest{
 				AccessToken: token,
-				Report: &pbv1.Report{
+				Report: &pbv1.CreatedReport{
 					Topic:       "test-report-other",
 					Type:        "",
 					Description: "This report is fake and should be deleted",
@@ -178,7 +178,7 @@ func TestCreateReport(t *testing.T) {
 		"description is empty": {
 			req: &pbv1.CreateReportRequest{
 				AccessToken: token,
-				Report: &pbv1.Report{
+				Report: &pbv1.CreatedReport{
 					Topic:       "test-report-other",
 					Type:        domain.REPORT_TYPE_OTHER,
 					Description: "",
@@ -192,7 +192,7 @@ func TestCreateReport(t *testing.T) {
 		"invalid token": {
 			req: &pbv1.CreateReportRequest{
 				AccessToken: "",
-				Report: &pbv1.Report{
+				Report: &pbv1.CreatedReport{
 					Topic:       "test-report-other",
 					Type:        domain.REPORT_TYPE_OTHER,
 					Description: "This report is fake and should be deleted",

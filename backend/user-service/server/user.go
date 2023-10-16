@@ -118,6 +118,13 @@ func (s *UserServer) UpdateStudent(ctx context.Context, req *pbv1.UpdateStudentR
 			Message: "Some fields are empty",
 		}, nil
 	}
+	if errors.Is(err, domain.ErrYearMustBeGreaterThanZero) {
+		log.Println("Error year must be greater than zero: ", err)
+		return &pbv1.UpdateStudentResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Year must be greater than zero",
+		}, nil
+	}
 	if errors.Is(err, domain.ErrForbidden) {
 		log.Println("Error NOT Authorize: ", err)
 		return &pbv1.UpdateStudentResponse{
