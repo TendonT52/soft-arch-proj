@@ -9,16 +9,20 @@ const (
 	Internal
 	Unauthorize
 	Forbidden
-	ReportNotFound
+	ReviewNotFound
 	FieldsAreRequired
+	RatingRangeMustBe1To5
+	CompanyIDNotFound
 )
 
 var (
 	ErrInternal          = BackEndError{Kind: Internal}
 	ErrUnauthorize       = BackEndError{Kind: Unauthorize}
 	ErrForbidden         = BackEndError{Kind: Forbidden}
-	ErrReportNotFound    = BackEndError{Kind: ReportNotFound}
+	ErrReviewNotFound    = BackEndError{Kind: ReviewNotFound}
 	ErrFieldsAreRequired = BackEndError{Kind: FieldsAreRequired}
+	ErrRatingRange       = BackEndError{Kind: RatingRangeMustBe1To5}
+	ErrCompanyNotFound   = BackEndError{Kind: CompanyIDNotFound}
 )
 
 type BackEndError struct {

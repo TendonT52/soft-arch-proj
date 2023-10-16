@@ -10,123 +10,171 @@ import (
 	"github.com/JinnnDamanee/review-service/domain"
 	pbv1 "github.com/JinnnDamanee/review-service/gen/v1"
 	"github.com/JinnnDamanee/review-service/mock"
+	"github.com/JinnnDamanee/review-service/tools"
+	"github.com/JinnnDamanee/review-service/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func TestGetReport(t *testing.T) {
-	config, _ := config.LoadConfig("..")
-	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+func TestGetReviewByID(t *testing.T) {
+	conf, _ := config.LoadConfig("..")
+	configTest, _ := config.LoadConfigTest("..")
+	target := fmt.Sprintf("%s:%s", conf.ServerHost, conf.ServerPort)
 	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("could not connect to grpc server: %v", err)
 	}
 	defer conn.Close()
 
-	c := pbv1.NewReportServiceClient(conn)
+	c := pbv1.NewReviewServiceClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	tokenAdmin, err := mock.GenerateAccessToken(config.AccessTokenExpiredInTest, &domain.Payload{
-		UserId: 1,
-		Role:   "admin",
-	})
+	companyId, err := tools.CreateMockCompany("Test Company for Get Review", utils.GenerateRandomString(5)+"@gmail.com", "123456", "Test Description", "Test Location", "0123456789", "Test Category")
 	require.NoError(t, err)
 
-	tokenStudent, err := mock.GenerateAccessToken(config.AccessTokenExpiredInTest, &domain.Payload{
-		UserId: 2,
-		Role:   "student",
-	})
+	studentId, err := tools.CreateMockStudent("Test Student for Get Review", utils.GenerateRandomNumber(10)+"@student.chula.ac.th", "123456", "Test Description", "Engineering", "Computer", 3)
 	require.NoError(t, err)
 
-	tokenCompany, err := mock.GenerateAccessToken(config.AccessTokenExpiredInTest, &domain.Payload{
-		UserId: 3,
+	tokenCompany, err := mock.GenerateAccessToken(configTest.AccessTokenExpiredInTest, &domain.Payload{
+		UserId: companyId,
 		Role:   "company",
 	})
 	require.NoError(t, err)
 
-	// Create report
-	report := &pbv1.Report{
-		Topic:       "test-report",
-		Type:        domain.REPORT_TYPE_SCAM_LIST,
-		Description: "This post is fake and should be deleted!!!",
-	}
-	resCreate, err := c.CreateReport(ctx, &pbv1.CreateReportRequest{
-		AccessToken: tokenStudent,
-		Report:      report,
+	tokenStudent, err := mock.GenerateAccessToken(configTest.AccessTokenExpiredInTest, &domain.Payload{
+		UserId: studentId,
+		Role:   "student",
 	})
 	require.NoError(t, err)
-	require.Equal(t, int64(201), resCreate.Status)
+
+	// Create review
+	lex := `{
+		"root": {
+		}
+	}`
+
+	r_anonymous := &pbv1.CreatedReview{
+		Cid:         companyId,
+		Title:       "Test Title for Get Review",
+		Description: lex,
+		Rating:      3,
+		IsAnonymous: true,
+	}
+	reqCreateReview := &pbv1.CreateReviewRequest{
+		AccessToken: tokenStudent,
+		Review:      r_anonymous,
+	}
+	resCreateReviewAno, err := c.CreateReview(ctx, reqCreateReview)
+	require.NoError(t, err)
+	require.Equal(t, int64(201), resCreateReviewAno.Status)
+
+	r_unanonymous := &pbv1.CreatedReview{
+		Cid:         companyId,
+		Title:       "Test Title for Get Review",
+		Description: lex,
+		Rating:      4,
+		IsAnonymous: false,
+	}
+	reqCreateReview = &pbv1.CreateReviewRequest{
+		AccessToken: tokenStudent,
+		Review:      r_unanonymous,
+	}
+	resCreateReviewUnAno, err := c.CreateReview(ctx, reqCreateReview)
+	require.NoError(t, err)
+	require.Equal(t, int64(201), resCreateReviewUnAno.Status)
 
 	tests := map[string]struct {
-		req    *pbv1.GetReportRequest
-		expect *pbv1.GetReportResponse
+		req    *pbv1.GetReviewRequest
+		expect *pbv1.GetReviewResponse
 	}{
-		"Admin get report": {
-			req: &pbv1.GetReportRequest{
-				AccessToken: tokenAdmin,
-				Id:          resCreate.Id,
-			},
-			expect: &pbv1.GetReportResponse{
-				Status:  200,
-				Message: "Report retrieved successfully",
-				Report:  report,
-			},
-		},
-		"Student get report": {
-			req: &pbv1.GetReportRequest{
-				AccessToken: tokenStudent,
-				Id:          resCreate.Id,
-			},
-			expect: &pbv1.GetReportResponse{
-				Status:  403,
-				Message: "You don't have permission to access this resource",
-			},
-		},
-		"Company get report": {
-			req: &pbv1.GetReportRequest{
+		"Successfull with Annonymous": {
+			req: &pbv1.GetReviewRequest{
 				AccessToken: tokenCompany,
-				Id:          resCreate.Id,
+				Id:          resCreateReviewAno.Id,
 			},
-			expect: &pbv1.GetReportResponse{
-				Status:  403,
-				Message: "You don't have permission to access this resource",
+			expect: &pbv1.GetReviewResponse{
+				Status:  200,
+				Message: "Get review successfully",
+				Review: &pbv1.Review{
+					Id:          resCreateReviewAno.Id,
+					Title:       r_anonymous.Title,
+					Description: r_anonymous.Description,
+					Rating:      r_anonymous.Rating,
+					Owner: &pbv1.Owner{
+						Id:   0,
+						Name: "Anonymous",
+					},
+					Company: &pbv1.ReviewdCompany{
+						Id:   companyId,
+						Name: "Test Company for Get Review",
+					},
+				},
 			},
 		},
-		"Report not found": {
-			req: &pbv1.GetReportRequest{
-				AccessToken: tokenAdmin,
-				Id:          0,
+		"Successfull with UnAnnonymous": {
+			req: &pbv1.GetReviewRequest{
+				AccessToken: tokenCompany,
+				Id:          resCreateReviewUnAno.Id,
 			},
-			expect: &pbv1.GetReportResponse{
-				Status:  404,
-				Message: "Report not found",
+			expect: &pbv1.GetReviewResponse{
+				Status:  200,
+				Message: "Get review successfully",
+				Review: &pbv1.Review{
+					Id:          resCreateReviewUnAno.Id,
+					Title:       r_unanonymous.Title,
+					Description: r_unanonymous.Description,
+					Rating:      r_unanonymous.Rating,
+					Owner: &pbv1.Owner{
+						Id:   studentId,
+						Name: "Test Student for Get Review",
+					},
+					Company: &pbv1.ReviewdCompany{
+						Id:   companyId,
+						Name: "Test Company for Get Review",
+					},
+				},
 			},
 		},
-		"Invalid token": {
-			req: &pbv1.GetReportRequest{
-				AccessToken: "",
-				Id:          resCreate.Id,
+		"Invalid access token": {
+			req: &pbv1.GetReviewRequest{
+				AccessToken: "invalid access token",
+				Id:          resCreateReviewAno.Id,
 			},
-			expect: &pbv1.GetReportResponse{
+			expect: &pbv1.GetReviewResponse{
 				Status:  401,
 				Message: "Your access token is invalid",
+			},
+		},
+		"Get review with invalid review id": {
+			req: &pbv1.GetReviewRequest{
+				AccessToken: tokenCompany,
+				Id:          0,
+			},
+			expect: &pbv1.GetReviewResponse{
+				Status:  404,
+				Message: "Review not found",
 			},
 		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			res, err := c.GetReport(ctx, tc.req)
+			res, err := c.GetReview(ctx, tc.req)
 			require.NoError(t, err)
 			require.Equal(t, tc.expect.Status, res.Status)
 			require.Equal(t, tc.expect.Message, res.Message)
 			if res.Status == 200 {
-				require.Equal(t, report.Topic, res.Report.Topic)
-				require.Equal(t, report.Type, res.Report.Type)
-				require.Equal(t, report.Description, res.Report.Description)
-				require.NotEmpty(t, res.Report.UpdatedAt)
+				require.Equal(t, tc.expect.Review.Id, res.Review.Id)
+				require.Equal(t, tc.expect.Review.Title, res.Review.Title)
+				require.Equal(t, tc.expect.Review.Description, res.Review.Description)
+				require.Equal(t, tc.expect.Review.Rating, res.Review.Rating)
+				require.NotEmpty(t, res.Review.UpdatedAt)
+				require.Equal(t, tc.expect.Review.Owner.Id, res.Review.Owner.Id)
+				require.Equal(t, tc.expect.Review.Owner.Name, res.Review.Owner.Name)
+				require.Equal(t, tc.expect.Review.Company.Id, res.Review.Company.Id)
+				require.Equal(t, tc.expect.Review.Company.Name, res.Review.Company.Name)
 			}
 		})
 	}

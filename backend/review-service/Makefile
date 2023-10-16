@@ -18,6 +18,13 @@ gen-proto:
     --go_out=gen \
     --go_opt=paths=source_relative \
     --go-grpc_out=gen \
+    --go-grpc_opt=paths=source_relative & \
+	protoc \
+    --proto_path=../user-service/proto \
+    ../user-service/proto/**/*.proto \
+    --go_out=gen \
+    --go_opt=paths=source_relative \
+    --go-grpc_out=gen \
     --go-grpc_opt=paths=source_relative
 
 test-all:
@@ -49,10 +56,14 @@ k8s-run-dev:
 	@echo "Persistent data will be stored in ${DATA_PATH}"
 	parallel ::: \
 		"telepresence helm install" \
+		"DATA_PATH=${DATA_PATH} make -C ../../helm memphis" \
+		"DATA_PATH=${DATA_PATH}/user-service make -C ../user-service dependency" \
 		"DATA_PATH=${DATA_PATH} make dependency"
+	MODE=remote make -C ../user-service deploy
 	kubectl wait --for=condition=Ready pods --all --all-namespaces
 
 	telepresence connect
+	make -C ../user-service migrate-up
 	make migrate-up
 
 k8s-run-prod:
@@ -62,9 +73,15 @@ k8s-run-prod:
 	@echo "Persistent data will be stored in ${DATA_PATH}"
 	parallel ::: \
 		"telepresence helm install" \
+		"DATA_PATH=${DATA_PATH} make -C ../../helm memphis" \
+		"DATA_PATH=${DATA_PATH}/user-service make -C ../user-service dependency" \
 		"DATA_PATH=${DATA_PATH} make dependency"
+	MODE=remote make -C ../user-service deploy
 	kubectl wait --for=condition=Ready pods --all --all-namespaces
 
 	telepresence connect
+	make -C ../user-service migrate-up
 	make migrate-up
+
 	MODE=local make deploy
+

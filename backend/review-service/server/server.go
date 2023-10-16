@@ -16,7 +16,7 @@ var (
 	customFunc grpc_recovery.RecoveryHandlerFunc
 )
 
-func NewServer(port string, reportService port.ReportServicePort) {
+func NewServer(port string, reviewService port.ReviewServicePort) {
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatalf("tcp connection failed: %v", err)
@@ -38,8 +38,8 @@ func NewServer(port string, reportService port.ReportServicePort) {
 		),
 	)
 
-	p := NewReportServer(reportService)
-	pbv1.RegisterReportServiceServer(s, p)
+	p := NewReviewServer(reviewService)
+	pbv1.RegisterReviewServiceServer(s, p)
 
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("grpc server failed: %v", err)

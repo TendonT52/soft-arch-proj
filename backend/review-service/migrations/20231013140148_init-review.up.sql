@@ -3,7 +3,9 @@ CREATE TABLE IF NOT EXISTS reviews(
     uid BIGSERIAL NOT NULL,
     cid BIGSERIAL NOT NULL,
     title VARCHAR(255) NOT NULL,
-    description VARCHAR(255) NOT NULL,
-    created_at BIGINT NOT NULL DEFAULT NOW(),
-    updated_at BIGINT NOT NULL DEFAULT NOW(),
+    description json NOT NULL,
+    rating integer NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    anonymous BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at BIGINT NOT NULL,
+    updated_at BIGINT NOT NULL
 )
