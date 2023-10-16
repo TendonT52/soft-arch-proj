@@ -9,11 +9,11 @@ import {
 import { parseType } from "@/lib/utils";
 
 export async function createStudent(
-  formData: z.infer<typeof createStudentSchema>
+  body: z.infer<typeof createStudentSchema>
 ): Promise<z.infer<typeof createStudentResponseSchema>> {
   const response = await fetch(`${env.API_URL}/v1/student`, {
     method: "POST",
-    body: JSON.stringify(formData),
+    body: JSON.stringify(body),
   });
 
   // TODO: revalidate something

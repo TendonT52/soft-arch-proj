@@ -7,14 +7,14 @@ import { getRefreshToken } from "@/lib/token";
 import { parseType } from "@/lib/utils";
 
 export async function login(
-  formData: z.infer<typeof loginSchema>
+  body: z.infer<typeof loginSchema>
 ): Promise<z.infer<typeof loginResponseSchema>> {
   const response = await fetch(`${env.API_URL}/v1/login`, {
     method: "POST",
-    body: JSON.stringify(formData),
+    body: JSON.stringify(body),
   });
-  const data = (await response.json()) as object;
   const refreshToken = getRefreshToken(response);
+  const data = (await response.json()) as object;
 
   // TODO: revalidate something
   return parseType(loginResponseSchema, { ...data, refreshToken });

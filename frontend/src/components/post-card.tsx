@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Building2Icon, ClockIcon } from "lucide-react";
+import { ClockIcon, MapPinnedIcon } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 
@@ -25,7 +25,7 @@ const PostCard = ({ post }: PostCardProps) => {
         <h3 className="mb-2 text-lg font-semibold tracking-tight">{topic}</h3>
         <div className="mb-4 flex gap-4">
           <div className="flex items-center">
-            <Building2Icon className="mr-1.5 h-3 w-3 opacity-50" />
+            <MapPinnedIcon className="mr-1.5 h-3 w-3 opacity-50" />
             <Link
               className="text-sm leading-none text-muted-foreground underline underline-offset-2"
               href="/companies/1"

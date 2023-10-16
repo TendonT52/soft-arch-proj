@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { TRANSFORMERS } from "@lexical/markdown";
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
@@ -14,9 +14,9 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { type EditorState } from "lexical";
 import { ChevronLeftIcon } from "lucide-react";
 import TextareaAutosize from "react-textarea-autosize";
+import { type Post } from "@/types/base/post";
 import { initialConfig } from "@/lib/lexical";
 import { CodeHighlightPlugin } from "./lexical/code-highlight-plugin";
 import { ListMaxIndentLevelPlugin } from "./lexical/list-max-index-level-plugin";
@@ -25,11 +25,16 @@ import { ModeToggle } from "./mode-toggle";
 import { PostEditorSaveDialog } from "./post-editor-save-dialog";
 import { Button } from "./ui/button";
 
-const PostEditor = () => {
-  const editorStateRef = useRef<EditorState>();
+type PostEditorProps = {
+  postId: string;
+  post: Post;
+  // accessToken:
+};
 
-  const [topic, setTopic] = useState("Untitled Post");
-  const description = editorStateRef.current?.toJSON();
+const PostEditor = ({ postId, post }: PostEditorProps) => {
+  const editorState = post.description;
+  const [description, setDescription] = useState<string>("{}");
+  const [topic, setTopic] = useState(post?.topic ?? "Untitled Post");
 
   return (
     <div className="relative flex min-h-screen items-start md:container">
@@ -41,7 +46,7 @@ const PostEditor = () => {
           </Link>
         </Button>
       </div>
-      <LexicalComposer initialConfig={initialConfig}>
+      <LexicalComposer initialConfig={{ ...initialConfig, editorState }}>
         <div className="relative mx-auto flex w-full max-w-3xl flex-col items-start">
           <div className="pointer-events-none sticky top-0 z-10 flex w-full justify-center bg-background pt-4">
             <ToolbarPlugin className="pointer-events-auto rounded-full border bg-background px-4 shadow-sm" />
@@ -81,12 +86,17 @@ const PostEditor = () => {
         <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
         <OnChangePlugin
           onChange={(editorState) => {
-            editorStateRef.current = editorState;
+            setDescription(JSON.stringify(editorState.toJSON()));
           }}
         />
       </LexicalComposer>
       <div className="sticky top-0 hidden h-screen flex-1 flex-col items-end justify-between py-6 lg:flex">
-        <PostEditorSaveDialog topic={topic} description={description} />
+        <PostEditorSaveDialog
+          postId={postId}
+          post={post}
+          topic={topic}
+          description={description}
+        />
         <ModeToggle />
       </div>
     </div>

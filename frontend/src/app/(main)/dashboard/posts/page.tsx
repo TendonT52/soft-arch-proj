@@ -1,51 +1,15 @@
 import Link from "next/link";
+import { getPostsMe } from "@/actions/get-posts-me";
 import { PlusIcon } from "lucide-react";
+import { getServerSession } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { PostItem } from "@/components/post-item";
 
-/* DUMMY */
-type Post = {
-  topic: string;
-  period: string;
-  positions: string[];
-  skills: string[];
-  benefits: string[];
-};
+export default async function Page() {
+  const session = await getServerSession();
+  if (!session) return <></>;
 
-const posts: Post[] = [
-  {
-    topic: "Social Engineering",
-    period: "Summer 2022",
-    positions: ["Software Developer", "Data Analyst"],
-    skills: ["Python", "SQL", "Data Analysis"],
-    benefits: ["Healthcare", "Flexible Work Hours"],
-  },
-  {
-    topic: "Marketing",
-    period: "Summer 2022",
-    positions: ["Marketing Coordinator", "Social Media Manager"],
-    skills: [
-      "Digital Marketing",
-      "Content Creation",
-      "Social Media Management",
-    ],
-    benefits: ["401(k) Matching", "Paid Time Off"],
-  },
-  {
-    topic: "Business",
-    period: "Summer 2022",
-    positions: ["Mechanical Engineer", "Product Designer"],
-    skills: ["CAD Design", "Mechanical Engineering", "Product Prototyping"],
-    benefits: ["Dental Insurance", "Tuition Reimbursement"],
-  },
-];
-
-const getPosts = () => posts;
-/* DUMMY */
-
-export default function Page() {
-  const posts = getPosts();
-
+  const { posts } = await getPostsMe(session.accessToken);
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between gap-8">

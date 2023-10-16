@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { MoreVerticalIcon, TrashIcon } from "lucide-react";
+import { type Post } from "@/types/base/post";
 import { cn, formatDate } from "@/lib/utils";
 import {
   AlertDialog,
@@ -22,18 +23,11 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
-/* DUMMY */
-type Post = {
-  topic: string;
-  period: string;
-  positions: string[];
-  skills: string[];
-  benefits: string[];
-};
-/* DUMMY */
-
 type PostItemProps = {
-  post: Post;
+  post: Post & {
+    postId: string;
+    updatedAt: string;
+  };
 };
 
 export function PostItem({ post }: PostItemProps) {
@@ -47,7 +41,7 @@ export function PostItem({ post }: PostItemProps) {
         </Link>
         <div>
           <p className="text-sm text-muted-foreground">
-            {formatDate(Date.now())}
+            {formatDate(parseInt(post.updatedAt) * 1000)}
           </p>
         </div>
       </div>
@@ -60,7 +54,7 @@ export function PostItem({ post }: PostItemProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem>
-            <Link href="/editor/1" className="flex w-full">
+            <Link href={`/editor/${post.postId}`} className="flex w-full">
               Edit
             </Link>
           </DropdownMenuItem>

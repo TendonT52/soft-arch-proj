@@ -2,7 +2,10 @@ import { getCompanyMe } from "@/actions/get-company-me";
 import { getStudentMe } from "@/actions/get-student-me";
 import { login } from "@/actions/login";
 import { refresh } from "@/actions/refresh";
-import { getServerSession, type AuthOptions } from "next-auth";
+import {
+  getServerSession as nextAuthGetServerSession,
+  type AuthOptions,
+} from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { UserRole } from "@/types/base/user";
 import { validateAccessToken, verifyAccessToken } from "./token";
@@ -91,7 +94,6 @@ export const authOptions: AuthOptions = {
   },
 };
 
-export async function getSessionUser() {
-  const session = await getServerSession(authOptions);
-  return session?.user ?? null;
+export async function getServerSession() {
+  return await nextAuthGetServerSession(authOptions);
 }

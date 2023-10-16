@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { type DateRange } from "react-day-picker";
@@ -13,11 +13,26 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+type DatePickerWithRangeProps = React.HTMLAttributes<HTMLButtonElement> & {
+  date?: DateRange;
+  onDateChange?: (date: DateRange) => void;
+  value?: string;
+};
+
 export function DatePickerWithRange({
+  date,
+  onDateChange,
+  value,
   className,
   ...props
-}: React.HTMLAttributes<HTMLButtonElement>) {
-  const [date, setDate] = React.useState<DateRange>();
+}: DatePickerWithRangeProps) {
+  const [_date, _setDate] = useState<DateRange>();
+
+  useEffect(() => {
+    if (_date && onDateChange) {
+      onDateChange(_date);
+    }
+  }, [_date, onDateChange]);
 
   return (
     <Popover>
@@ -37,7 +52,7 @@ export function DatePickerWithRange({
               ? `${format(date.from, "LLL dd, y")} - 
                   ${format(date.to, "LLL dd, y")}`
               : format(date.from, "LLL dd, y")
-            : "Date range"}
+            : value ?? "Date range"}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
@@ -45,8 +60,8 @@ export function DatePickerWithRange({
           initialFocus
           mode="range"
           defaultMonth={date?.from}
-          selected={date}
-          onSelect={setDate}
+          selected={date ?? _date}
+          onSelect={_setDate}
           numberOfMonths={2}
         />
       </PopoverContent>

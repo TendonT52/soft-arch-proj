@@ -1,16 +1,21 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   FileTextIcon,
+  SettingsIcon,
   StarIcon,
-  UserIcon,
   type LucideIcon,
 } from "lucide-react";
+import { UserRole, type User } from "@/types/base/user";
+import { cn } from "@/lib/utils";
 
 type NavItem = {
   Icon: LucideIcon;
   title: string;
   href: string;
-  type?: "company" | "student";
+  role?: UserRole;
 };
 
 const navItems: NavItem[] = [
@@ -18,27 +23,34 @@ const navItems: NavItem[] = [
     Icon: FileTextIcon,
     title: "Posts",
     href: "/dashboard/posts",
-    type: "company",
+    role: UserRole.Company,
   },
   { Icon: StarIcon, title: "Reviews", href: "/dashboard/reviews" },
-  { Icon: UserIcon, title: "Account", href: "/dashboard/account" },
+  { Icon: SettingsIcon, title: "Settings", href: "/dashboard/settings" },
 ];
 
-const DashboardNav = () => {
-  const userType = "company";
+type DashboardNavProps = {
+  user: User;
+};
+
+const DashboardNav = ({ user }: DashboardNavProps) => {
+  const pathname = usePathname();
 
   return (
     <div className="flex h-full flex-col gap-2">
       {navItems.map(
-        (item) =>
-          (!item.type || item.type === userType) && (
+        ({ Icon, title, href, role }) =>
+          (!role || role === user.role) && (
             <Link
-              className="flex h-9 items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-              href={item.href}
-              key={item.href}
+              className={cn(
+                "flex h-9 items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                pathname === href && "bg-accent"
+              )}
+              href={href}
+              key={href}
             >
-              <item.Icon className="mr-2 h-4 w-4" />
-              {item.title}
+              <Icon className="mr-2 h-4 w-4" />
+              {title}
             </Link>
           )
       )}
