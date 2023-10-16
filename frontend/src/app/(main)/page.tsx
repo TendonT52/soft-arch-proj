@@ -70,12 +70,12 @@ export default function Home() {
           </p>
           <div className="hidden lg:block">
             <SignUpOptionMenu align="end" side="right" direction="row">
-              <Button>Get started</Button>
+              <Button>Get started -&gt;</Button>
             </SignUpOptionMenu>
           </div>
           <div className="block lg:hidden">
             <SignUpOptionMenu align="center" direction="row">
-              <Button>Get started</Button>
+              <Button>Get started -&gt;</Button>
             </SignUpOptionMenu>
           </div>
         </div>

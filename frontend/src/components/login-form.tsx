@@ -1,17 +1,68 @@
 "use client";
 
-import { KeyIcon, LogIn, MailIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { KeyIcon, Loader2Icon, LogInIcon, MailIcon } from "lucide-react";
+import { signIn } from "next-auth/react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { cn } from "@/lib/utils";
+import { FormErrorTooltip } from "./form-error-tooltip";
 import { Logo } from "./logo";
 import { SignUpOptionMenu } from "./sign-up-option-menu";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Separator } from "./ui/separator";
+import { useToast } from "./ui/toaster";
+
+const formDataSchema = z.object({
+  email: z
+    .string()
+    .min(1, { message: "Email is required" })
+    .email({ message: "Invalid email" }),
+  password: z.string().min(1, { message: "Password is required" }),
+});
+
+type FormData = z.infer<typeof formDataSchema>;
 
 const LogInForm = () => {
+  const router = useRouter();
+  const { toast } = useToast();
+  const {
+    register,
+    formState: { isSubmitting, errors },
+    handleSubmit,
+  } = useForm<FormData>({
+    mode: "onChange",
+    resolver: zodResolver(formDataSchema),
+  });
+
+  const onSubmit = async (data: FormData) => {
+    const { email, password } = data;
+    const signInResult = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+    if (signInResult?.error) {
+      toast({
+        title: "Error",
+        description: "Login failed.",
+        variant: "destructive",
+      });
+    } else {
+      router.refresh();
+      router.push("/dashboard");
+    }
+  };
+
   return (
     <div className="relative flex flex-1 items-center justify-center">
-      <div className="mx-auto flex w-full max-w-lg flex-col items-center justify-center p-8 lg:max-w-sm lg:p-0">
+      <form
+        className="mx-auto flex w-full max-w-lg flex-col items-center justify-center p-8 lg:max-w-sm lg:p-0"
+        onSubmit={(...a) => void handleSubmit(onSubmit)(...a)}
+      >
         <div className="mb-6 flex w-full flex-col items-center gap-6">
           <Logo />
           <h1 className="max-w-[85%] text-center text-2xl font-semibold leading-none tracking-tight sm:max-w-none">
@@ -23,17 +74,27 @@ const LogInForm = () => {
             Enter your Email and password to sign in
           </p>
         </div>
-        <form className="flex w-full flex-col items-center gap-3">
-          <div className="relative mb-4 flex w-full">
+        <div className="flex w-full flex-col items-center gap-3">
+          <fieldset className="relative mb-4 flex w-full items-center gap-4">
             <Label
               className="absolute flex h-full w-10 items-center justify-center"
               htmlFor="email"
             >
               <MailIcon className="h-4 w-4 opacity-50" />
             </Label>
-            <Input className="flex-1 pl-10" placeholder="Email" id="email" />
-          </div>
-          <div className="relative mb-4 flex w-full">
+            <Input
+              {...register("email")}
+              className={cn(
+                "flex-1 pl-10",
+                errors.email &&
+                  "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+              )}
+              placeholder="Email"
+              id="email"
+            />
+            <FormErrorTooltip message={errors.email?.message} />
+          </fieldset>
+          <fieldset className="relative mb-4 flex w-full items-center gap-4">
             <Label
               className="absolute flex h-full w-10 items-center justify-center"
               htmlFor="password"
@@ -41,15 +102,25 @@ const LogInForm = () => {
               <KeyIcon className="h-4 w-4 opacity-50" />
             </Label>
             <Input
-              className="flex-1 pl-10"
+              {...register("password")}
+              className={cn(
+                "flex-1 pl-10",
+                errors.password &&
+                  "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+              )}
               placeholder="Password"
               type="password"
               id="password"
             />
-          </div>
+            <FormErrorTooltip message={errors.password?.message} />
+          </fieldset>
           <div className="flex items-center">
-            <Button type="button">
-              <LogIn className="mr-2 h-4 w-4" />
+            <Button disabled={isSubmitting} type="submit">
+              {isSubmitting ? (
+                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <LogInIcon className="mr-2 h-4 w-4" />
+              )}
               Sign In
             </Button>
           </div>
@@ -64,8 +135,8 @@ const LogInForm = () => {
               </SignUpOptionMenu>
             </p>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 };

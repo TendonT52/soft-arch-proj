@@ -1,11 +1,13 @@
 import * as React from "react";
 import Link from "next/link";
+import { getSessionUser } from "@/lib/auth";
 import { Logo } from "./logo";
+import { SignOutButton } from "./sign-out-button";
 import { SignUpOptionMenu } from "./sign-up-option-menu";
 import { Button } from "./ui/button";
 
-const Header = () => {
-  const userType: string = "student";
+const Header = async () => {
+  const user = await getSessionUser();
 
   return (
     <header className="container sticky left-0 right-0 top-0 z-50 flex h-16 items-center justify-between bg-background/70 backdrop-blur-xl backdrop-saturate-150">
@@ -16,7 +18,9 @@ const Header = () => {
           <span className="text-primary">Hub</span>
         </div>
       </Link>
-      {userType === undefined ? (
+      {user ? (
+        <SignOutButton />
+      ) : (
         <div className="flex items-center gap-4 text-sm font-medium">
           <Link
             className="text-foreground transition-colors hover:text-foreground/90"
@@ -30,10 +34,6 @@ const Header = () => {
             </Button>
           </SignUpOptionMenu>
         </div>
-      ) : userType === "company" ? (
-        <>Company</>
-      ) : (
-        <>Student</>
       )}
     </header>
   );

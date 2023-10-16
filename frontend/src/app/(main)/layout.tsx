@@ -1,4 +1,3 @@
-import { Toaster } from "@/components/ui/toaster";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 
@@ -12,7 +11,6 @@ export default function Layout({ children }: LayoutProps) {
       <Header />
       {children}
       <Footer />
-      <Toaster />
     </div>
   );
 }

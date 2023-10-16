@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { createCompany } from "@/actions/create-company";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  BriefcaseIcon,
+  Building2Icon,
   CheckCircleIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -43,7 +43,10 @@ const secondPageSchema = z.object({
     .string()
     .min(1, { message: "Email is required" })
     .email({ message: "Invalid email" }),
-  password: z.string().min(1, { message: "Password is required" }),
+  password: z
+    .string()
+    .min(1, { message: "Password is required" })
+    .min(6, { message: "Password length must be greater than 6" }),
   passwordConfirm: z
     .string()
     .min(1, { message: "Please confirm your password" }),
@@ -108,6 +111,7 @@ const RegisterCompanyForm = () => {
       toast({
         title: "Error",
         description: response.message,
+        variant: "destructive",
       });
     }
   };
@@ -302,7 +306,7 @@ const RegisterCompanyForm = () => {
                 {isSubmitting ? (
                   <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <BriefcaseIcon className="mr-2 h-4 w-4" />
+                  <Building2Icon className="mr-2 h-4 w-4" />
                 )}
                 Create account
               </Button>

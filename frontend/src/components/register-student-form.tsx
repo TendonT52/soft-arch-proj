@@ -11,6 +11,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   KeyIcon,
+  Loader2Icon,
   MailIcon,
 } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
@@ -57,7 +58,10 @@ const secondPageSchema = z.object({
     .regex(/^\d{10}@student\.chula\.ac\.th$/, {
       message: "Email must be studentID with @student.chula.ac.th",
     }),
-  password: z.string().min(1, { message: "Password is required" }),
+  password: z
+    .string()
+    .min(1, { message: "Password is required" })
+    .min(6, { message: "Password length must be greater than 6" }),
   passwordConfirm: z
     .string()
     .min(1, { message: "Please confirm your password" }),
@@ -82,7 +86,7 @@ const RegisterStudentForm = () => {
   const { toast } = useToast();
   const {
     register,
-    formState: { errors },
+    formState: { isSubmitting, errors },
     handleSubmit,
     setValue,
     clearErrors,
@@ -131,6 +135,7 @@ const RegisterStudentForm = () => {
       toast({
         title: "Error",
         description: response.message,
+        variant: "destructive",
       });
     }
   };
@@ -218,7 +223,7 @@ const RegisterStudentForm = () => {
                     "flex-[0.5]",
                     year === undefined && "text-muted-foreground",
                     errors.year &&
-                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                      "ring-2 !ring-destructive ring-offset-2 focus-visible:ring-destructive"
                   )}
                 >
                   {year ?? "Year"}
@@ -351,8 +356,12 @@ const RegisterStudentForm = () => {
               <FormErrorTooltip message={errors.terms?.message} />
             </fieldset>
             <div className="flex items-center">
-              <Button type="submit">
-                <BriefcaseIcon className="mr-2 h-4 w-4" />
+              <Button disabled={isSubmitting} type="submit">
+                {isSubmitting ? (
+                  <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <BriefcaseIcon className="mr-2 h-4 w-4" />
+                )}
                 Create account
               </Button>
             </div>
