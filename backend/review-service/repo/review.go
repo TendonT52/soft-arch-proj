@@ -74,7 +74,7 @@ func (r *reviewRepository) GetReviewByID(ctx context.Context, reviewID int64) (*
 }
 
 func (r *reviewRepository) GetReviewsByCompany(ctx context.Context, companyID int64) ([]*pbv1.ReviewCompany, error) {
-	query := `SELECT rid, uid, title, description, rating, anonymous, updated_at FROM reviews WHERE cid = $1 ORDER BY title ASC`
+	query := `SELECT rid, uid, title, description, rating, anonymous, updated_at FROM reviews WHERE cid = $1 ORDER BY updated_at DESC, rating DESC`
 
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
