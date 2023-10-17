@@ -28,8 +28,15 @@ const roundRobin = <T,>(...arrays: T[][]): T[] => {
 };
 
 const PostCard = ({ post }: PostCardProps) => {
-  const { topic, openPositions, requiredSkills, benefits, owner, updatedAt } =
-    post;
+  const {
+    topic,
+    openPositions,
+    requiredSkills,
+    benefits,
+    owner,
+    updatedAt,
+    postId,
+  } = post;
   return (
     <div className="flex justify-between rounded-lg border bg-card text-card-foreground shadow-sm">
       <div className="p-6">
@@ -38,7 +45,7 @@ const PostCard = ({ post }: PostCardProps) => {
           <div className="flex items-center">
             <MapPinnedIcon className="mr-1.5 h-3 w-3 opacity-50" />
             <Link
-              className="text-sm leading-none text-muted-foreground underline underline-offset-2"
+              className="text-sm leading-none text-muted-foreground hover:underline hover:underline-offset-2"
               href="/companies/1"
             >
               {owner.name}
@@ -65,7 +72,7 @@ const PostCard = ({ post }: PostCardProps) => {
       </div>
       <div className="flex flex-col justify-center gap-2 p-6">
         <Button asChild>
-          <Link href="/posts/1">View</Link>
+          <Link href={`/posts/${postId}`}>View</Link>
         </Button>
       </div>
     </div>

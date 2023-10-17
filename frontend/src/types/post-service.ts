@@ -1,4 +1,4 @@
-/* UserService */
+/* PostService */
 
 import { z } from "zod";
 import { postSchema } from "./base/post";
