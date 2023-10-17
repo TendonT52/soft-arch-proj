@@ -25,8 +25,25 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { useToast } from "./ui/toaster";
 
+const formDataSchema = z.object({
+  openPositions: z.string().trim(),
+  requiredSkills: z.string().trim(),
+  benefits: z.string().trim(),
+  howTo: z.string().trim(),
+});
+
+type FormData = z.infer<typeof formDataSchema>;
+
+type PostEditorSaveDialogProps = {
+  post: Post & {
+    postId: string;
+  };
+  topic: string;
+  description: string;
+};
+
 /* NAIVE SHIT */
-function getUserElements(remove: string[], add: string[]) {
+const getUserElements = (remove: string[], add: string[]) => {
   const userElement = [
     ...remove
       .filter((value) => !add.includes(value))
@@ -43,26 +60,9 @@ function getUserElements(remove: string[], add: string[]) {
   ];
   if (userElement.length === 0) return [{ action: "SAME" as const }];
   return userElement;
-}
-
-const formDataSchema = z.object({
-  openPositions: z.string().trim(),
-  requiredSkills: z.string().trim(),
-  benefits: z.string().trim(),
-  howTo: z.string().trim(),
-});
-
-type FormData = z.infer<typeof formDataSchema>;
-
-type PostEditorSaveDialogProps = {
-  postId: string;
-  post: Post;
-  topic: string;
-  description: string;
 };
 
 const PostEditorSaveDialog = ({
-  postId,
   post,
   topic,
   description,
@@ -85,10 +85,10 @@ const PostEditorSaveDialog = ({
   });
 
   // const {} = useWatch({ control });
-  const [period, setPeriod] = useState(post?.period);
+  const [period, setPeriod] = useState(post.period);
 
   const onSubmit = async (data: FormData) => {
-    const response = await updatePost(postId, {
+    const response = await updatePost(post.postId, {
       post: {
         topic,
         description,
@@ -137,7 +137,7 @@ const PostEditorSaveDialog = ({
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-6">
-            <div className="flex w-full gap-4">
+            <fieldset className="flex w-full gap-4">
               <div className="flex flex-1 flex-col gap-2">
                 <Label
                   className="w-full text-sm font-medium leading-none"
@@ -171,24 +171,8 @@ const PostEditorSaveDialog = ({
                   }
                 />
               </div>
-            </div>
-            <div className="flex w-full flex-col gap-2">
-              <Label
-                className="w-full text-sm font-medium leading-none"
-                htmlFor="skills"
-              >
-                Required skills
-                <span className="ml-4 font-normal text-muted-foreground">
-                  *Space delimited
-                </span>
-              </Label>
-              <Input
-                {...register("requiredSkills")}
-                id="requiredSkills"
-                placeholder="SQL slamming"
-              />
-            </div>
-            <div className="flex w-full flex-col gap-2">
+            </fieldset>
+            <fieldset className="flex w-full flex-col gap-2">
               <Label
                 className="w-full text-sm font-medium leading-none"
                 htmlFor="positions"
@@ -203,8 +187,24 @@ const PostEditorSaveDialog = ({
                 id="openPositions"
                 placeholder="Top of the world"
               />
-            </div>
-            <div className="flex w-full flex-col gap-2">
+            </fieldset>
+            <fieldset className="flex w-full flex-col gap-2">
+              <Label
+                className="w-full text-sm font-medium leading-none"
+                htmlFor="skills"
+              >
+                Required skills
+                <span className="ml-4 font-normal text-muted-foreground">
+                  *Space delimited
+                </span>
+              </Label>
+              <Input
+                {...register("requiredSkills")}
+                id="requiredSkills"
+                placeholder="SQL slamming"
+              />
+            </fieldset>
+            <fieldset className="flex w-full flex-col gap-2">
               <Label
                 className="w-full text-sm font-medium leading-none"
                 htmlFor="benefits"
@@ -219,8 +219,8 @@ const PostEditorSaveDialog = ({
                 id="benefits"
                 placeholder="Coffee"
               />
-            </div>
-            <div className="flex flex-col gap-2">
+            </fieldset>
+            <fieldset className="flex flex-col gap-2">
               <Label
                 className="text-sm font-medium leading-none"
                 htmlFor="howTo"
@@ -233,7 +233,7 @@ const PostEditorSaveDialog = ({
                 className="resize-none"
                 placeholder="Run to the office like the flash ⚡"
               />
-            </div>
+            </fieldset>
           </div>
           <DialogFooter className="mt-2 flex sm:justify-center">
             <Button size="sm" disabled={isSubmitting} type="submit">

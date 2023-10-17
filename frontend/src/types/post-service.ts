@@ -19,16 +19,18 @@ import { postSchema } from "./base/post";
 export const getPostsResponseSchema = z.object({
   status: z.string(),
   message: z.string(),
-  posts: z.array(
-    postSchema.extend({
-      owner: z.object({
-        id: z.string(),
-        name: z.string(),
-      }),
-      postId: z.string(),
-      updatedAt: z.string(),
-    })
-  ),
+  posts: z
+    .array(
+      postSchema.extend({
+        owner: z.object({
+          id: z.string(),
+          name: z.string(),
+        }),
+        postId: z.string(),
+        updatedAt: z.string(),
+      })
+    )
+    .optional(),
 });
 
 /**

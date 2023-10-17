@@ -13,7 +13,7 @@ interface FormErrorTooltipProps {
   message?: string;
 }
 
-export function FormErrorTooltip({ message }: FormErrorTooltipProps) {
+const FormErrorTooltip = ({ message }: FormErrorTooltipProps) => {
   const [open, setOpen] = useState(false);
 
   if (message === undefined) {
@@ -39,4 +39,6 @@ export function FormErrorTooltip({ message }: FormErrorTooltipProps) {
       </Tooltip>
     </TooltipProvider>
   );
-}
+};
+
+export { FormErrorTooltip };

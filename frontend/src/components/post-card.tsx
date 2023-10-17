@@ -1,24 +1,35 @@
 import Link from "next/link";
 import { ClockIcon, MapPinnedIcon } from "lucide-react";
+import { type Post } from "@/types/base/post";
+import { formatDate } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 
-/* DUMMY */
-type Post = {
-  topic: string;
-  period: string;
-  positions: string[];
-  skills: string[];
-  benefits: string[];
-};
-/* DUMMY */
-
 type PostCardProps = {
-  post: Post;
+  post: Post & {
+    owner: {
+      id: string;
+      name: string;
+    };
+    updatedAt: string;
+    postId: string;
+  };
+};
+
+const roundRobin = <T,>(...arrays: T[][]): T[] => {
+  const maxLength = Math.max(...arrays.map((arr) => arr.length));
+  return Array.from({ length: maxLength }, (_, i) =>
+    arrays.reduce((acc, cur) => {
+      const val = cur[i];
+      if (val) acc.push(val);
+      return acc;
+    }, [])
+  ).flat();
 };
 
 const PostCard = ({ post }: PostCardProps) => {
-  const { topic, positions } = post;
+  const { topic, openPositions, requiredSkills, benefits, owner, updatedAt } =
+    post;
   return (
     <div className="flex justify-between rounded-lg border bg-card text-card-foreground shadow-sm">
       <div className="p-6">
@@ -30,18 +41,18 @@ const PostCard = ({ post }: PostCardProps) => {
               className="text-sm leading-none text-muted-foreground underline underline-offset-2"
               href="/companies/1"
             >
-              Umbrella Corporation
+              {owner.name}
             </Link>
           </div>
           <div className="flex items-center">
             <ClockIcon className="mr-1.5 h-3 w-3 opacity-50" />
             <span className="text-sm leading-none text-muted-foreground">
-              August 2023
+              {formatDate(parseInt(updatedAt) * 1000)}
             </span>
           </div>
         </div>
         <div className="flex gap-2">
-          {positions.map((skill) => (
+          {roundRobin(openPositions, requiredSkills, benefits).map((skill) => (
             <Badge
               key={`badge${skill}`}
               className="px-2 font-medium"

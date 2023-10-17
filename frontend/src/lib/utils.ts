@@ -26,7 +26,7 @@ export function parseType<T>(schema: z.ZodSchema<T>, data: unknown) {
   return schema.parse(data);
 }
 
-export function getSearchArray(searchParam: string | string[] | undefined) {
+export function getSearchArray(searchParam?: string | string[]) {
   return searchParam
     ? Array.isArray(searchParam)
       ? searchParam

@@ -4,7 +4,6 @@ import * as React from "react";
 import { useState } from "react";
 import Link from "next/link";
 import { TRANSFORMERS } from "@lexical/markdown";
-import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
@@ -26,12 +25,12 @@ import { PostEditorSaveDialog } from "./post-editor-save-dialog";
 import { Button } from "./ui/button";
 
 type PostEditorProps = {
-  postId: string;
-  post: Post;
-  // accessToken:
+  post: Post & {
+    postId: string;
+  };
 };
 
-const PostEditor = ({ postId, post }: PostEditorProps) => {
+const PostEditor = ({ post }: PostEditorProps) => {
   const editorState = post.description;
   const [description, setDescription] = useState<string>("{}");
   const [topic, setTopic] = useState(post?.topic ?? "Untitled Post");
@@ -78,7 +77,7 @@ const PostEditor = ({ postId, post }: PostEditorProps) => {
           </div>
         </div>
         <HistoryPlugin />
-        <AutoFocusPlugin />
+        {/* <AutoFocusPlugin /> */}
         <CodeHighlightPlugin />
         <ListPlugin />
         <LinkPlugin />
@@ -92,7 +91,6 @@ const PostEditor = ({ postId, post }: PostEditorProps) => {
       </LexicalComposer>
       <div className="sticky top-0 hidden h-screen flex-1 flex-col items-end justify-between py-6 lg:flex">
         <PostEditorSaveDialog
-          postId={postId}
           post={post}
           topic={topic}
           description={description}

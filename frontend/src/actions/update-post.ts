@@ -22,7 +22,7 @@ export async function updatePost(
     method: "PUT",
     body: JSON.stringify({
       ...body,
-      accessToken: session.accessToken,
+      accessToken: body.accessToken ?? session.accessToken,
     }),
   });
 

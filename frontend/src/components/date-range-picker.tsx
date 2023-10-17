@@ -19,13 +19,13 @@ type DatePickerWithRangeProps = React.HTMLAttributes<HTMLButtonElement> & {
   value?: string;
 };
 
-export function DatePickerWithRange({
+const DatePickerWithRange = ({
   date,
   onDateChange,
   value,
   className,
   ...props
-}: DatePickerWithRangeProps) {
+}: DatePickerWithRangeProps) => {
   const [_date, _setDate] = useState<DateRange>();
 
   useEffect(() => {
@@ -67,4 +67,6 @@ export function DatePickerWithRange({
       </PopoverContent>
     </Popover>
   );
-}
+};
+
+export { DatePickerWithRange };
