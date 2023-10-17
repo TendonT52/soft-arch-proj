@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
 import localFont from "next/font/local";
 import { cn } from "@/lib/utils";
-import { Indicator } from "@/components/indicator";
+import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -48,7 +48,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
           <Toaster />
-          <Indicator />
+          <TailwindIndicator />
         </ThemeProvider>
       </body>
     </html>

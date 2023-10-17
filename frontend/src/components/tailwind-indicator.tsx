@@ -1,4 +1,4 @@
-const Indicator = () => {
+const TailwindIndicator = () => {
   if (process.env.NODE_ENV === "production") return <></>;
 
   return (
@@ -15,4 +15,4 @@ const Indicator = () => {
   );
 };
 
-export { Indicator };
+export { TailwindIndicator };

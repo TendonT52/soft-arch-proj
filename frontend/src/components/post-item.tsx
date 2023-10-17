@@ -36,7 +36,7 @@ export function PostItem({ post }: PostItemProps) {
   return (
     <div className="flex items-center justify-between p-4">
       <div className="flex flex-col items-start gap-1">
-        <Link href="/editor/1" className="font-semibold hover:underline">
+        <Link href={`/editor/${post.postId}`} className="font-semibold hover:underline">
           {post.topic}
         </Link>
         <div>

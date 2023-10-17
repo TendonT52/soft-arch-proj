@@ -18,12 +18,6 @@ export async function updatePost(
     throw new Error("No session");
   }
 
-  body.post.openPositions = [{ action: "SAME" as const }];
-  body.post.benefits = [{ action: "SAME" as const }];
-  body.post.requiredSkills = [{ action: "SAME" as const }];
-
-  console.log(body);
-
   const response = await fetch(`${env.API_URL}/v1/posts/${id}`, {
     method: "PUT",
     body: JSON.stringify({

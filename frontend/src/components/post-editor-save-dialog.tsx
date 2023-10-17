@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { updatePost } from "@/actions/update-post";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -24,24 +25,31 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { useToast } from "./ui/toaster";
 
+/* NAIVE SHIT */
 function getUserElements(remove: string[], add: string[]) {
-  return [
-    ...remove.map((value) => ({
-      action: "REMOVE" as const,
-      value,
-    })),
-    ...add.map((value) => ({
-      action: "ADD" as const,
-      value,
-    })),
+  const userElement = [
+    ...remove
+      .filter((value) => !add.includes(value))
+      .map((value) => ({
+        action: "REMOVE" as const,
+        value,
+      })),
+    ...add
+      .filter((value) => !remove.includes(value))
+      .map((value) => ({
+        action: "ADD" as const,
+        value,
+      })),
   ];
+  if (userElement.length === 0) return [{ action: "SAME" as const }];
+  return userElement;
 }
 
 const formDataSchema = z.object({
-  openPositions: z.string(),
-  requiredSkills: z.string(),
-  benefits: z.string(),
-  howTo: z.string(),
+  openPositions: z.string().trim(),
+  requiredSkills: z.string().trim(),
+  benefits: z.string().trim(),
+  howTo: z.string().trim(),
 });
 
 type FormData = z.infer<typeof formDataSchema>;
@@ -59,6 +67,7 @@ const PostEditorSaveDialog = ({
   topic,
   description,
 }: PostEditorSaveDialogProps) => {
+  const router = useRouter();
   const { toast } = useToast();
   const {
     register,
@@ -101,6 +110,7 @@ const PostEditorSaveDialog = ({
         title: "Success",
         description: response.message,
       });
+      router.refresh();
     } else {
       toast({
         title: "Error",
@@ -108,23 +118,6 @@ const PostEditorSaveDialog = ({
         variant: "destructive",
       });
     }
-    // console.log({
-    //   post: {
-    //     topic,
-    //     description,
-    //     period,
-    //     howTo: data.howTo,
-    //     openPositions: getUserElements(
-    //       post.openPositions,
-    //       data.openPositions.split(/\s+/)
-    //     ),
-    //     benefits: getUserElements(post.benefits, data.benefits.split(/\s+/)),
-    //     requiredSkills: getUserElements(
-    //       post.requiredSkills,
-    //       data.requiredSkills.split(/\s+/)
-    //     ),
-    //   },
-    // });
   };
 
   return (
