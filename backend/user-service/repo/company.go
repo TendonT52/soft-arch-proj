@@ -9,6 +9,7 @@ import (
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
+	"github.com/lib/pq"
 )
 
 func (r *userRepository) CreateCompany(ctx context.Context, company *pbv1.CreateCompanyRequest, createTime int64) (int64, error) {
@@ -252,7 +253,7 @@ func (r *userRepository) DeleteCompanies(ctx context.Context) error {
 
 func (r *userRepository) GetCompanies(ctx context.Context, ids []int64) ([]*pbv1.CompanyInfo, error) {
 	query := "SELECT users.id, companies.name FROM users INNER JOIN companies ON users.id = companies.cid WHERE users.id = ANY($1)"
-	rows, err := r.db.QueryContext(ctx, query, ids)
+	rows, err := r.db.QueryContext(ctx, query, pq.Array(ids))
 	if err != nil {
 		return nil, domain.ErrInternal.From(err.Error(), err)
 	}

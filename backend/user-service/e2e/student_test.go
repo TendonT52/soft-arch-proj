@@ -98,7 +98,7 @@ func TestGetStudentMe(t *testing.T) {
 				AccessToken: access_token_wrong,
 			},
 			expect: &pbv1.GetStudentResponse{
-				Status: 500,
+				Status:  500,
 				Message: "Something went wrong",
 			},
 		},
@@ -358,7 +358,7 @@ func TestUpdateStudent(t *testing.T) {
 		"invalid token": {
 			req: &pbv1.UpdateStudentRequest{
 				AccessToken: "invalid token",
-				Student: &pbv1.UpdatedStudent{},
+				Student:     &pbv1.UpdatedStudent{},
 			},
 			expect: &pbv1.UpdateCompanyResponse{
 				Status:  401,
@@ -384,4 +384,89 @@ func TestUpdateStudent(t *testing.T) {
 	require.Equal(t, "UPADATED Mock Engineering", resGet.Faculty)
 	require.Equal(t, "UPADATED Mock Computer Engineering", resGet.Major)
 	require.Equal(t, int32(3), resGet.Year)
+}
+
+func TestGetStudents(t *testing.T) {
+	config, _ := config.LoadConfig("..")
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		t.Errorf("could not connect to grpc server: %v", err)
+	}
+	defer conn.Close()
+
+	c := pbv1.NewAuthServiceClient(conn)
+	u := pbv1.NewUserServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Create Admin
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
+	admin := &pbv1.CreateAdminRequest{
+		Email:           utils.GenerateRandomString(18) + "@admin.com",
+		Password:        "password-test",
+		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
+	}
+	a, err := c.CreateAdmin(ctx, admin)
+	require.Equal(t, int64(201), a.Status)
+	require.NoError(t, err)
+
+	// Admin Sign In
+	ad, err := c.SignIn(ctx, &pbv1.LoginRequest{
+		Email:    admin.Email,
+		Password: admin.Password,
+	})
+	require.Equal(t, int64(200), ad.Status)
+	require.NoError(t, err)
+
+	_, id1 := createMockStudent(t, "Student - 1", ad.AccessToken)
+	_, id2 := createMockStudent(t, "Student - 2", ad.AccessToken)
+	_, id3 := createMockStudent(t, "Student - 3", ad.AccessToken)
+
+	tests := map[string]struct {
+		req    *pbv1.GetStudentsRequest
+		expect *pbv1.GetStudentsResponse
+	}{
+		"success": {
+			req: &pbv1.GetStudentsRequest{
+				AccessToken: ad.AccessToken,
+				Ids:         []int64{id1, id2, id3},
+			},
+			expect: &pbv1.GetStudentsResponse{
+				Status: 200,
+				Students: []*pbv1.StudentInfo{
+					{
+						Id:   id1,
+						Name: "Student - 1",
+					},
+					{
+						Id:   id2,
+						Name: "Student - 2",
+					},
+					{
+						Id:   id3,
+						Name: "Student - 3",
+					},
+				},
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			res, err := u.GetStudents(ctx, tc.req)
+			require.NoError(t, err)
+			require.Equal(t, tc.expect.Status, res.Status)
+			if tc.expect.Students != nil {
+				for i, s := range tc.expect.Students {
+					require.Equal(t, s.Id, res.Students[i].Id)
+					require.Equal(t, s.Name, res.Students[i].Name)
+				}
+			}
+		})
+	}
 }

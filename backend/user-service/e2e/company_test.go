@@ -401,3 +401,96 @@ func TestUpdateCompany(t *testing.T) {
 	require.Equal(t, "IT New", get_res.Category)
 	require.Equal(t, domain.ComapanyStatusApprove, get_res.Status)
 }
+
+
+func TestGetCompanies(t *testing.T) {
+	config, _ := config.LoadConfig("..")
+	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		t.Errorf("could not connect to grpc server: %v", err)
+	}
+	defer conn.Close()
+
+	c := pbv1.NewAuthServiceClient(conn)
+	u := pbv1.NewUserServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	mail1 := utils.GenerateRandomString(10) + "@company.com"
+	mail2 := utils.GenerateRandomString(10) + "@company.com"
+	mail3 := utils.GenerateRandomString(10) + "@company.com"
+
+	c1 := createMockComapny(t, "Mock Company - 1", mail1, "Company - 1 desc", "Bangkok", "0123456789", "Technology")
+	c2 := createMockComapny(t, "Mock Company - 2", mail2, "Company - 2 desc", "Bangkok", "0123456789", "Bank and Tech")
+	c3 := createMockComapny(t, "Mock Company - 3", mail3, "Company - 3 desc", "Bangkok", "0123456789", "Consultant")
+
+	// Craete Admin
+	admin_access_token, err := utils.CreateAccessToken(365*24*time.Hour, &domain.Payload{
+		UserId: 0,
+		Role:   domain.AdminRole,
+	})
+	admin := &pbv1.CreateAdminRequest{
+		Email:           utils.GenerateRandomString(18) + "@admin.com",
+		Password:        "password-test",
+		PasswordConfirm: "password-test",
+		AccessToken:     admin_access_token,
+	}
+	a, err := c.CreateAdmin(ctx, admin)
+	require.Equal(t, int64(201), a.Status)
+	require.NoError(t, err)
+
+	// Admin Sign In
+	ad, err := c.SignIn(ctx, &pbv1.LoginRequest{
+		Email:    admin.Email,
+		Password: admin.Password,
+	})
+	require.Equal(t, int64(200), ad.Status)
+	require.NoError(t, err)
+
+	approveMultipleCompanies(t, []int64{c1.Id, c2.Id, c3.Id}, ad, u, domain.ComapanyStatusApprove)
+
+	tests := map[string]struct {
+		req    *pbv1.GetCompaniesRequest
+		expect *pbv1.GetCompaniesResponse
+	}{
+		"success": {
+			req: &pbv1.GetCompaniesRequest{
+				AccessToken: ad.AccessToken,
+				Ids: 	   []int64{c1.Id, c2.Id, c3.Id},
+			},
+			expect: &pbv1.GetCompaniesResponse{
+				Status: int64(200),
+				Companies: []*pbv1.CompanyInfo{
+					{
+						Id:          c1.Id,
+						Name:        c1.Name,
+					},
+					{
+						Id:          c2.Id,
+						Name:        c2.Name,
+					},
+					{
+						Id:          c3.Id,
+						Name:        c3.Name,
+					},
+				},
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			res, err := u.GetCompanies(ctx, tc.req)
+			require.NoError(t, err)
+			require.Equal(t, tc.expect.Status, res.Status)
+			if tc.expect.Companies != nil {
+				for i, s := range tc.expect.Companies {
+					require.Equal(t, s.Id, res.Companies[i].Id)
+					require.Equal(t, s.Name, res.Companies[i].Name)
+				}
+			}
+		})
+	}
+
+}
