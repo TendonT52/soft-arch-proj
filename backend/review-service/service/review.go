@@ -206,19 +206,16 @@ func (s *reviewService) GetReviewsByUser(ctx context.Context, token string, user
 		return nil, err
 	}
 
-	// fetch company name
-	for _, review := range myReviews {
-		req := &pbv1.GetCompanyRequest{
-			AccessToken: token,
-			Id:          review.Company.Id,
-		}
-
-		cProfile, err := s.userService.GetCompanyProfile(ctx, req)
-		if err != nil {
-			return nil, err
-		}
-		review.Company.Name = cProfile.Company.Name
+	keys := make([]int64, 0, len(myReviews))
+	for _, r := range myReviews {
+		keys = append(keys, r.Company.Id)
 	}
+
+	s.userService.GetCompanyProfiles(ctx, &pbv1.GetCompaniesRequest{
+		AccessToken: token,
+		Ids:         keys,
+	})
+
 	return myReviews, nil
 }
 
