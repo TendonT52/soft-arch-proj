@@ -15,6 +15,8 @@ type ReviewServicePort interface {
 }
 
 type UserClientPort interface {
-	GetUserProfile(ctx context.Context, req *pbv1.GetStudentRequest) (*pbv1.GetStudentResponse, error)
+	GetStudentProfile(ctx context.Context, req *pbv1.GetStudentRequest) (*pbv1.GetStudentResponse, error)
+	GetStudentProfiles(ctx context.Context, req *pbv1.GetStudentsRequest) (*pbv1.GetStudentsResponse, error)
 	GetCompanyProfile(ctx context.Context, req *pbv1.GetCompanyRequest) (*pbv1.GetCompanyResponse, error)
+	GetCompanyProfiles(ctx context.Context, req *pbv1.GetCompaniesRequest) (*pbv1.GetCompaniesResponse, error)
 }

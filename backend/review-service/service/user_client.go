@@ -47,7 +47,7 @@ func NewUserClientService() port.UserClientPort {
 	return &userClientService{}
 }
 
-func (s *userClientService) GetUserProfile(ctx context.Context, req *pbv1.GetStudentRequest) (*pbv1.GetStudentResponse, error) {
+func (s *userClientService) GetStudentProfile(ctx context.Context, req *pbv1.GetStudentRequest) (*pbv1.GetStudentResponse, error) {
 	config, err := config.LoadConfig("../")
 	if err != nil {
 		return nil, err
@@ -62,6 +62,28 @@ func (s *userClientService) GetUserProfile(ctx context.Context, req *pbv1.GetStu
 
 	client := pbv1.NewUserServiceClient(conn)
 	res, err := client.GetStudent(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (s *userClientService) GetStudentProfiles(ctx context.Context, req *pbv1.GetStudentsRequest) (*pbv1.GetStudentsResponse, error) {
+	config, err := config.LoadConfig("../")
+	if err != nil {
+		return nil, err
+	}
+
+	target := fmt.Sprintf("%s:%s", config.UserServiceHost, config.UserServicePort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := pbv1.NewUserServiceClient(conn)
+	res, err := client.GetStudents(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +106,28 @@ func (s *userClientService) GetCompanyProfile(ctx context.Context, req *pbv1.Get
 
 	client := pbv1.NewUserServiceClient(conn)
 	res, err := client.GetCompany(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (s *userClientService) GetCompanyProfiles(ctx context.Context, req *pbv1.GetCompaniesRequest) (*pbv1.GetCompaniesResponse, error) {
+	config, err := config.LoadConfig("../")
+	if err != nil {
+		return nil, err
+	}
+
+	target := fmt.Sprintf("%s:%s", config.UserServiceHost, config.UserServicePort)
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := pbv1.NewUserServiceClient(conn)
+	res, err := client.GetCompanies(ctx, req)
 	if err != nil {
 		return nil, err
 	}
