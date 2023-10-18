@@ -29,4 +29,6 @@ type UserServicePort interface {
 	DeleteStudent(ctx context.Context, userId, id int64) error
 	DeleteCompany(ctx context.Context, userId, id int64) error
 	DeleteCompanies(ctx context.Context, userId int64) error
+	GetStudents(ctx context.Context, ids []int64) ([]*pbv1.StudentInfo, error)
+	GetCompanies(ctx context.Context, ids []int64) ([]*pbv1.CompanyInfo, error)
 }

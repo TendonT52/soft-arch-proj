@@ -224,3 +224,21 @@ func (s *userService) DeleteCompanies(ctx context.Context, userId int64) error {
 
 	return nil
 }
+
+func (s *userService) GetStudents(ctx context.Context, ids []int64) ([]*pbv1.StudentInfo, error) {
+	students, err := s.repo.GetStudents(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+
+	return students, nil	
+}
+
+func (s *userService) GetCompanies(ctx context.Context, ids []int64) ([]*pbv1.CompanyInfo, error) {
+	companies, err := s.repo.GetCompanies(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+
+	return companies, nil
+}

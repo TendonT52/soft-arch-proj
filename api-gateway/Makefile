@@ -29,7 +29,8 @@ k8s-run-dev:
 		"DATA_PATH=${DATA_PATH}/report-service make -C ../backend/report-service dependency" \
 		"MODE=remote make -C ../backend/user-service deploy" \
 		"MODE=remote make -C ../backend/post-service deploy" \
-		"MODE=remote make -C ../backend/report-service deploy"
+		"MODE=remote make -C ../backend/report-service deploy" \
+		"MODE=remote make -C ../backend/mail-service deploy" \
 	telepresence connect
 	kubectl wait --for=condition=Ready pods --all --all-namespaces
 
@@ -48,6 +49,7 @@ k8s-run-prod:
 		"MODE=remote make -C ../backend/user-service deploy" \
 		"MODE=remote make -C ../backend/post-service deploy" \
 		"MODE=remote make -C ../backend/report-service deploy" \
+		"MODE=remote make -C ../backend/mail-service deploy" \
 		"MODE=local make deploy"
 	telepresence connect
 	kubectl wait --for=condition=Ready pods --all --all-namespaces
@@ -65,8 +67,9 @@ k8s-run-local:
 		"DATA_PATH=${DATA_PATH}/post-service make -C ../backend/post-service dependency" \
 		"DATA_PATH=${DATA_PATH}/report-service make -C ../backend/report-service dependency" \
 		"MODE=local make -C ../backend/user-service deploy" \
-		"MODE=local make -C ../backend/post-service deploy" \
-		"MODE=local make -C ../backend/report-service deploy" \
+		"MODE=remote make -C ../backend/post-service deploy" \
+		"MODE=remote make -C ../backend/report-service deploy" \
+		"MODE=remote make -C ../backend/mail-service deploy" \
 		"MODE=local make deploy"
 	telepresence connect
 	kubectl wait --for=condition=Ready pods --all --all-namespaces
