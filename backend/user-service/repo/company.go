@@ -249,3 +249,24 @@ func (r *userRepository) DeleteCompanies(ctx context.Context) error {
 
 	return nil
 }
+
+func (r *userRepository) GetCompanies(ctx context.Context, ids []int64) ([]*pbv1.CompanyInfo, error) {
+	query := "SELECT users.id, companies.name FROM users INNER JOIN companies ON users.id = companies.cid WHERE users.id = ANY($1)"
+	rows, err := r.db.QueryContext(ctx, query, ids)
+	if err != nil {
+		return nil, domain.ErrInternal.From(err.Error(), err)
+	}
+	defer rows.Close()
+
+	var companies []*pbv1.CompanyInfo
+	for rows.Next() {
+		var company pbv1.CompanyInfo
+		err := rows.Scan(&company.Id, &company.Name)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+		companies = append(companies, &company)
+	}
+
+	return companies, nil
+}
