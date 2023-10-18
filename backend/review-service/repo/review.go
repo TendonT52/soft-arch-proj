@@ -133,11 +133,17 @@ func (r *reviewRepository) UpdateReview(ctx context.Context, review *pbv1.Update
 }
 
 func (r *reviewRepository) GetReviewsByUser(ctx context.Context, userID int64) ([]*pbv1.MyReview, error) {
-	panic("NEED Implement from Jindamanee")
+	// panic("NEED Implement from Jindamanee")
 	// Similar to GetReviewsByCompany function, but doesn't need to check anonymous
 	// Order by title ASC
+	return nil, nil
 }
 
 func (r *reviewRepository) DeleteReview(ctx context.Context, reviewID int64) error {
-	panic("NEED Implement from Jindamanee")
+	query := `DELETE FROM reviews WHERE rid = $1`
+	_, err := r.db.ExecContext(ctx, query, reviewID)
+	if err != nil {
+		return err
+	}
+	return nil
 }

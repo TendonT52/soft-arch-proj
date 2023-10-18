@@ -100,7 +100,7 @@ func (s *ReviewServer) ListReviewsByCompany(ctx context.Context, req *pbv1.ListR
 		Status:  http.StatusOK,
 		Message: "List reviews by company successfully",
 		Reviews: res,
-		Total:  int32(len(res)),
+		Total:   int32(len(res)),
 	}, nil
 }
 
@@ -180,9 +180,36 @@ func (s *ReviewServer) UpdateReview(ctx context.Context, req *pbv1.UpdateReviewR
 }
 
 func (s *ReviewServer) ListReviewsByUser(ctx context.Context, req *pbv1.ListReviewsByUserRequest) (*pbv1.ListReviewsByUserResponse, error) {
-	panic("NEED Implement from Jindamanee")
+	// panic("NEED Implement from Jindamanee")
+	return nil, nil
 }
 
 func (s *ReviewServer) DeleteReview(ctx context.Context, req *pbv1.DeleteReviewRequest) (*pbv1.DeleteReviewResponse, error) {
-	panic("NEED Implement from Jindamanee")
+	err := s.ReviewService.DeleteReview(ctx, req.AccessToken, req.Id)
+	if errors.Is(err, domain.ErrUnauthorize) {
+		log.Println("Delete Review: Your access token is invalid")
+		return &pbv1.DeleteReviewResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrForbidden) {
+		log.Println("Delete Review: You are not allowed to delete review")
+		return &pbv1.DeleteReviewResponse{
+			Status:  http.StatusForbidden,
+			Message: "You are not allowed to delete review",
+		}, nil
+	}
+	if err != nil {
+		log.Println("Delete Review: ", err)
+		return &pbv1.DeleteReviewResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Internal server error",
+		}, nil
+	}
+
+	return &pbv1.DeleteReviewResponse{
+		Status:  http.StatusOK,
+		Message: "Delete review successfully",
+	}, nil
 }
