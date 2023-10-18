@@ -13,7 +13,7 @@ const (
 	REPORT_TYPE_OTHER           = "Other"
 )
 
-func CheckRequireFields(report *pbv1.Report) bool {
+func CheckRequireFields(report *pbv1.CreatedReport) bool {
 	if report.Topic == "" || report.Type == "" || report.Description == "" {
 		return false
 	}

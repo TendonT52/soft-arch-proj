@@ -17,7 +17,7 @@ import (
 )
 
 func createMockReport(t *testing.T, c pbv1.ReportServiceClient, ctx context.Context, token, topic, reporttype, description string) *pbv1.Report {
-	report := &pbv1.Report{
+	report := &pbv1.CreatedReport{
 		Topic:       topic,
 		Type:        reporttype,
 		Description: description,
@@ -29,7 +29,11 @@ func createMockReport(t *testing.T, c pbv1.ReportServiceClient, ctx context.Cont
 	require.NoError(t, err)
 	require.Equal(t, int64(201), resCreate.Status)
 
-	return report
+	return &pbv1.Report{
+		Topic:       topic,
+		Type:        reporttype,
+		Description: description,
+	}
 }
 
 func TestListReports(t *testing.T) {

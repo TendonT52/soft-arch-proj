@@ -147,13 +147,12 @@
       "type": "object",
       "properties": {
         "report": {
-          "$ref": "#/definitions/userReport"
+          "$ref": "#/definitions/userCreatedReport"
         },
         "accessToken": {
           "type": "string"
         }
-      },
-      "title": "Create Report"
+      }
     },
     "userCreateReportResponse": {
       "type": "object",
@@ -170,6 +169,21 @@
           "format": "int64"
         }
       }
+    },
+    "userCreatedReport": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "title": "Create Report"
     },
     "userGetReportResponse": {
       "type": "object",

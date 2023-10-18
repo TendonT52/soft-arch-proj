@@ -47,7 +47,7 @@ func TestGetReport(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create report
-	report := &pbv1.Report{
+	report := &pbv1.CreatedReport{
 		Topic:       "test-report",
 		Type:        domain.REPORT_TYPE_SCAM_LIST,
 		Description: "This post is fake and should be deleted!!!",
@@ -71,7 +71,11 @@ func TestGetReport(t *testing.T) {
 			expect: &pbv1.GetReportResponse{
 				Status:  200,
 				Message: "Report retrieved successfully",
-				Report: report,
+				Report: &pbv1.Report{
+					Topic:       "test-report",
+					Type:        domain.REPORT_TYPE_SCAM_LIST,
+					Description: "This post is fake and should be deleted!!!",
+				},
 			},
 		},
 		"Student get report": {
@@ -115,7 +119,7 @@ func TestGetReport(t *testing.T) {
 			},
 		},
 	}
-		
+
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			res, err := c.GetReport(ctx, tc.req)

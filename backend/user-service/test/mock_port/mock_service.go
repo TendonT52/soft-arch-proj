@@ -234,6 +234,21 @@ func (mr *MockUserServicePortMockRecorder) GetApprovedCompany(ctx, userId, searc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetApprovedCompany", reflect.TypeOf((*MockUserServicePort)(nil).GetApprovedCompany), ctx, userId, search)
 }
 
+// GetCompanies mocks base method.
+func (m *MockUserServicePort) GetCompanies(ctx context.Context, ids []int64) ([]*gen.CompanyInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCompanies", ctx, ids)
+	ret0, _ := ret[0].([]*gen.CompanyInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCompanies indicates an expected call of GetCompanies.
+func (mr *MockUserServicePortMockRecorder) GetCompanies(ctx, ids interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCompanies", reflect.TypeOf((*MockUserServicePort)(nil).GetCompanies), ctx, ids)
+}
+
 // GetCompanyByID mocks base method.
 func (m *MockUserServicePort) GetCompanyByID(ctx context.Context, userId, id int64) (*gen.Company, error) {
 	m.ctrl.T.Helper()
@@ -292,6 +307,21 @@ func (m *MockUserServicePort) GetStudentMe(ctx context.Context, id int64) (*gen.
 func (mr *MockUserServicePortMockRecorder) GetStudentMe(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudentMe", reflect.TypeOf((*MockUserServicePort)(nil).GetStudentMe), ctx, id)
+}
+
+// GetStudents mocks base method.
+func (m *MockUserServicePort) GetStudents(ctx context.Context, ids []int64) ([]*gen.StudentInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStudents", ctx, ids)
+	ret0, _ := ret[0].([]*gen.StudentInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStudents indicates an expected call of GetStudents.
+func (mr *MockUserServicePortMockRecorder) GetStudents(ctx, ids interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudents", reflect.TypeOf((*MockUserServicePort)(nil).GetStudents), ctx, ids)
 }
 
 // UpdateCompanyMe mocks base method.

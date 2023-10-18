@@ -28,7 +28,7 @@ func approveMultipleCompanies(t *testing.T, ids []int64, ad *pbv1.LoginResponse,
 	}
 }
 
-func createMockStudent(t *testing.T, admin_access string) string {
+func createMockStudent(t *testing.T, name, admin_access string) (string, int64) {
 	config, _ := config.LoadConfig("..")
 	target := fmt.Sprintf("%s:%s", config.ServerHost, config.ServerPort)
 	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -44,7 +44,7 @@ func createMockStudent(t *testing.T, admin_access string) string {
 	// Register
 	studentEmail := utils.GenerateRandomNumber(10) + "@student.chula.ac.th"
 	student := &pbv1.CreateStudentRequest{
-		Name:            "Mock Student" + utils.GenerateRandomString(3),
+		Name:            name,
 		Email:           studentEmail,
 		Password:        "password-test",
 		PasswordConfirm: "password-test",
@@ -76,7 +76,7 @@ func createMockStudent(t *testing.T, admin_access string) string {
 	require.Equal(t, int64(200), st.Status)
 	require.NoError(t, err)
 
-	return st.AccessToken
+	return st.AccessToken, stu.Id
 }
 
 func TestListApprovedCompanies(t *testing.T) {
@@ -145,7 +145,7 @@ func TestListApprovedCompanies(t *testing.T) {
 	approveMultipleCompanies(t, []int64{c5.Id}, ad, u, domain.ComapanyStatusReject)
 
 	// Create Student
-	student_access := createMockStudent(t, ad.AccessToken)
+	student_access, _ := createMockStudent(t, "Mock student 101", ad.AccessToken)
 
 	tests := map[string]struct {
 		req    *pbv1.ListApprovedCompaniesRequest
