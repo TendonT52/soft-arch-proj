@@ -77,7 +77,7 @@ func TestDeleteReview(t *testing.T) {
 		"success": {
 			req: &pbv1.DeleteReviewRequest{
 				AccessToken: tokenStudent,
-				Id:          companyId,
+				Id:          res.Id,
 			},
 			expect: &pbv1.DeleteReviewResponse{
 				Status:  200,
@@ -87,7 +87,7 @@ func TestDeleteReview(t *testing.T) {
 		"Invalid access token": {
 			req: &pbv1.DeleteReviewRequest{
 				AccessToken: "invalid access token",
-				Id:          companyId,
+				Id:          res.Id,
 			},
 			expect: &pbv1.DeleteReviewResponse{
 				Status:  401,
@@ -107,7 +107,7 @@ func TestDeleteReview(t *testing.T) {
 		"Not allowed to delete review": {
 			req: &pbv1.DeleteReviewRequest{
 				AccessToken: tokenCompany,
-				Id:          companyId,
+				Id:          res.Id,
 			},
 			expect: &pbv1.DeleteReviewResponse{
 				Status:  403,

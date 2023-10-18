@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/JinnnDamanee/review-service/domain"
 	pbv1 "github.com/JinnnDamanee/review-service/gen/v1"
@@ -216,6 +217,7 @@ func (s *reviewService) DeleteReview(ctx context.Context, token string, reviewID
 	// Check review owner
 	ownerID := payload.UserId
 	uid, err := s.repo.GetReviewOwner(ctx, reviewID)
+	log.Println("uid", uid, "ownerID", ownerID)
 	if err == sql.ErrNoRows && ownerID != uid {
 		return domain.ErrForbidden
 	}
