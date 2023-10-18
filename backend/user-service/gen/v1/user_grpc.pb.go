@@ -29,6 +29,8 @@ const (
 	UserService_ListApprovedCompanies_FullMethodName = "/user.UserService/ListApprovedCompanies"
 	UserService_ListCompanies_FullMethodName         = "/user.UserService/ListCompanies"
 	UserService_UpdateCompanyStatus_FullMethodName   = "/user.UserService/UpdateCompanyStatus"
+	UserService_GetStudents_FullMethodName           = "/user.UserService/GetStudents"
+	UserService_GetCompanies_FullMethodName          = "/user.UserService/GetCompanies"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -45,6 +47,8 @@ type UserServiceClient interface {
 	ListApprovedCompanies(ctx context.Context, in *ListApprovedCompaniesRequest, opts ...grpc.CallOption) (*ListApprovedCompaniesResponse, error)
 	ListCompanies(ctx context.Context, in *ListCompaniesRequest, opts ...grpc.CallOption) (*ListCompaniesResponse, error)
 	UpdateCompanyStatus(ctx context.Context, in *UpdateCompanyStatusRequest, opts ...grpc.CallOption) (*UpdateCompanyStatusResponse, error)
+	GetStudents(ctx context.Context, in *GetStudentsRequest, opts ...grpc.CallOption) (*GetStudentsResponse, error)
+	GetCompanies(ctx context.Context, in *GetCompaniesRequest, opts ...grpc.CallOption) (*GetCompaniesResponse, error)
 }
 
 type userServiceClient struct {
@@ -145,6 +149,24 @@ func (c *userServiceClient) UpdateCompanyStatus(ctx context.Context, in *UpdateC
 	return out, nil
 }
 
+func (c *userServiceClient) GetStudents(ctx context.Context, in *GetStudentsRequest, opts ...grpc.CallOption) (*GetStudentsResponse, error) {
+	out := new(GetStudentsResponse)
+	err := c.cc.Invoke(ctx, UserService_GetStudents_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetCompanies(ctx context.Context, in *GetCompaniesRequest, opts ...grpc.CallOption) (*GetCompaniesResponse, error) {
+	out := new(GetCompaniesResponse)
+	err := c.cc.Invoke(ctx, UserService_GetCompanies_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -159,6 +181,8 @@ type UserServiceServer interface {
 	ListApprovedCompanies(context.Context, *ListApprovedCompaniesRequest) (*ListApprovedCompaniesResponse, error)
 	ListCompanies(context.Context, *ListCompaniesRequest) (*ListCompaniesResponse, error)
 	UpdateCompanyStatus(context.Context, *UpdateCompanyStatusRequest) (*UpdateCompanyStatusResponse, error)
+	GetStudents(context.Context, *GetStudentsRequest) (*GetStudentsResponse, error)
+	GetCompanies(context.Context, *GetCompaniesRequest) (*GetCompaniesResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -195,6 +219,12 @@ func (UnimplementedUserServiceServer) ListCompanies(context.Context, *ListCompan
 }
 func (UnimplementedUserServiceServer) UpdateCompanyStatus(context.Context, *UpdateCompanyStatusRequest) (*UpdateCompanyStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCompanyStatus not implemented")
+}
+func (UnimplementedUserServiceServer) GetStudents(context.Context, *GetStudentsRequest) (*GetStudentsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStudents not implemented")
+}
+func (UnimplementedUserServiceServer) GetCompanies(context.Context, *GetCompaniesRequest) (*GetCompaniesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCompanies not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -389,6 +419,42 @@ func _UserService_UpdateCompanyStatus_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetStudents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStudentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetStudents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetStudents_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetStudents(ctx, req.(*GetStudentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetCompanies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCompaniesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetCompanies(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetCompanies_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetCompanies(ctx, req.(*GetCompaniesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -435,6 +501,14 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateCompanyStatus",
 			Handler:    _UserService_UpdateCompanyStatus_Handler,
+		},
+		{
+			MethodName: "GetStudents",
+			Handler:    _UserService_GetStudents_Handler,
+		},
+		{
+			MethodName: "GetCompanies",
+			Handler:    _UserService_GetCompanies_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

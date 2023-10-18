@@ -118,6 +118,13 @@ func (s *UserServer) UpdateStudent(ctx context.Context, req *pbv1.UpdateStudentR
 			Message: "Some fields are empty",
 		}, nil
 	}
+	if errors.Is(err, domain.ErrYearMustBeGreaterThanZero) {
+		log.Println("Error year must be greater than zero: ", err)
+		return &pbv1.UpdateStudentResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Year must be greater than zero",
+		}, nil
+	}
 	if errors.Is(err, domain.ErrForbidden) {
 		log.Println("Error NOT Authorize: ", err)
 		return &pbv1.UpdateStudentResponse{
@@ -138,6 +145,34 @@ func (s *UserServer) UpdateStudent(ctx context.Context, req *pbv1.UpdateStudentR
 	return &pbv1.UpdateStudentResponse{
 		Status:  http.StatusOK,
 		Message: message,
+	}, nil
+}
+
+func (s *UserServer) GetStudents(ctx context.Context, req *pbv1.GetStudentsRequest) (*pbv1.GetStudentsResponse, error) {
+	_, err := utils.ValidateAccessToken(req.AccessToken)
+	if err != nil {
+		log.Println("Error in extract userID: ", err)
+		return &pbv1.GetStudentsResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
+		}, nil
+	}
+
+	res, err := s.UserService.GetStudents(ctx, req.Ids)
+	if err != nil {
+		log.Println("Error from get students: ", err)
+		return &pbv1.GetStudentsResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Something went wrong",
+		}, nil
+	}
+
+	log.Println("Success getting students: ", len(res))
+	return &pbv1.GetStudentsResponse{
+		Status:   http.StatusOK,
+		Message:  "success",
+		Students: res,
+		Total:    int64(len(res)),
 	}, nil
 }
 
@@ -352,5 +387,33 @@ func (s *UserServer) UpdateCompanyStatus(ctx context.Context, req *pbv1.UpdateCo
 	return &pbv1.UpdateCompanyStatusResponse{
 		Status:  http.StatusOK,
 		Message: message,
+	}, nil
+}
+
+func (s *UserServer) GetCompanies(ctx context.Context, req *pbv1.GetCompaniesRequest) (*pbv1.GetCompaniesResponse, error) {
+	_, err := utils.ValidateAccessToken(req.AccessToken)
+	if err != nil {
+		log.Println("Error in extract userID: ", err)
+		return &pbv1.GetCompaniesResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
+		}, nil
+	}
+
+	res, err := s.UserService.GetCompanies(ctx, req.Ids)
+	if err != nil {
+		log.Println("Error from get companies: ", err)
+		return &pbv1.GetCompaniesResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Something went wrong",
+		}, nil
+	}
+
+	log.Println("Success getting companies: ", len(res))
+	return &pbv1.GetCompaniesResponse{
+		Status:    http.StatusOK,
+		Message:   "success",
+		Companies: res,
+		Total:     int64(len(res)),
 	}, nil
 }

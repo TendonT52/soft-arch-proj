@@ -96,6 +96,7 @@ func (s *ReviewServer) ListReviewsByCompany(ctx context.Context, req *pbv1.ListR
 			Message: "Internal server error",
 		}, nil
 	}
+	log.Println("List Reviews By Company success: Total is ", int32(len(res)))
 
 	return &pbv1.ListReviewsByCompanyResponse{
 		Status:  http.StatusOK,
@@ -129,6 +130,7 @@ func (s *ReviewServer) GetReview(ctx context.Context, req *pbv1.GetReviewRequest
 		}, nil
 	}
 
+	log.Println("Get Review success: ", http.StatusOK)
 	return &pbv1.GetReviewResponse{
 		Status:  http.StatusOK,
 		Message: "Get review successfully",

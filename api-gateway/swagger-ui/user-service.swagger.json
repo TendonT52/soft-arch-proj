@@ -832,6 +832,42 @@
         }
       }
     },
+    "userCompanyInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "title": "Get Companies"
+    },
+    "userGetCompaniesResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        },
+        "companies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/userCompanyInfo"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
     "userGetCompanyResponse": {
       "type": "object",
       "properties": {
@@ -859,6 +895,29 @@
         },
         "student": {
           "$ref": "#/definitions/userStudent"
+        }
+      }
+    },
+    "userGetStudentsResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        },
+        "students": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/userStudentInfo"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -935,6 +994,19 @@
           "format": "int32"
         }
       }
+    },
+    "userStudentInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "title": "Get Students"
     },
     "userUpdateCompanyRequest": {
       "type": "object",

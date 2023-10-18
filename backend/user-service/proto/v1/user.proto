@@ -57,6 +57,9 @@ service UserService {
             body: "*"
         };
     }
+
+    rpc GetStudents(GetStudentsRequest) returns (GetStudentsResponse) {}  // Internal use only
+    rpc GetCompanies(GetCompaniesRequest) returns (GetCompaniesResponse) {} // Internal use only
 }
 
 // Health Check
@@ -203,4 +206,39 @@ message UpdateCompanyStatusRequest {
 message UpdateCompanyStatusResponse {
     int64 status = 1;
     string message = 2;
+}
+
+// Get Students
+message StudentInfo {
+    int64 id = 1;
+    string name = 2;
+}
+message GetStudentsRequest {
+    string access_token = 1;
+    repeated int64 ids = 2;
+}
+
+message GetStudentsResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated StudentInfo students = 3;
+    int64 total = 4;
+}
+
+// Get Companies
+message CompanyInfo {
+    int64 id = 1;
+    string name = 2;
+}
+
+message GetCompaniesRequest {
+    string access_token = 1;
+    repeated int64 ids = 2;
+}
+
+message GetCompaniesResponse {
+    int64 status = 1;
+    string message = 2;
+    repeated CompanyInfo companies = 3;
+    int64 total = 4;
 }

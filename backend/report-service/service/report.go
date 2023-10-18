@@ -21,7 +21,7 @@ func NewReportService(repo port.ReportRepoPort) port.ReportServicePort {
 	return &reportService{repo: repo}
 }
 
-func (s *reportService) CreateReport(ctx context.Context, token string, report *pbv1.Report) (int64, error) {
+func (s *reportService) CreateReport(ctx context.Context, token string, report *pbv1.CreatedReport) (int64, error) {
 	if !domain.CheckRequireFields(report) {
 		return 0, domain.ErrFieldsAreRequired
 	}

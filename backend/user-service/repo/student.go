@@ -8,6 +8,7 @@ import (
 
 	"github.com/TikhampornSky/go-auth-verifiedMail/domain"
 	pbv1 "github.com/TikhampornSky/go-auth-verifiedMail/gen/v1"
+	"github.com/lib/pq"
 )
 
 func (r *userRepository) CreateStudent(ctx context.Context, student *pbv1.CreateStudentRequest, createTime int64) (int64, error) {
@@ -117,4 +118,25 @@ func (r *userRepository) UpdateStudentStatus(ctx context.Context, email string, 
 	}
 
 	return nil
+}
+
+func (r *userRepository) GetStudents(ctx context.Context, ids []int64) ([]*pbv1.StudentInfo, error) {
+	query := "SELECT users.id, students.name FROM users INNER JOIN students ON users.id = students.sid WHERE users.id = ANY($1)"
+	rows, err := r.db.QueryContext(ctx, query, pq.Array(ids))
+	if err != nil {
+		return nil, domain.ErrInternal.From(err.Error(), err)
+	}
+	defer rows.Close()
+
+	var students []*pbv1.StudentInfo
+	for rows.Next() {
+		var student pbv1.StudentInfo
+		err := rows.Scan(&student.Id, &student.Name)
+		if err != nil {
+			return nil, domain.ErrInternal.From(err.Error(), err)
+		}
+		students = append(students, &student)
+	}
+
+	return students, nil
 }

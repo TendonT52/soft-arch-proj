@@ -40,8 +40,13 @@ message Report {
 }
 
 // Create Report
+message CreatedReport {
+    string topic = 2;
+    string type = 3;
+    string description = 4;
+}
 message CreateReportRequest {
-    Report report = 1;
+    CreatedReport report = 1;
     string access_token = 2;
 }
 

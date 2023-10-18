@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
-	"log"
+	"sort"
 
 	"github.com/JinnnDamanee/review-service/domain"
 	pbv1 "github.com/JinnnDamanee/review-service/gen/v1"
@@ -96,7 +96,7 @@ func (s *reviewService) GetReviewByID(ctx context.Context, token string, reviewI
 		AccessToken: token,
 		Id:          review.Owner.Id,
 	}
-	res, err := s.userService.GetUserProfile(ctx, reqStudent)
+	res, err := s.userService.GetStudentProfile(ctx, reqStudent)
 	if err != nil {
 		return nil, err
 	}
@@ -115,21 +115,41 @@ func (s *reviewService) GetReviewsByCompany(ctx context.Context, token string, c
 		return nil, err
 	}
 
+	m := make(map[int64]string) // map[userID]Name
+
 	for _, review := range reviews {
-		// Get user info
+		if review.Owner.Id == 0 {
+			continue
+		}
+		m[review.Owner.Id] = ""
+	}
+
+	keys := make([]int64, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
+
+	res, err := s.userService.GetStudentProfiles(ctx, &pbv1.GetStudentsRequest{
+		AccessToken: token,
+		Ids:         keys,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, student := range res.Students {
+		m[student.Id] = student.Name
+	}
+
+	for _, review := range reviews {
 		if review.Owner.Id == 0 {
 			review.Owner.Name = AnonymousName
 			continue
 		}
-		reqStudent := &pbv1.GetStudentRequest{
-			AccessToken: token,
-			Id:          review.Owner.Id,
-		}
-		res, err := s.userService.GetUserProfile(ctx, reqStudent)
-		if err != nil {
-			return nil, err
-		}
-		review.Owner.Name = res.Student.Name
+		review.Owner.Name = m[review.Owner.Id]
 	}
 
 	return reviews, nil
@@ -217,7 +237,6 @@ func (s *reviewService) DeleteReview(ctx context.Context, token string, reviewID
 	// Check review owner
 	ownerID := payload.UserId
 	uid, err := s.repo.GetReviewOwner(ctx, reviewID)
-	log.Println("uid", uid, "ownerID", ownerID)
 	if err == sql.ErrNoRows && ownerID != uid {
 		return domain.ErrForbidden
 	}
