@@ -9,6 +9,7 @@ import (
 	"github.com/JinnnDamanee/review-service/domain"
 	pbv1 "github.com/JinnnDamanee/review-service/gen/v1"
 	"github.com/JinnnDamanee/review-service/port"
+	"github.com/JinnnDamanee/review-service/utils"
 )
 
 type ReviewServer struct {
@@ -180,8 +181,36 @@ func (s *ReviewServer) UpdateReview(ctx context.Context, req *pbv1.UpdateReviewR
 }
 
 func (s *ReviewServer) ListReviewsByUser(ctx context.Context, req *pbv1.ListReviewsByUserRequest) (*pbv1.ListReviewsByUserResponse, error) {
-	// panic("NEED Implement from Jindamanee")
-	return nil, nil
+	payload, err := utils.ValidateAccessToken(req.AccessToken)
+	if err != nil {
+		log.Println("List Reviews By User: Your access token is invalid")
+		return &pbv1.ListReviewsByUserResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
+		}, nil
+	}
+
+	myReviews, err := s.ReviewService.GetReviewsByUser(ctx, req.AccessToken, payload.UserId)
+	if errors.Is(err, domain.ErrUnauthorize) {
+		log.Println("List Reviews By User: Your access token is invalid")
+		return &pbv1.ListReviewsByUserResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrForbidden) {
+		log.Println("List Reviews By User: You are not allowed to get reviews")
+		return &pbv1.ListReviewsByUserResponse{
+			Status:  http.StatusForbidden,
+			Message: "You are not allowed to view these reviews",
+		}, nil
+	}
+	return &pbv1.ListReviewsByUserResponse{
+		Status:  http.StatusOK,
+		Message: "List reviews by user successfully",
+		Reviews: myReviews,
+		Total:   int32(len(myReviews)),
+	}, nil
 }
 
 func (s *ReviewServer) DeleteReview(ctx context.Context, req *pbv1.DeleteReviewRequest) (*pbv1.DeleteReviewResponse, error) {

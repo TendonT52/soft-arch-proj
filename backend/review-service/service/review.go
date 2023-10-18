@@ -170,12 +170,35 @@ func (s *reviewService) UpdateReview(ctx context.Context, token string, review *
 }
 
 func (s *reviewService) GetReviewsByUser(ctx context.Context, token string, userID int64) ([]*pbv1.MyReview, error) {
-	// panic("NEED Implement from Jindamanee")
 	// Similar to GetReviewsByCompany function
-	// Don't forget to check the role of the user who is requesting
-	// Use `utils.ValidateAccessToken(token)` to validate the token and get role, userID from token
-	// You can see the code of connecting to userClient to get user data in GetReviewByID function (Around Line 59-68)
-	return nil, nil
+
+	payload, err := utils.ValidateAccessToken(token)
+	if err != nil {
+		return nil, domain.ErrUnauthorize
+	}
+	if payload.Role != StudentRole {
+		return nil, domain.ErrForbidden
+	}
+
+	myReviews, err := s.repo.GetReviewsByUser(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// fetch company name
+	for _, review := range myReviews {
+		req := &pbv1.GetCompanyRequest{
+			AccessToken: token,
+			Id:          review.Company.Id,
+		}
+
+		cProfile, err := s.userService.GetCompanyProfile(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+		review.Company.Name = cProfile.Company.Name
+	}
+	return myReviews, nil
 }
 
 func (s *reviewService) DeleteReview(ctx context.Context, token string, reviewID int64) error {
