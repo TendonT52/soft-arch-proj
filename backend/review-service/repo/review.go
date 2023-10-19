@@ -133,11 +133,46 @@ func (r *reviewRepository) UpdateReview(ctx context.Context, review *pbv1.Update
 }
 
 func (r *reviewRepository) GetReviewsByUser(ctx context.Context, userID int64) ([]*pbv1.MyReview, error) {
-	panic("NEED Implement from Jindamanee")
-	// Similar to GetReviewsByCompany function, but doesn't need to check anonymous
-	// Order by title ASC
+	query := `
+		SELECT rid, cid, title, description, rating, updated_at
+		FROM reviews
+		WHERE uid = $1
+		ORDER BY title ASC
+	`
+
+	stmt, err := r.db.PrepareContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.QueryContext(ctx, userID)
+	defer rows.Close()
+
+	var reviews []*pbv1.MyReview
+
+	for rows.Next() {
+		var currReview pbv1.MyReview
+		var cid int64
+
+		err := rows.Scan(&currReview.Id, &cid, &currReview.Title, &currReview.Description, &currReview.Rating, &currReview.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		currReview.Company = &pbv1.ReviewdCompany{
+			Id: cid,
+		}
+
+		reviews = append(reviews, &currReview)
+	}
+	return reviews, nil
 }
 
 func (r *reviewRepository) DeleteReview(ctx context.Context, reviewID int64) error {
-	panic("NEED Implement from Jindamanee")
+	query := `DELETE FROM reviews WHERE rid = $1`
+	_, err := r.db.ExecContext(ctx, query, reviewID)
+	if err != nil {
+		return err
+	}
+	return nil
 }

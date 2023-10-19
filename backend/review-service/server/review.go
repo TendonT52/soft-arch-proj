@@ -9,6 +9,7 @@ import (
 	"github.com/JinnnDamanee/review-service/domain"
 	pbv1 "github.com/JinnnDamanee/review-service/gen/v1"
 	"github.com/JinnnDamanee/review-service/port"
+	"github.com/JinnnDamanee/review-service/utils"
 )
 
 type ReviewServer struct {
@@ -101,7 +102,7 @@ func (s *ReviewServer) ListReviewsByCompany(ctx context.Context, req *pbv1.ListR
 		Status:  http.StatusOK,
 		Message: "List reviews by company successfully",
 		Reviews: res,
-		Total:  int32(len(res)),
+		Total:   int32(len(res)),
 	}, nil
 }
 
@@ -182,9 +183,78 @@ func (s *ReviewServer) UpdateReview(ctx context.Context, req *pbv1.UpdateReviewR
 }
 
 func (s *ReviewServer) ListReviewsByUser(ctx context.Context, req *pbv1.ListReviewsByUserRequest) (*pbv1.ListReviewsByUserResponse, error) {
-	panic("NEED Implement from Jindamanee")
+	payload, err := utils.ValidateAccessToken(req.AccessToken)
+	if err != nil {
+		log.Println("List Reviews By User: Your access token is invalid")
+		return &pbv1.ListReviewsByUserResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
+		}, nil
+	}
+
+	myReviews, err := s.ReviewService.GetReviewsByUser(ctx, req.AccessToken, payload.UserId)
+	if errors.Is(err, domain.ErrUnauthorize) {
+		log.Println("List Reviews By User: Your access token is invalid")
+		return &pbv1.ListReviewsByUserResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrForbidden) {
+		log.Println("List Reviews By User: You are not allowed to get reviews")
+		return &pbv1.ListReviewsByUserResponse{
+			Status:  http.StatusForbidden,
+			Message: "You are not allowed to view these reviews",
+		}, nil
+	}
+	if err != nil {
+		log.Println("List Review by User : ", err)
+		return &pbv1.ListReviewsByUserResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Internal server error",
+		}, nil
+	}
+	return &pbv1.ListReviewsByUserResponse{
+		Status:  http.StatusOK,
+		Message: "List reviews by user successfully",
+		Reviews: myReviews,
+		Total:   int32(len(myReviews)),
+	}, nil
 }
 
 func (s *ReviewServer) DeleteReview(ctx context.Context, req *pbv1.DeleteReviewRequest) (*pbv1.DeleteReviewResponse, error) {
-	panic("NEED Implement from Jindamanee")
+	err := s.ReviewService.DeleteReview(ctx, req.AccessToken, req.Id)
+	if errors.Is(err, domain.ErrUnauthorize) {
+		log.Println("Delete Review: Your access token is invalid")
+		return &pbv1.DeleteReviewResponse{
+			Status:  http.StatusUnauthorized,
+			Message: "Your access token is invalid",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrForbidden) {
+		log.Println("Delete Review: You are not allowed to delete review")
+		return &pbv1.DeleteReviewResponse{
+			Status:  http.StatusForbidden,
+			Message: "You are not allowed to delete review",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrReviewNotFound) {
+		log.Println("Delete Review: Review not found")
+		return &pbv1.DeleteReviewResponse{
+			Status:  http.StatusNotFound,
+			Message: "Review not found",
+		}, nil
+	}
+	if err != nil {
+		log.Println("Delete Review: ", err)
+		return &pbv1.DeleteReviewResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Internal server error",
+		}, nil
+	}
+
+	return &pbv1.DeleteReviewResponse{
+		Status:  http.StatusOK,
+		Message: "Delete review successfully",
+	}, nil
 }
