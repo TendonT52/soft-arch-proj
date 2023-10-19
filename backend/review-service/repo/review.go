@@ -133,8 +133,6 @@ func (r *reviewRepository) UpdateReview(ctx context.Context, review *pbv1.Update
 }
 
 func (r *reviewRepository) GetReviewsByUser(ctx context.Context, userID int64) ([]*pbv1.MyReview, error) {
-	// Similar to GetReviewsByCompany function, but doesn't need to check anonymous
-	// Order by title ASC
 	query := `
 		SELECT rid, cid, title, description, rating, updated_at
 		FROM reviews
@@ -155,11 +153,16 @@ func (r *reviewRepository) GetReviewsByUser(ctx context.Context, userID int64) (
 
 	for rows.Next() {
 		var currReview pbv1.MyReview
+		var cid int64
 
-		err := rows.Scan(&currReview.Id, &currReview.Company, &currReview.Title, &currReview.Description, &currReview.Rating, &currReview.UpdatedAt)
+		err := rows.Scan(&currReview.Id, &cid, &currReview.Title, &currReview.Description, &currReview.Rating, &currReview.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
+		currReview.Company = &pbv1.ReviewdCompany{
+			Id: cid,
+		}
+
 		reviews = append(reviews, &currReview)
 	}
 	return reviews, nil

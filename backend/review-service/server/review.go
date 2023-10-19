@@ -207,6 +207,13 @@ func (s *ReviewServer) ListReviewsByUser(ctx context.Context, req *pbv1.ListRevi
 			Message: "You are not allowed to view these reviews",
 		}, nil
 	}
+	if err != nil {
+		log.Println("List Review by User : ", err)
+		return &pbv1.ListReviewsByUserResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Internal server error",
+		}, nil
+	}
 	return &pbv1.ListReviewsByUserResponse{
 		Status:  http.StatusOK,
 		Message: "List reviews by user successfully",
@@ -229,6 +236,13 @@ func (s *ReviewServer) DeleteReview(ctx context.Context, req *pbv1.DeleteReviewR
 		return &pbv1.DeleteReviewResponse{
 			Status:  http.StatusForbidden,
 			Message: "You are not allowed to delete review",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrReviewNotFound) {
+		log.Println("Delete Review: Review not found")
+		return &pbv1.DeleteReviewResponse{
+			Status:  http.StatusNotFound,
+			Message: "Review not found",
 		}, nil
 	}
 	if err != nil {

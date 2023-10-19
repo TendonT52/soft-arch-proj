@@ -3,7 +3,6 @@ package e2e
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"testing"
 	"time"
 
@@ -18,7 +17,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func createMockMyReviews(c pbv1.ReviewServiceClient, cid, uid int64, ownerName, title, description string, rating int32, isAnnonymous bool) (*pbv1.MyReview, error) {
+func createMockMyReviews(c pbv1.ReviewServiceClient, cid, uid int64, companyName, ownerName, title, description string, rating int32, isAnnonymous bool) (*pbv1.MyReview, error) {
 	configTest, _ := config.LoadConfigTest("..")
 	token, err := mock.GenerateAccessToken(configTest.AccessTokenExpiredInTest, &domain.Payload{
 		UserId: uid,
@@ -48,7 +47,7 @@ func createMockMyReviews(c pbv1.ReviewServiceClient, cid, uid int64, ownerName, 
 		Rating:      rating,
 		Company: &pbv1.ReviewdCompany{
 			Id:   cid,
-			Name: fmt.Sprintf("Test Company %s", strconv.FormatInt(cid, 10)),
+			Name: companyName,
 		},
 	}
 
@@ -69,8 +68,14 @@ func TestListByUser(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	tokenStudent, err := mock.GenerateAccessToken(conf_test.AccessTokenExpiredInTest, &domain.Payload{
+	tokenStudent1, err := mock.GenerateAccessToken(conf_test.AccessTokenExpiredInTest, &domain.Payload{
 		UserId: 1,
+		Role:   "student",
+	})
+	require.NoError(t, err)
+
+	tokenStudent2, err := mock.GenerateAccessToken(conf_test.AccessTokenExpiredInTest, &domain.Payload{
+		UserId: 2,
 		Role:   "student",
 	})
 	require.NoError(t, err)
@@ -87,11 +92,11 @@ func TestListByUser(t *testing.T) {
 		}
 	}`
 
-	r1, err := createMockMyReviews(c, companyId, 1, "Test Student 1", "Test Title 1-1", lex, 5, true)
+	r1, err := createMockMyReviews(c, companyId, 1, "Test Company", "Test Student 1", "Test Title 1-1", lex, 5, true)
 	require.NoError(t, err)
-	r2, err := createMockMyReviews(c, companyId, 1, "Test Student 1", "Test Title 1-2", lex, 4, false)
+	r2, err := createMockMyReviews(c, companyId, 1, "Test Company", "Test Student 1", "Test Title 1-2", lex, 4, false)
 
-	r3, err := createMockMyReviews(c, companyId, 2, "Test Student 2", "Test Title 2-1", lex, 3, true)
+	r3, err := createMockMyReviews(c, companyId, 2, "Test Company", "Test Student 2", "Test Title 2-1", lex, 3, true)
 	require.NoError(t, err)
 
 	// List Review By User
@@ -99,13 +104,26 @@ func TestListByUser(t *testing.T) {
 		req    *pbv1.ListReviewsByUserRequest
 		expect *pbv1.ListReviewsByUserResponse
 	}{
-		"Success": {
+		"User 1 Success": {
 			req: &pbv1.ListReviewsByUserRequest{
-				AccessToken: tokenStudent,
+				AccessToken: tokenStudent1,
 			},
 			expect: &pbv1.ListReviewsByUserResponse{
 				Status:  200,
 				Message: "List reviews by user successfully",
+				Reviews: []*pbv1.MyReview{r1, r2},
+				Total:   2,
+			},
+		},
+		"User 2 Success": {
+			req: &pbv1.ListReviewsByUserRequest{
+				AccessToken: tokenStudent2,
+			},
+			expect: &pbv1.ListReviewsByUserResponse{
+				Status:  200,
+				Message: "List reviews by user successfully",
+				Reviews: []*pbv1.MyReview{r3},
+				Total:   1,
 			},
 		},
 		"Invalid Access Token": {
@@ -117,38 +135,26 @@ func TestListByUser(t *testing.T) {
 				Message: "Your access token is invalid",
 			},
 		},
-		"User 1 should correctly list reviews": {
-			req: &pbv1.ListReviewsByUserRequest{
-				AccessToken: tokenStudent,
-			},
-			expect: &pbv1.ListReviewsByUserResponse{
-				Status:  200,
-				Message: "List reviews by user successfully",
-				Reviews: []*pbv1.MyReview{r1, r2},
-				Total:   2,
-			},
-		},
-		"User 2 should correctly list review": {
-			req: &pbv1.ListReviewsByUserRequest{
-				AccessToken: tokenStudent,
-			},
-			expect: &pbv1.ListReviewsByUserResponse{
-				Status:  200,
-				Message: "List reviews by user successfully",
-				Reviews: []*pbv1.MyReview{r3},
-				Total:   2,
-			},
-		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			log_name := name
-			_ = log_name
 			res, err := c.ListReviewsByUser(ctx, tc.req)
 			require.NoError(t, err)
 			require.Equal(t, tc.expect.Status, res.Status)
 			require.Equal(t, tc.expect.Message, res.Message)
+			require.Equal(t, int32(len(tc.expect.Reviews)), res.Total)
+
+			if tc.expect.Reviews != nil {
+				for i := 0; i < len(tc.expect.Reviews); i++ {
+					require.Equal(t, tc.expect.Reviews[i].Id, res.Reviews[i].Id)
+					require.Equal(t, tc.expect.Reviews[i].Title, res.Reviews[i].Title)
+					require.Equal(t, tc.expect.Reviews[i].Description, res.Reviews[i].Description)
+					require.Equal(t, tc.expect.Reviews[i].Rating, res.Reviews[i].Rating)
+					require.Equal(t, tc.expect.Reviews[i].Company.Id, res.Reviews[i].Company.Id)
+					require.Equal(t, tc.expect.Reviews[i].Company.Name, res.Reviews[i].Company.Name)
+				}
+			}
 		})
 	}
 }

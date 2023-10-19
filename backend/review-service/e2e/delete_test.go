@@ -37,6 +37,12 @@ func TestDeleteReview(t *testing.T) {
 	})
 	require.NoError(t, err)
 
+	AnotherTokenStudent, err := mock.GenerateAccessToken(conf_test.AccessTokenExpiredInTest, &domain.Payload{
+		UserId: 2,
+		Role:   "student",
+	})
+	require.NoError(t, err)
+
 	tokenCompany, err := mock.GenerateAccessToken(conf_test.AccessTokenExpiredInTest, &domain.Payload{
 		UserId: 2,
 		Role:   "company",
@@ -61,6 +67,7 @@ func TestDeleteReview(t *testing.T) {
 		Rating:      5,
 		IsAnonymous: true,
 	}
+
 	res, err := c.CreateReview(ctx, &pbv1.CreateReviewRequest{
 		AccessToken: tokenStudent,
 		Review:      successReview,
@@ -68,6 +75,14 @@ func TestDeleteReview(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, int64(201), res.Status)
 	require.Greater(t, res.Id, int64(0))
+
+	anotherRes, err := c.CreateReview(ctx, &pbv1.CreateReviewRequest{
+		AccessToken: AnotherTokenStudent,
+		Review:      successReview,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(201), anotherRes.Status)
+	require.Greater(t, anotherRes.Id, int64(0))
 
 	// Delete Review
 	tests := map[string]struct {
@@ -84,6 +99,26 @@ func TestDeleteReview(t *testing.T) {
 				Message: "Delete review successfully",
 			},
 		},
+		"Given Review ID is not found": {
+			req: &pbv1.DeleteReviewRequest{
+				AccessToken: tokenStudent,
+				Id:          0,
+			},
+			expect: &pbv1.DeleteReviewResponse{
+				Status:  404,
+				Message: "Review not found",
+			},
+		},
+		"Not your review": {
+			req: &pbv1.DeleteReviewRequest{
+				AccessToken: tokenStudent,
+				Id:          anotherRes.Id,
+			},
+			expect: &pbv1.DeleteReviewResponse{
+				Status:  403,
+				Message: "You are not allowed to delete review",
+			},
+		},
 		"Invalid access token": {
 			req: &pbv1.DeleteReviewRequest{
 				AccessToken: "invalid access token",
@@ -92,16 +127,6 @@ func TestDeleteReview(t *testing.T) {
 			expect: &pbv1.DeleteReviewResponse{
 				Status:  401,
 				Message: "Your access token is invalid",
-			},
-		},
-		"Invalid review ID": {
-			req: &pbv1.DeleteReviewRequest{
-				AccessToken: tokenStudent,
-				Id:          0,
-			},
-			expect: &pbv1.DeleteReviewResponse{
-				Status:  403,
-				Message: "You are not allowed to delete review",
 			},
 		},
 		"Not allowed to delete review": {
@@ -122,6 +147,16 @@ func TestDeleteReview(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, tc.expect.Status, res.Status)
 			require.Equal(t, tc.expect.Message, res.Message)
+
+			if tc.expect.Status == 200 {
+				res, err := c.GetReview(ctx, &pbv1.GetReviewRequest{
+					AccessToken: tokenStudent,
+					Id:          tc.req.Id,
+				})
+				require.NoError(t, err)
+				require.Equal(t, int64(404), res.Status)
+				require.Equal(t, "Review not found", res.Message)
+			}
 		})
 	}
 }
