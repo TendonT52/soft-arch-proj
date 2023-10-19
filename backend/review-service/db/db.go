@@ -1,48 +1,56 @@
 package db
 
 import (
-	"JinnnDamanee/review-service/config"
 	"database/sql"
 	"fmt"
 	"log"
 
+	"github.com/JinnnDamanee/review-service/config"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 type Database struct {
-	Gorm *gorm.DB
+	db *sql.DB
 }
 
 func NewDatabase(config *config.Config) (*Database, error) {
-	connFormat := "user=%s password=%s dbname=%s host=%s port=%s sslmode=disable"
-	conn := fmt.Sprintf(connFormat, config.DBUsername, config.DBPassword, config.DBName, config.DBHost, config.DBPort)
-
-	// sqlDB, err := sql.Open("pgx", conn)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	gormDB, err := gorm.Open(
-		postgres.Open(conn), &gorm.Config{})
+	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s", config.DBUserName, config.DBUserPassword, config.DBHost, config.DBPort, config.DBName, "disable")
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err
 	}
-
-	log.Print("Connected to database")
-
-	return &Database{Gorm: gormDB}, nil
-}
-
-func (d *Database) Close() {
-	sqlDB, err := d.Gorm.DB()
-	if err != nil {
-		log.Fatal(err)
+	if err := db.Ping(); err != nil {
+		return nil, err
 	}
-	sqlDB.Close()
+	log.Println("Successfully connected to the postgresql database")
+
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return nil, err
+	}
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://"+config.MigrationPath,
+		"postgres", driver)
+
+	if m == nil {
+		return nil, err
+	}
+	err = m.Up()
+	if err != nil && err != migrate.ErrNoChange {
+		return nil, err
+	}
+	log.Println("Successfully applied migrations")
+
+	return &Database{db: db}, nil
 }
 
-func (d *Database) GetDB() *sql.DB {
-	sqlDB, _ := d.Gorm.DB()
-	return sqlDB
+func (d *Database) Close() error {
+	return d.db.Close()
+}
+
+func (d *Database) GetPostgresqlDB() *sql.DB {
+	return d.db
 }

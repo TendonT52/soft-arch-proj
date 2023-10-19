@@ -1,20 +1,32 @@
 package config
 
 import (
-	"log"
+	"time"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	DBUsername string `mapstructure:"DB_USERNAME"`
-	DBPassword string `mapstructure:"DB_PASSWORD"`
-	DBHost     string `mapstructure:"DB_HOST"`
-	DBPort     string `mapstructure:"DB_PORT"`
-	DBName     string `mapstructure:"DB_NAME"`
+	DBHost               string `mapstructure:"POSTGRES_HOST"`
+	DBUserName           string `mapstructure:"POSTGRES_USER"`
+	DBUserPassword       string `mapstructure:"POSTGRES_PASSWORD"`
+	DBName               string `mapstructure:"POSTGRES_DB"`
+	DBPort               string `mapstructure:"POSTGRES_PORT"`
+	UserServiceHost      string `mapstructure:"USER_SERVICE_HOST"`
+	UserServicePort      string `mapstructure:"USER_SERVICE_PORT"`
+	ServerHost           string `mapstructure:"SERVER_HOST"`
+	ServerPort           string `mapstructure:"SERVER_PORT"`
+	AccessTokenPublicKey string `mapstructure:"ACCESS_TOKEN_PUBLIC_KEY"`
 
-	ServerPort string `mapstructure:"SERVER_PORT"`
+	MigrationPath string `mapstructure:"MIGRATION_PATH"`
+}
+
+type ConfigTest struct {
+	AccessTokenPrivateKeyTest string        `mapstructure:"ACCESS_TOKEN_PRIVATE_KEY_TEST"`
+	AccessTokenPublicKeyTest  string        `mapstructure:"ACCESS_TOKEN_PUBLIC_KEY_TEST"`
+	AccessTokenExpiredInTest  time.Duration `mapstructure:"ACCESS_TOKEN_EXPIRED_IN_TEST"`
+	AccessTokenMaxAgeTest     int           `mapstructure:"ACCESS_TOKEN_MAXAGE_TEST"`
 }
 
 func LoadConfig(path string) (config *Config, err error) {
@@ -22,8 +34,8 @@ func LoadConfig(path string) (config *Config, err error) {
 	viper.SetConfigType("env")
 	viper.SetConfigName("app")
 
-	viper.AutomaticEnv()
-	if err = viper.ReadInConfig(); err != nil {
+	err = viper.ReadInConfig() 
+	if err != nil {
 		return nil, err
 	}
 
@@ -33,8 +45,24 @@ func LoadConfig(path string) (config *Config, err error) {
 	if err != nil {
 		return nil, err
 	}
+	return
+}
 
-	log.Print("Loaded config")
+func LoadConfigTest(path string) (config *ConfigTest, err error) {
+	viper.AddConfigPath(path)
+	viper.SetConfigType("env")
+	viper.SetConfigName("test")
 
+	err = viper.ReadInConfig() 
+	if err != nil {
+		return nil, err
+	}
+
+	err = viper.Unmarshal(&config, func(dc *mapstructure.DecoderConfig) {
+		dc.ErrorUnset = true
+	})
+	if err != nil {
+		return nil, err
+	}
 	return
 }
