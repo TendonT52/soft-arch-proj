@@ -29,7 +29,7 @@ resource "proxmox_vm_qemu" "kube-controller" {
   bootdisk = "scsi0"
   disk {
     slot = 0
-    size     = "50G"
+    size     = "60G"
     type     = "scsi"
     storage  = "local-lvm"
   }
