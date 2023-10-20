@@ -12,3 +12,4 @@ setup/join_command.out
 *.code-workspace
 **/*.code-workspace
 prod.sh
+containerize.sh
