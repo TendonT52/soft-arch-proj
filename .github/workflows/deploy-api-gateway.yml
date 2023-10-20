@@ -26,6 +26,8 @@ jobs:
           echo POST_SERVICE_PORT=${{ vars.POST_SERVICE_SERVER_PORT }} >> app.env
           echo REPORT_SERVICE_HOST=${{ vars.REPORT_SERVICE_SERVER_HOST }} >> app.env
           echo REPORT_SERVICE_PORT=${{ vars.REPORT_SERVICE_SERVER_PORT }} >> app.env
+          echo REVIEW_SERVICE_HOST=${{ vars.REVIEW_SERVICE_SERVER_HOST }} >> app.env
+          echo REVIEW_SERVICE_PORT=${{ vars.REVIEW_SERVICE_SERVER_PORT }} >> app.env
 
       - name: Create api-gateway-secret
         uses: wahyd4/kubectl-helm-action@master
