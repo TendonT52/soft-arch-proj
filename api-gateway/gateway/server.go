@@ -14,6 +14,7 @@ import (
 	"github.com/tendont52/api-gateway/config"
 	postService "github.com/tendont52/api-gateway/gen/post-service/v1"
 	reportService "github.com/tendont52/api-gateway/gen/report-service/v1"
+	reviewService "github.com/tendont52/api-gateway/gen/review-service/v1"
 	userService "github.com/tendont52/api-gateway/gen/user-service/v1"
 	_ "github.com/tendont52/api-gateway/statik"
 	"google.golang.org/grpc"
@@ -56,6 +57,10 @@ func Serve(conf *config.Config) error {
 	err = reportService.RegisterReportServiceHandlerFromEndpoint(ctx, gwmux, fmt.Sprintf("%s:%s", conf.ReportServiceHost, conf.ReportServicePort), opts)
 	if err != nil {
 		log.Fatalf("cannot register report service: %v", err)
+	}
+	err = reviewService.RegisterReviewServiceHandlerFromEndpoint(ctx, gwmux, fmt.Sprintf("%s:%s", conf.ReviewServiceHost, conf.ReviewServicePort), opts)
+	if err != nil {
+		log.Fatalf("cannot register review service: %v", err)
 	}
 
 	gwServer := &http.Server{

@@ -6,13 +6,15 @@ import (
 )
 
 type Config struct {
-	RESTPort       string `mapstructure:"REST_PORT"`
-	UserServiceHost string `mapstructure:"USER_SERVICE_HOST"`
-	UserServicePort string `mapstructure:"USER_SERVICE_PORT"`
-	PostServiceHost string `mapstructure:"POST_SERVICE_HOST"`
-	PostServicePort string `mapstructure:"POST_SERVICE_PORT"`
+	RESTPort          string `mapstructure:"REST_PORT"`
+	UserServiceHost   string `mapstructure:"USER_SERVICE_HOST"`
+	UserServicePort   string `mapstructure:"USER_SERVICE_PORT"`
+	PostServiceHost   string `mapstructure:"POST_SERVICE_HOST"`
+	PostServicePort   string `mapstructure:"POST_SERVICE_PORT"`
 	ReportServiceHost string `mapstructure:"REPORT_SERVICE_HOST"`
 	ReportServicePort string `mapstructure:"REPORT_SERVICE_PORT"`
+	ReviewServiceHost string `mapstructure:"REVIEW_SERVICE_HOST"`
+	ReviewServicePort string `mapstructure:"REVIEW_SERVICE_PORT"`
 }
 
 func LoadConfig(path string) (*Config, error) {
