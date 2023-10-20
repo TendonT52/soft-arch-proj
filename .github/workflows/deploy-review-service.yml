@@ -1,0 +1,68 @@
+name: Deploy review-service
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-review-service:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Deploy review-service-postgresql
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            helm upgrade review-service-postgresql ./backend/review-service/helm/postgresql \
+                --set global.postgresql.auth.postgresPassword=${{ secrets.review_SERVICE_POSTGRES_PASSWORD }} \
+                --set master.persistence.size=25Gi \
+                --set master.persistence.path="/pv/review-service/postgresql" \
+                --set primary.persistence.existingClaim=review-service-postgresql-persistent-claim \
+                --set volumePermissions.enabled=true \
+                --timeout 10m \
+                --install \
+                --wait
+
+      - name: Remove review-service-secret
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            kubectl delete secret review-service --ignore-not-found=true
+
+      - name: Create .env file
+        run: |
+          echo POSTGRES_HOST=${{ vars.REVIEW_SERVICE_POSTGRES_HOST }} >> app.env
+          echo POSTGRES_USER=${{ vars.REVIEW_SERVICE_POSTGRES_USER }} >> app.env
+          echo POSTGRES_PASSWORD=${{ secrets.REVIEW_SERVICE_POSTGRES_PASSWORD }} >> app.env
+          echo POSTGRES_DB=${{ vars.REVIEW_SERVICE_POSTGRES_DB }} >> app.env
+          echo POSTGRES_PORT=${{ vars.REVIEW_SERVICE_POSTGRES_PORT }} >> app.env
+          echo SERVER_HOST=${{ vars.REVIEW_SERVICE_SERVER_HOST }} >> app.env
+          echo SERVER_PORT=${{ vars.REVIEW_SERVICE_SERVER_PORT }} >> app.env
+          echo USER_SERVICE_HOST=${{ vars.USER_SERVICE_SERVER_HOST }} >> app.env
+          echo USER_SERVICE_PORT=${{ vars.USER_SERVICE_SERVER_PORT }} >> app.env
+          echo ACCESS_TOKEN_PUBLIC_KEY=${{ secrets.USER_SERVICE_ACCESS_TOKEN_PUBLIC_KEY }} >> app.env
+          echo MIGRATION_PATH=${{ vars.REVIEW_SERVICE_MIGRATION_PATH }} >> app.env
+
+      - name: Create review-service-secret
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            kubectl create secret generic review-service --from-file=app.env
+
+      - name: Deploy review-service
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            helm upgrade review-service ./backend/review-service/helm/review-service \
+                --set image="ghcr.io/tendont52/soft-arch-proj-backend-review-service:latest" \
+                --timeout 10m \
+                --install \
+                --wait
