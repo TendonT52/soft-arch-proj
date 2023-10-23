@@ -37,7 +37,7 @@ const DashboardNav = ({ user }: DashboardNavProps) => {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-full flex-col gap-2">
+    <nav className="flex h-full flex-col gap-2">
       {navItems.map(
         ({ Icon, title, href, role }) =>
           (!role || role === user.role) && (
@@ -54,7 +54,7 @@ const DashboardNav = ({ user }: DashboardNavProps) => {
             </Link>
           )
       )}
-    </div>
+    </nav>
   );
 };
 

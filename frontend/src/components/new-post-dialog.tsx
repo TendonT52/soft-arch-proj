@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { updatePost } from "@/actions/update-post";
+import { createPost } from "@/actions/create-post";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { Loader2Icon } from "lucide-react";
+import { Loader2Icon, PlusIcon } from "lucide-react";
+import { type DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { type Post } from "@/types/base/post";
+import { initialEditorState } from "@/lib/lexical";
 import { DatePickerWithRange } from "./date-range-picker";
 import { Button } from "./ui/button";
 import {
@@ -26,6 +27,7 @@ import { Textarea } from "./ui/textarea";
 import { useToast } from "./ui/toaster";
 
 const formDataSchema = z.object({
+  topic: z.string(),
   openPositions: z.string().trim(),
   requiredSkills: z.string().trim(),
   benefits: z.string().trim(),
@@ -34,39 +36,7 @@ const formDataSchema = z.object({
 
 type FormData = z.infer<typeof formDataSchema>;
 
-type PostEditorSaveDialogProps = {
-  post: Post & {
-    postId: string;
-  };
-  topic: string;
-  description: string;
-};
-
-/* NAIVE SHIT */
-const getUserElements = (remove: string[], add: string[]) => {
-  const userElement = [
-    ...remove
-      .filter((value) => !add.includes(value))
-      .map((value) => ({
-        action: "REMOVE" as const,
-        value,
-      })),
-    ...add
-      .filter((value) => !remove.includes(value))
-      .map((value) => ({
-        action: "ADD" as const,
-        value,
-      })),
-  ];
-  if (userElement.length === 0) return [{ action: "SAME" as const }];
-  return userElement;
-};
-
-const PostEditorSaveDialog = ({
-  post,
-  topic,
-  description,
-}: PostEditorSaveDialogProps) => {
+const NewPostDialog = () => {
   const router = useRouter();
   const { toast } = useToast();
   const {
@@ -76,36 +46,29 @@ const PostEditorSaveDialog = ({
   } = useForm<FormData>({
     mode: "onChange",
     resolver: zodResolver(formDataSchema),
-    defaultValues: {
-      openPositions: post.openPositions.join(" "),
-      requiredSkills: post.requiredSkills.join(" "),
-      benefits: post.benefits.join(" "),
-      howTo: post.howTo,
-    },
   });
 
-  // const {} = useWatch({ control });
-  const [period, setPeriod] = useState(post.period);
+  const [date, setDate] = useState<DateRange>();
+  const period = date?.from
+    ? date.to
+      ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}`
+      : format(date.from, "LLL dd, y")
+    : "";
 
   const onSubmit = async (data: FormData) => {
-    const response = await updatePost(post.postId, {
+    const regex = /\s+/;
+    const response = await createPost({
       post: {
-        topic,
-        description,
+        topic: data.topic,
+        description: initialEditorState,
         period,
         howTo: data.howTo,
-        openPositions: getUserElements(
-          post.openPositions,
-          data.openPositions.split(/\s+/)
-        ),
-        requiredSkills: getUserElements(
-          post.requiredSkills,
-          data.requiredSkills.split(/\s+/)
-        ),
-        benefits: getUserElements(post.benefits, data.benefits.split(/\s+/)),
+        openPositions: data.openPositions.split(regex),
+        requiredSkills: data.requiredSkills.split(regex),
+        benefits: data.benefits.split(regex),
       },
     });
-    if (response.status === "200") {
+    if (response.status === "201") {
       toast({
         title: "Success",
         description: response.message,
@@ -123,7 +86,10 @@ const PostEditorSaveDialog = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="h-10">Save</Button>
+        <Button className="h-10">
+          <PlusIcon className="mr-2 h-4 w-4" />
+          New post
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <form
@@ -131,9 +97,9 @@ const PostEditorSaveDialog = ({
           onSubmit={(...a) => void handleSubmit(onSubmit)(...a)}
         >
           <DialogHeader className="mb-2">
-            <DialogTitle>Additional information</DialogTitle>
+            <DialogTitle>Create new post</DialogTitle>
             <DialogDescription>
-              Help students reach your post easily
+              Enter information to create your post
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-6">
@@ -145,7 +111,11 @@ const PostEditorSaveDialog = ({
                 >
                   Topic
                 </Label>
-                <Input id="topic" value={topic} readOnly />
+                <Input
+                  {...register("topic")}
+                  placeholder="Untitled Post"
+                  id="topic"
+                />
               </div>
               <div className="flex flex-1 flex-col gap-2">
                 <Label
@@ -156,30 +126,19 @@ const PostEditorSaveDialog = ({
                 </Label>
                 <DatePickerWithRange
                   id="period"
-                  value={period}
-                  onDateChange={(date) =>
-                    void setPeriod(
-                      date?.from
-                        ? date.to
-                          ? `${format(date.from, "LLL dd, y")} - ${format(
-                              date.to,
-                              "LLL dd, y"
-                            )}`
-                          : format(date.from, "LLL dd, y")
-                        : ""
-                    )
-                  }
+                  date={date}
+                  onDateChange={setDate}
                 />
               </div>
             </fieldset>
             <fieldset className="flex w-full flex-col gap-2">
               <Label
-                className="w-full text-sm font-medium leading-none"
-                htmlFor="positions"
+                className="flex w-full justify-between text-sm font-medium leading-none"
+                htmlFor="openPositions"
               >
-                Open positions
+                <div>Open positions</div>
                 <span className="ml-4 font-normal text-muted-foreground">
-                  *Space delimited
+                  Space delimited
                 </span>
               </Label>
               <Input
@@ -190,12 +149,12 @@ const PostEditorSaveDialog = ({
             </fieldset>
             <fieldset className="flex w-full flex-col gap-2">
               <Label
-                className="w-full text-sm font-medium leading-none"
-                htmlFor="skills"
+                className="flex w-full justify-between text-sm font-medium leading-none"
+                htmlFor="requiredSkills"
               >
-                Required skills
+                <div>Required skills</div>
                 <span className="ml-4 font-normal text-muted-foreground">
-                  *Space delimited
+                  Space delimited
                 </span>
               </Label>
               <Input
@@ -206,12 +165,12 @@ const PostEditorSaveDialog = ({
             </fieldset>
             <fieldset className="flex w-full flex-col gap-2">
               <Label
-                className="w-full text-sm font-medium leading-none"
+                className="flex w-full justify-between text-sm font-medium leading-none"
                 htmlFor="benefits"
               >
-                Benefits
+                <div>Benefits</div>
                 <span className="ml-4 font-normal text-muted-foreground">
-                  *Space delimited
+                  Space delimited
                 </span>
               </Label>
               <Input
@@ -249,4 +208,4 @@ const PostEditorSaveDialog = ({
   );
 };
 
-export { PostEditorSaveDialog };
+export { NewPostDialog };

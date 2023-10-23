@@ -188,8 +188,8 @@ const positionElement = (
 ) => {
   if (!rect) {
     elem.style.opacity = "0";
-    elem.style.top = "-10000px";
-    elem.style.left = "-10000px";
+    elem.style.top = "-100000px";
+    elem.style.left = "-100000px";
   } else {
     elem.style.opacity = "1";
     elem.style.top = "0";

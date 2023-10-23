@@ -1,17 +1,34 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { withAuth } from "next-auth/middleware";
+import { verifyAccessToken } from "./lib/token";
+import { UserRole } from "./types/base/user";
 
 export default withAuth(
   async function middleware(req) {
-    const user = await getToken({ req });
-    if (!user) {
-      return NextResponse.redirect(new URL("/login", req.nextUrl));
+    const token = await getToken({ req });
+    if (!token) return NextResponse.next();
+
+    const accessToken = verifyAccessToken(token.accessToken);
+    if (["/dashboard"].includes(req.nextUrl.pathname)) {
+      switch (accessToken.role) {
+        case UserRole.Company:
+          return NextResponse.redirect(
+            new URL("/dashboard/posts", req.nextUrl)
+          );
+        case UserRole.Student:
+          return NextResponse.redirect(
+            new URL("/dashboard/reviews", req.nextUrl)
+          );
+      }
     }
 
-    const { pathname } = req.nextUrl;
-    if (pathname === "/dashboard") {
-      return NextResponse.redirect(new URL("/dashboard/posts", req.nextUrl));
+    if (
+      ["/login", "/register/company", "/register/student"].includes(
+        req.nextUrl.pathname
+      )
+    ) {
+      return NextResponse.redirect(new URL("/", req.nextUrl));
     }
 
     return NextResponse.next();
@@ -19,9 +36,6 @@ export default withAuth(
   {
     callbacks: {
       authorized() {
-        // This is a work-around for handling redirect on auth pages.
-        // We return true here so that the middleware function above
-        // is always called.
         return true;
       },
     },
@@ -29,5 +43,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/posts"],
+  matcher: ["/dashboard", "/login", "/register/company", "/register/student"],
 };

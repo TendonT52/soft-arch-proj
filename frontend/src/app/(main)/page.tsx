@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   AlertCircleIcon,
   FileTextIcon,
@@ -8,6 +9,7 @@ import {
   UserIcon,
   type LucideIcon,
 } from "lucide-react";
+import { getServerSession } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SignUpOptionMenu } from "@/components/sign-up-option-menu";
@@ -53,7 +55,8 @@ const features: Feature[] = [
 ];
 /* DUMMY */
 
-export default function Home() {
+export default async function Home() {
+  const session = await getServerSession();
   return (
     <main className="container relative flex flex-col gap-6">
       <section className="mx-auto flex min-h-[calc(100vh-5.5rem)] max-w-lg flex-1 flex-col items-center gap-12 py-12 lg:max-w-none lg:flex-row lg:gap-0 lg:px-8 xl:gap-8 xl:px-12 2xl:min-h-0 2xl:py-40">
@@ -69,14 +72,26 @@ export default function Home() {
             simplifying the path to your ideal internship.
           </p>
           <div className="hidden lg:block">
-            <SignUpOptionMenu align="end" side="right" direction="row">
-              <Button>Get started -&gt;</Button>
-            </SignUpOptionMenu>
+            {session ? (
+              <Button asChild>
+                <Link href="/dashboard">Get started -&gt;</Link>
+              </Button>
+            ) : (
+              <SignUpOptionMenu align="end" side="right" direction="row">
+                <Button>Get started -&gt;</Button>
+              </SignUpOptionMenu>
+            )}
           </div>
           <div className="block lg:hidden">
-            <SignUpOptionMenu align="center" direction="row">
-              <Button>Get started -&gt;</Button>
-            </SignUpOptionMenu>
+            {session ? (
+              <Button asChild>
+                <Link href="/dashboard">Get started -&gt;</Link>
+              </Button>
+            ) : (
+              <SignUpOptionMenu align="center" direction="row">
+                <Button>Get started -&gt;</Button>
+              </SignUpOptionMenu>
+            )}
           </div>
         </div>
         <div className="relative lg:flex-1">
@@ -96,7 +111,7 @@ export default function Home() {
         </h2>
         <div className="grid w-full auto-cols-fr grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {features.map(({ Icon, title, description }) => (
-            <Card className="shadow-sm" key={title}>
+            <Card key={title} className="shadow-sm">
               <CardContent className="flex flex-col gap-2 p-6">
                 <Icon className="h-12 w-12" />
                 <p className="font-semibold">{title}</p>

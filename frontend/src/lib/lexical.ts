@@ -5,7 +5,7 @@ import { type InitialConfigType } from "@lexical/react/LexicalComposer";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 
-export const initialConfig: InitialConfigType = {
+export const editorConfig: InitialConfigType = {
   namespace: "Editor",
   // The editor theme
   theme: {
@@ -68,3 +68,23 @@ export const initialConfig: InitialConfigType = {
     LinkNode,
   ],
 };
+
+export const initialEditorState = JSON.stringify({
+  root: {
+    children: [
+      {
+        children: [],
+        direction: null,
+        format: "",
+        indent: 0,
+        type: "paragraph",
+        version: 1,
+      },
+    ],
+    direction: null,
+    format: "",
+    indent: 0,
+    type: "root",
+    version: 1,
+  },
+});

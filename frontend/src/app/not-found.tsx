@@ -1,8 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getServerSession } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const session = await getServerSession();
   return (
     <main className="container flex min-h-screen flex-col items-center justify-center gap-8">
       <Image
@@ -17,7 +19,11 @@ export default function NotFound() {
         page could not be found.
       </p>
       <Button className="h-auto p-0" variant="link" asChild>
-        <Link href="/">Back to home</Link>
+        {session ? (
+          <Link href="/">Back to home</Link>
+        ) : (
+          <Link href="/login">Login</Link>
+        )}
       </Button>
     </main>
   );

@@ -1,15 +1,15 @@
-import Link from "next/link";
+import { notFound } from "next/navigation";
 import { getPostsMe } from "@/actions/get-posts-me";
-import { PlusIcon } from "lucide-react";
+import { UserRole } from "@/types/base/user";
 import { getServerSession } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
+import { NewPostDialog } from "@/components/new-post-dialog";
 import { PostItem } from "@/components/post-item";
 
 export default async function Page() {
   const session = await getServerSession();
-  if (!session) return <></>;
+  if (!session || session.user.role !== UserRole.Company) notFound();
 
-  const { posts } = await getPostsMe(session.accessToken);
+  const { posts = [] } = await getPostsMe();
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between gap-8">
@@ -19,18 +19,17 @@ export default async function Page() {
             Create and manage posts
           </p>
         </div>
-        <Button asChild>
-          <Link href="/editor/1">
-            <PlusIcon className="mr-2 h-4 w-4" />
-            New post
-          </Link>
-        </Button>
+        <NewPostDialog />
       </div>
-      <div className="divide-y rounded-md border">
-        {posts.map((post, idx) => (
-          <PostItem key={idx} post={post} />
-        ))}
-      </div>
+      {posts.length === 0 ? (
+        <p>No posts.</p>
+      ) : (
+        <div className="divide-y rounded-md border">
+          {posts.map((post, idx) => (
+            <PostItem key={idx} post={post} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

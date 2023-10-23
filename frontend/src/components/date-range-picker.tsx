@@ -16,13 +16,11 @@ import {
 type DatePickerWithRangeProps = React.HTMLAttributes<HTMLButtonElement> & {
   date?: DateRange;
   onDateChange?: (date: DateRange) => void;
-  value?: string;
 };
 
 const DatePickerWithRange = ({
   date,
   onDateChange,
-  value,
   className,
   ...props
 }: DatePickerWithRangeProps) => {
@@ -47,12 +45,14 @@ const DatePickerWithRange = ({
           {...props}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date?.from
-            ? date.to
-              ? `${format(date.from, "LLL dd, y")} - 
+          <span className="block">
+            {date?.from
+              ? date.to
+                ? `${format(date.from, "LLL dd, y")} - 
                   ${format(date.to, "LLL dd, y")}`
-              : format(date.from, "LLL dd, y")
-            : value ?? "Date range"}
+                : format(date.from, "LLL dd, y")
+              : "Date range"}
+          </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

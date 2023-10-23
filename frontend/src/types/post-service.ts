@@ -38,7 +38,7 @@ export const getPostsResponseSchema = z.object({
  */
 export const createPostSchema = z.object({
   post: postSchema,
-  accessToken: z.string(),
+  accessToken: z.string().optional(),
 });
 
 export const createPostResponseSchema = z.object({
@@ -53,12 +53,14 @@ export const createPostResponseSchema = z.object({
 export const getPostsMeResponseSchema = z.object({
   status: z.string(),
   message: z.string(),
-  posts: z.array(
-    postSchema.extend({
-      postId: z.string(),
-      updatedAt: z.string(),
-    })
-  ),
+  posts: z
+    .array(
+      postSchema.extend({
+        postId: z.string(),
+        updatedAt: z.string(),
+      })
+    )
+    .optional(),
 });
 
 /**
@@ -67,13 +69,15 @@ export const getPostsMeResponseSchema = z.object({
 export const getPostResponseSchema = z.object({
   status: z.string(),
   message: z.string(),
-  post: postSchema.extend({
-    owner: z.object({
-      id: z.string(),
-      name: z.string(),
-    }),
-    updatedAt: z.string(),
-  }),
+  post: postSchema
+    .extend({
+      owner: z.object({
+        id: z.string(),
+        name: z.string(),
+      }),
+      updatedAt: z.string(),
+    })
+    .optional(),
 });
 
 /**

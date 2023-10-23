@@ -38,7 +38,7 @@
     "jwt-decode": "^3.1.2",
     "lexical": "^0.12.2",
     "lucide-react": "^0.287.0",
-    "next": "13.5.4",
+    "next": "13.5.6",
     "next-auth": "^4.23.2",
     "next-themes": "^0.2.1",
     "react": "18.2.0",

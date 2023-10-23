@@ -1,5 +1,7 @@
+import { notFound } from "next/navigation";
 import { getPosts } from "@/actions/get-posts";
 import { SearchIcon } from "lucide-react";
+import { getServerSession } from "@/lib/auth";
 import { getSearchArray } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PostCard } from "@/components/post-card";
@@ -19,6 +21,9 @@ function getSearchOption(searchParam?: string | string[]) {
 }
 
 export default async function Page({ searchParams }: PageProps) {
+  const session = await getServerSession();
+  if (!session) notFound();
+
   const { posts = [] } = await getPosts(undefined, {
     searchCompany: getSearchOption(searchParams.companies),
     searchOpenPosition: getSearchOption(searchParams.openPositions),
