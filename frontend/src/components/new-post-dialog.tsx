@@ -4,12 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createPost } from "@/actions/create-post";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
 import { Loader2Icon, PlusIcon } from "lucide-react";
 import { type DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { initialEditorState } from "@/lib/lexical";
+import { cn, formatPeriod } from "@/lib/utils";
 import { DatePickerWithRange } from "./date-range-picker";
 import { Button } from "./ui/button";
 import {
@@ -27,11 +27,20 @@ import { Textarea } from "./ui/textarea";
 import { useToast } from "./ui/toaster";
 
 const formDataSchema = z.object({
-  topic: z.string(),
-  openPositions: z.string().trim(),
-  requiredSkills: z.string().trim(),
-  benefits: z.string().trim(),
-  howTo: z.string().trim(),
+  topic: z.string().min(1, { message: "Topic is required" }),
+  openPositions: z
+    .string()
+    .trim()
+    .min(1, { message: "At least 1 open position is required" }),
+  requiredSkills: z
+    .string()
+    .trim()
+    .min(1, { message: "At least 1 required skill is required" }),
+  benefits: z
+    .string()
+    .trim()
+    .min(1, { message: "At least 1 benefit is required" }),
+  howTo: z.string().trim().min(1, { message: "How to is required" }),
 });
 
 type FormData = z.infer<typeof formDataSchema>;
@@ -41,19 +50,16 @@ const NewPostDialog = () => {
   const { toast } = useToast();
   const {
     register,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
     handleSubmit,
   } = useForm<FormData>({
     mode: "onChange",
+    shouldUseNativeValidation: true,
     resolver: zodResolver(formDataSchema),
   });
 
   const [date, setDate] = useState<DateRange>();
-  const period = date?.from
-    ? date.to
-      ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}`
-      : format(date.from, "LLL dd, y")
-    : "";
+  const period = formatPeriod(date);
 
   const onSubmit = async (data: FormData) => {
     const regex = /\s+/;
@@ -74,6 +80,7 @@ const NewPostDialog = () => {
         description: response.message,
       });
       router.refresh();
+      router.push(`/editor/${response.id}`);
     } else {
       toast({
         title: "Error",
@@ -113,8 +120,12 @@ const NewPostDialog = () => {
                 </Label>
                 <Input
                   {...register("topic")}
-                  placeholder="Untitled Post"
                   id="topic"
+                  className={cn(
+                    errors.topic &&
+                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                  )}
+                  placeholder="Untitled Post"
                 />
               </div>
               <div className="flex flex-1 flex-col gap-2">
@@ -131,67 +142,91 @@ const NewPostDialog = () => {
                 />
               </div>
             </fieldset>
-            <fieldset className="flex w-full flex-col gap-2">
-              <Label
-                className="flex w-full justify-between text-sm font-medium leading-none"
-                htmlFor="openPositions"
-              >
-                <div>Open positions</div>
-                <span className="ml-4 font-normal text-muted-foreground">
-                  Space delimited
-                </span>
-              </Label>
-              <Input
-                {...register("openPositions")}
-                id="openPositions"
-                placeholder="Top of the world"
-              />
+            <fieldset className="flex w-full gap-4">
+              <div className="flex w-full flex-col gap-2">
+                <Label
+                  className="flex w-full justify-between text-sm font-medium leading-none"
+                  htmlFor="openPositions"
+                >
+                  Open positions
+                  <span className="ml-4 font-normal text-muted-foreground">
+                    Space delimited
+                  </span>
+                </Label>
+                <Input
+                  {...register("openPositions")}
+                  id="openPositions"
+                  className={cn(
+                    errors.openPositions &&
+                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                  )}
+                  placeholder="Top of the world"
+                />
+              </div>
             </fieldset>
-            <fieldset className="flex w-full flex-col gap-2">
-              <Label
-                className="flex w-full justify-between text-sm font-medium leading-none"
-                htmlFor="requiredSkills"
-              >
-                <div>Required skills</div>
-                <span className="ml-4 font-normal text-muted-foreground">
-                  Space delimited
-                </span>
-              </Label>
-              <Input
-                {...register("requiredSkills")}
-                id="requiredSkills"
-                placeholder="SQL slamming"
-              />
+            <fieldset className="flex w-full gap-4">
+              <div className="flex w-full flex-col gap-2">
+                <Label
+                  className="flex w-full justify-between text-sm font-medium leading-none"
+                  htmlFor="requiredSkills"
+                >
+                  Required skills
+                  <span className="ml-4 font-normal text-muted-foreground">
+                    Space delimited
+                  </span>
+                </Label>
+                <Input
+                  {...register("requiredSkills")}
+                  id="requiredSkills"
+                  className={cn(
+                    errors.requiredSkills &&
+                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                  )}
+                  placeholder="SQL slamming"
+                />
+              </div>
             </fieldset>
-            <fieldset className="flex w-full flex-col gap-2">
-              <Label
-                className="flex w-full justify-between text-sm font-medium leading-none"
-                htmlFor="benefits"
-              >
-                <div>Benefits</div>
-                <span className="ml-4 font-normal text-muted-foreground">
-                  Space delimited
-                </span>
-              </Label>
-              <Input
-                {...register("benefits")}
-                id="benefits"
-                placeholder="Coffee"
-              />
+            <fieldset className="flex w-full gap-4">
+              <div className="flex w-full flex-col gap-2">
+                <Label
+                  className="flex w-full justify-between text-sm font-medium leading-none"
+                  htmlFor="benefits"
+                >
+                  Benefits
+                  <span className="ml-4 font-normal text-muted-foreground">
+                    Space delimited
+                  </span>
+                </Label>
+                <Input
+                  {...register("benefits")}
+                  id="benefits"
+                  className={cn(
+                    errors.benefits &&
+                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                  )}
+                  placeholder="Coffee"
+                />
+              </div>
             </fieldset>
-            <fieldset className="flex flex-col gap-2">
-              <Label
-                className="text-sm font-medium leading-none"
-                htmlFor="howTo"
-              >
-                How to apply
-              </Label>
-              <Textarea
-                {...register("howTo")}
-                id="howTo"
-                className="resize-none"
-                placeholder="Run to the office like the flash ⚡"
-              />
+            <fieldset className="flex w-full gap-4">
+              <div className="flex w-full flex-col gap-2">
+                <Label
+                  className="text-sm font-medium leading-none"
+                  htmlFor="howTo"
+                >
+                  How to apply
+                </Label>
+                <Textarea
+                  {...register("howTo")}
+                  id="howTo"
+                  className={cn(
+                    "resize-none",
+                    errors.howTo &&
+                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                  )}
+                  placeholder="Run to the office like the flash ⚡"
+                />
+              </div>
             </fieldset>
           </div>
           <DialogFooter className="mt-2 flex sm:justify-center">

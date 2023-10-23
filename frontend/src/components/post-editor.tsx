@@ -16,7 +16,6 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { format } from "date-fns";
 import { ChevronLeftIcon, Loader2Icon } from "lucide-react";
 import { type DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
@@ -24,7 +23,7 @@ import TextareaAutosize from "react-textarea-autosize";
 import { z } from "zod";
 import { type Post } from "@/types/base/post";
 import { editorConfig } from "@/lib/lexical";
-import { parsePeriod } from "@/lib/utils";
+import { cn, formatPeriod, parsePeriod } from "@/lib/utils";
 import { DatePickerWithRange } from "./date-range-picker";
 import { CodeHighlightPlugin } from "./lexical/code-highlight-plugin";
 import { ListMaxIndentLevelPlugin } from "./lexical/list-max-index-level-plugin";
@@ -46,10 +45,19 @@ import { Textarea } from "./ui/textarea";
 import { useToast } from "./ui/toaster";
 
 const formDataSchema = z.object({
-  openPositions: z.string().trim(),
-  requiredSkills: z.string().trim(),
-  benefits: z.string().trim(),
-  howTo: z.string().trim(),
+  openPositions: z
+    .string()
+    .trim()
+    .min(1, { message: "At least 1 open position is required" }),
+  requiredSkills: z
+    .string()
+    .trim()
+    .min(1, { message: "At least 1 required skill is required" }),
+  benefits: z
+    .string()
+    .trim()
+    .min(1, { message: "At least 1 benefit is required" }),
+  howTo: z.string().trim().min(1, { message: "How to is required" }),
 });
 
 type PostEditorProps = {
@@ -92,10 +100,11 @@ const PostEditor = ({ post }: PostEditorProps) => {
   const { toast } = useToast();
   const {
     register,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
     handleSubmit,
   } = useForm<FormData>({
     mode: "onChange",
+    shouldUseNativeValidation: true,
     resolver: zodResolver(formDataSchema),
     defaultValues: {
       openPositions: post.openPositions.join(" "),
@@ -108,17 +117,13 @@ const PostEditor = ({ post }: PostEditorProps) => {
   const [date, setDate] = useState<DateRange | undefined>(
     parsePeriod(post.period)
   );
-  const period = date?.from
-    ? date.to
-      ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}`
-      : format(date.from, "LLL dd, y")
-    : "";
+  const period = formatPeriod(date);
 
   const onSubmit = async (data: FormData) => {
     const regex = /\s+/;
     const response = await updatePost(post.postId, {
       post: {
-        topic,
+        topic: topic || "Untitled Post",
         description,
         period,
         howTo: data.howTo,
@@ -167,6 +172,7 @@ const PostEditor = ({ post }: PostEditorProps) => {
             <TextareaAutosize
               className="flex h-[5.625rem] w-full max-w-none resize-none appearance-none items-end bg-transparent px-8 pb-0.5 pt-12 text-4xl font-extrabold text-[#111827] scrollbar-hide focus:outline-none focus-visible:outline-none dark:text-[#ffffff]"
               value={topic}
+              placeholder="Untitled Post"
               spellCheck={false}
               onChange={(e) => void setTopic(e.target.value)}
               aria-label="title"
@@ -225,7 +231,7 @@ const PostEditor = ({ post }: PostEditorProps) => {
                 >
                   Topic
                 </Label>
-                <Input id="topic" value={topic} readOnly />
+                <Input id="topic" value={topic || "Untitled Post"} readOnly />
               </div>
               <div className="flex flex-1 flex-col gap-2">
                 <Label
@@ -244,7 +250,7 @@ const PostEditor = ({ post }: PostEditorProps) => {
             <fieldset className="flex w-full flex-col gap-2">
               <Label
                 className="w-full text-sm font-medium leading-none"
-                htmlFor="positions"
+                htmlFor="openPositions"
               >
                 Open positions
                 <span className="ml-4 font-normal text-muted-foreground">
@@ -254,6 +260,10 @@ const PostEditor = ({ post }: PostEditorProps) => {
               <Input
                 {...register("openPositions")}
                 id="openPositions"
+                className={cn(
+                  errors.openPositions &&
+                    "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                )}
                 placeholder="Top of the world"
               />
             </fieldset>
@@ -270,6 +280,10 @@ const PostEditor = ({ post }: PostEditorProps) => {
               <Input
                 {...register("requiredSkills")}
                 id="requiredSkills"
+                className={cn(
+                  errors.requiredSkills &&
+                    "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                )}
                 placeholder="SQL slamming"
               />
             </fieldset>
@@ -286,6 +300,10 @@ const PostEditor = ({ post }: PostEditorProps) => {
               <Input
                 {...register("benefits")}
                 id="benefits"
+                className={cn(
+                  errors.benefits &&
+                    "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                )}
                 placeholder="Coffee"
               />
             </fieldset>

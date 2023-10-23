@@ -183,13 +183,7 @@ const RegisterStudentForm = () => {
                 placeholder="Last name"
               />
               <FormErrorTooltip
-                message={
-                  errors.firstName
-                    ? errors.firstName.message
-                    : errors.lastName
-                    ? errors.lastName.message
-                    : undefined
-                }
+                message={errors.firstName?.message ?? errors.lastName?.message}
               />
             </fieldset>
             <fieldset className="relative flex w-full items-center gap-4">
@@ -242,13 +236,9 @@ const RegisterStudentForm = () => {
               </Select>
               <FormErrorTooltip
                 message={
-                  errors.faculty
-                    ? errors.faculty.message
-                    : errors.major
-                    ? errors.major.message
-                    : errors.year
-                    ? errors.year.message
-                    : undefined
+                  errors.faculty?.message ??
+                  errors.major?.message ??
+                  errors.year?.message
                 }
               />
             </fieldset>

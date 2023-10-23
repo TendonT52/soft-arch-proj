@@ -36,7 +36,7 @@ export function getSearchArray(searchParam?: string | string[]) {
     : [];
 }
 
-export function formatPeriod(date: DateRange) {
+export function formatPeriod(date?: DateRange) {
   return date?.from
     ? date.to
       ? `${format(date.from, "LLL dd, y")} - 

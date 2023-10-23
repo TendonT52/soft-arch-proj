@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getPost } from "@/actions/get-post";
+import { getServerSession } from "@/lib/auth";
 import { PostViewer } from "@/components/post-viewer";
 
 /* DUMMY */
@@ -11,8 +12,11 @@ type PageProps = {
 
 export default async function Page({ params }: PageProps) {
   const postId = params.id;
-  const { post } = await getPost(postId);
+  const session = await getServerSession();
+  if (!session) notFound();
 
+  const { post } = await getPost(postId);
   if (!post) notFound();
+
   return <PostViewer post={{ ...post, postId }} />;
 }

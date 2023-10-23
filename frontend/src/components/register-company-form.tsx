@@ -159,13 +159,7 @@ const RegisterCompanyForm = () => {
                 placeholder="Category"
               />
               <FormErrorTooltip
-                message={
-                  errors.name
-                    ? errors.name.message
-                    : errors.category
-                    ? errors.category.message
-                    : undefined
-                }
+                message={errors.name?.message ?? errors.category?.message}
               />
             </fieldset>
             <fieldset className="flex w-full items-center gap-4">
@@ -189,13 +183,7 @@ const RegisterCompanyForm = () => {
                 type="number"
               />
               <FormErrorTooltip
-                message={
-                  errors.location
-                    ? errors.location.message
-                    : errors.phone
-                    ? errors.phone.message
-                    : undefined
-                }
+                message={errors.location?.message ?? errors.phone?.message}
               />
             </fieldset>
             <fieldset className="mb-12 flex w-full items-center gap-4">
