@@ -116,9 +116,7 @@ const RegisterCompanyForm = () => {
     }
   };
 
-  useEffect(() => {
-    void trigger("terms");
-  }, [trigger, terms]);
+  useEffect(() => void trigger("terms"), [trigger, terms]);
 
   return (
     <div className="relative flex flex-1 items-center justify-center">

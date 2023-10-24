@@ -13,6 +13,7 @@ export default async function NotFound() {
         alt="Not found"
         height={1030}
         width={1477}
+        priority
       />
       <p className="text-center text-base sm:text-lg">
         <span className="block font-extrabold sm:inline">404</span>&nbsp;This

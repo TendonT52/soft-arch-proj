@@ -14,6 +14,7 @@ export default function Layout({ children }: LayoutProps) {
           alt="Register"
           height={531}
           width={646}
+          priority
         />
       </div>
       {children}

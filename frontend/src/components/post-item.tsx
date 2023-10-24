@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { deletePost } from "@/actions/delete-post";
 import { MoreVerticalIcon, TrashIcon } from "lucide-react";
 import { type Post } from "@/types/base/post";
 import { cn, formatDate } from "@/lib/utils";
@@ -22,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { useToast } from "./ui/toaster";
 
 type PostItemProps = {
   post: Post & {
@@ -31,12 +34,39 @@ type PostItemProps = {
 };
 
 export function PostItem({ post }: PostItemProps) {
+  const router = useRouter();
+  const { toast } = useToast();
+
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    const response = await deletePost(post.postId);
+    if (response.status === "200") {
+      toast({
+        title: "Success",
+        description: response.message,
+      });
+      router.refresh();
+      setShowDeleteAlert(false);
+    } else {
+      toast({
+        title: "Error",
+        description: response.message,
+        variant: "destructive",
+      });
+    }
+    setDeleting(false);
+  };
 
   return (
     <div className="flex items-center justify-between p-4">
       <div className="flex flex-col items-start gap-1">
-        <Link href={`/editor/${post.postId}`} className="font-semibold hover:underline">
+        <Link
+          href={`/editor/${post.postId}`}
+          className="font-semibold hover:underline"
+        >
           {post.topic}
         </Link>
         <div>
@@ -60,7 +90,7 @@ export function PostItem({ post }: PostItemProps) {
           </DropdownMenuItem>
           <DropdownMenuItem
             className="flex cursor-pointer items-center text-destructive focus:text-destructive"
-            onSelect={() => setShowDeleteAlert(true)}
+            onSelect={() => void setShowDeleteAlert(true)}
           >
             Delete
           </DropdownMenuItem>
@@ -80,7 +110,8 @@ export function PostItem({ post }: PostItemProps) {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className={cn(buttonVariants({ variant: "destructive" }))}
-              onClick={() => void setShowDeleteAlert(false)}
+              disabled={deleting}
+              onClick={() => void handleDelete()}
             >
               <TrashIcon className="mr-2 h-4 w-4" />
               Delete
