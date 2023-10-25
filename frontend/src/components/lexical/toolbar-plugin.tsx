@@ -307,7 +307,7 @@ const LinkEditor = ({ editor }: LinkEditorProps) => {
     <div
       ref={ref}
       className={cn(
-        "prose prose-green absolute left-[-10000px] top-[-10000px] z-50 inline-flex w-full max-w-xs items-center justify-between gap-1 rounded-lg border bg-background text-sm text-foreground opacity-0 shadow transition-opacity duration-300",
+        "prose prose-green absolute left-[-10000px] top-[-10000px] z-50 flex w-full max-w-xs items-center justify-between gap-1 rounded-lg border bg-background text-sm text-foreground opacity-0 shadow transition-opacity duration-300",
         isEditMode ? "p-1" : "p-1 pl-4"
       )}
     >
@@ -571,10 +571,12 @@ const BlockOptionsDropdownMenu = ({
   );
 };
 
-type ToolbarPluginProps = React.HTMLAttributes<HTMLDivElement>;
+type ToolbarPluginProps = React.HTMLAttributes<HTMLDivElement> & {
+  variant?: "default" | "minimal";
+};
 
 const ToolbarPlugin = React.forwardRef<HTMLDivElement, ToolbarPluginProps>(
-  ({ className, ...props }, ref) => {
+  ({ variant = "default", className, ...props }, ref) => {
     const [editor] = useLexicalComposerContext();
     const [canUndo, setCanUndo] = useState(false);
     const [canRedo, setCanRedo] = useState(false);
@@ -722,7 +724,7 @@ const ToolbarPlugin = React.forwardRef<HTMLDivElement, ToolbarPluginProps>(
     return (
       <div
         className={cn(
-          "relative flex flex-wrap justify-center gap-1 rounded-[inherit] bg-background p-1",
+          "relative flex flex-wrap justify-center gap-1 bg-background p-1",
           className
         )}
         ref={ref}
@@ -752,11 +754,13 @@ const ToolbarPlugin = React.forwardRef<HTMLDivElement, ToolbarPluginProps>(
             <Redo2Icon className="h-4 w-8" strokeWidth={1} />
           </Button>
         </div>
-        <Separator orientation="vertical" className="hidden md:block" />
-        <div className="flex gap-1">
-          <BlockOptionsDropdownMenu editor={editor} blockType={blockType} />
-        </div>
-        <Separator orientation="vertical" className="hidden md:block" />
+        {variant !== "minimal" && <Separator orientation="vertical" />}
+        {variant !== "minimal" && (
+          <div className="flex gap-1">
+            <BlockOptionsDropdownMenu editor={editor} blockType={blockType} />
+          </div>
+        )}
+        <Separator orientation="vertical" />
         {blockType === "code" ? (
           <div className="flex gap-1">
             <LanguageOptionsSelect
@@ -838,61 +842,63 @@ const ToolbarPlugin = React.forwardRef<HTMLDivElement, ToolbarPluginProps>(
               </Toggle>
               {isLink && <LinkEditor editor={editor} />}
             </div>
-            <Separator orientation="vertical" className="hidden md:block" />
-            <div className="flex gap-1">
-              <Toggle
-                className="h-8 w-8 p-0"
-                onClick={() => {
-                  editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "start");
-                }}
-                pressed={elementFormat === "start"}
-                aria-label="Left Align"
-              >
-                <AlignLeftIcon
-                  className="h-4 w-8"
-                  strokeWidth={elementFormat === "start" ? 2 : 1}
-                />
-              </Toggle>
-              <Toggle
-                className="h-8 w-8 p-0"
-                onClick={() => {
-                  editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center");
-                }}
-                pressed={elementFormat === "center"}
-                aria-label="Center Align"
-              >
-                <AlignCenterIcon
-                  className="h-4 w-8"
-                  strokeWidth={elementFormat === "center" ? 2 : 1}
-                />
-              </Toggle>
-              <Toggle
-                className="h-8 w-8 p-0"
-                onClick={() => {
-                  editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "end");
-                }}
-                pressed={elementFormat === "end"}
-                aria-label="Right Align"
-              >
-                <AlignRightIcon
-                  className="h-4 w-8"
-                  strokeWidth={elementFormat === "end" ? 2 : 1}
-                />
-              </Toggle>
-              <Toggle
-                className="h-8 w-8 p-0"
-                onClick={() => {
-                  editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "justify");
-                }}
-                pressed={elementFormat === "justify"}
-                aria-label="Justify Align"
-              >
-                <AlignJustifyIcon
-                  className="h-4 w-8"
-                  strokeWidth={elementFormat === "justify" ? 2 : 1}
-                />
-              </Toggle>
-            </div>
+            {variant !== "minimal" && <Separator orientation="vertical" />}
+            {variant !== "minimal" && (
+              <div className="flex gap-1">
+                <Toggle
+                  className="h-8 w-8 p-0"
+                  onClick={() => {
+                    editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "start");
+                  }}
+                  pressed={elementFormat === "start"}
+                  aria-label="Left Align"
+                >
+                  <AlignLeftIcon
+                    className="h-4 w-8"
+                    strokeWidth={elementFormat === "start" ? 2 : 1}
+                  />
+                </Toggle>
+                <Toggle
+                  className="h-8 w-8 p-0"
+                  onClick={() => {
+                    editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center");
+                  }}
+                  pressed={elementFormat === "center"}
+                  aria-label="Center Align"
+                >
+                  <AlignCenterIcon
+                    className="h-4 w-8"
+                    strokeWidth={elementFormat === "center" ? 2 : 1}
+                  />
+                </Toggle>
+                <Toggle
+                  className="h-8 w-8 p-0"
+                  onClick={() => {
+                    editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "end");
+                  }}
+                  pressed={elementFormat === "end"}
+                  aria-label="Right Align"
+                >
+                  <AlignRightIcon
+                    className="h-4 w-8"
+                    strokeWidth={elementFormat === "end" ? 2 : 1}
+                  />
+                </Toggle>
+                <Toggle
+                  className="h-8 w-8 p-0"
+                  onClick={() => {
+                    editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "justify");
+                  }}
+                  pressed={elementFormat === "justify"}
+                  aria-label="Justify Align"
+                >
+                  <AlignJustifyIcon
+                    className="h-4 w-8"
+                    strokeWidth={elementFormat === "justify" ? 2 : 1}
+                  />
+                </Toggle>
+              </div>
+            )}
           </>
         )}
       </div>

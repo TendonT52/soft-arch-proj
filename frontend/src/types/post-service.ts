@@ -31,6 +31,7 @@ export const getPostsResponseSchema = z.object({
       })
     )
     .optional(),
+  total: z.string().optional(),
 });
 
 /**
@@ -44,7 +45,7 @@ export const createPostSchema = z.object({
 export const createPostResponseSchema = z.object({
   status: z.string(),
   message: z.string(),
-  id: z.string(),
+  id: z.string().optional(),
 });
 
 /**

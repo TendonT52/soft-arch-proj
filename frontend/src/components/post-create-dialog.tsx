@@ -45,9 +45,10 @@ const formDataSchema = z.object({
 
 type FormData = z.infer<typeof formDataSchema>;
 
-const NewPostDialog = () => {
+const PostCreateDialog = () => {
   const router = useRouter();
   const { toast } = useToast();
+
   const {
     register,
     formState: { isSubmitting, errors },
@@ -59,7 +60,6 @@ const NewPostDialog = () => {
   });
 
   const [date, setDate] = useState<DateRange>();
-  const period = formatPeriod(date);
 
   const onSubmit = async (data: FormData) => {
     const regex = /\s+/;
@@ -67,11 +67,11 @@ const NewPostDialog = () => {
       post: {
         topic: data.topic,
         description: initialEditorState,
-        period,
+        period: formatPeriod(date),
         howTo: data.howTo,
-        openPositions: data.openPositions.split(regex),
-        requiredSkills: data.requiredSkills.split(regex),
-        benefits: data.benefits.split(regex),
+        openPositions: [...new Set(data.openPositions.split(regex))],
+        requiredSkills: [...new Set(data.requiredSkills.split(regex))],
+        benefits: [...new Set(data.benefits.split(regex))],
       },
     });
     if (response.status === "201") {
@@ -137,6 +137,10 @@ const NewPostDialog = () => {
                 </Label>
                 <DatePickerWithRange
                   id="period"
+                  className={cn(
+                    !date &&
+                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                  )}
                   date={date}
                   onDateChange={setDate}
                 />
@@ -243,4 +247,4 @@ const NewPostDialog = () => {
   );
 };
 
-export { NewPostDialog };
+export { PostCreateDialog };

@@ -15,7 +15,7 @@ export const createAdminSchema = z.object({
 export const createAdminResponseSchema = z.object({
   status: z.string(),
   message: z.string(),
-  id: z.string(),
+  id: z.string().optional(),
 });
 
 /**
@@ -95,7 +95,7 @@ export const createStudentSchema = z.object({
 export const createStudentResponseSchema = z.object({
   status: z.string(),
   message: z.string(),
-  id: z.string(),
+  id: z.string().optional(),
 });
 
 /**

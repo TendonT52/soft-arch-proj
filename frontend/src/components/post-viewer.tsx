@@ -8,11 +8,10 @@ import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { type Post } from "@/types/base/post";
 import { editorConfig } from "@/lib/lexical";
-import { formatDate, parsePeriod } from "@/lib/utils";
+import { formatDate, formatPeriod, parsePeriod } from "@/lib/utils";
 import { CodeHighlightPlugin } from "./lexical/code-highlight-plugin";
 import { ListMaxIndentLevelPlugin } from "./lexical/list-max-index-level-plugin";
 import { Loading } from "./loading";
@@ -51,7 +50,6 @@ const PostViewer = ({ post }: PostViewerProps) => {
     owner,
     updatedAt,
   } = post;
-  const period = parsePeriod(post.period);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => void setLoading(false), []);
@@ -94,7 +92,7 @@ const PostViewer = ({ post }: PostViewerProps) => {
                 placeholder={
                   <div className="prose prose-green pointer-events-none absolute left-0 right-0 top-0 max-w-none p-8">
                     <p className="text-muted-foreground">
-                      Enter post description...
+                      This post currently has no description yet.
                     </p>
                   </div>
                 }
@@ -108,7 +106,7 @@ const PostViewer = ({ post }: PostViewerProps) => {
         <LinkPlugin />
         <ListMaxIndentLevelPlugin maxDepth={1} />
       </LexicalComposer>
-      <Card className="rounded-none border-transparent border-t-border bg-background">
+      <Card className="rounded-none border-transparent border-t-border bg-background shadow-none">
         <CardHeader className="p-8">
           <CardTitle>Additional information</CardTitle>
           <CardDescription>
@@ -139,12 +137,7 @@ const PostViewer = ({ post }: PostViewerProps) => {
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 <span className="block">
-                  {period?.from
-                    ? period.to
-                      ? `${format(period.from, "LLL dd, y")} - 
-                  ${format(period.to, "LLL dd, y")}`
-                      : format(period.from, "LLL dd, y")
-                    : "Date range"}
+                  {formatPeriod(parsePeriod(post.period))}
                 </span>
               </Button>
             </div>

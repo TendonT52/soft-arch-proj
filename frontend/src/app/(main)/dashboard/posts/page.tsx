@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getPostsMe } from "@/actions/get-posts-me";
 import { UserRole } from "@/types/base/user";
 import { getServerSession } from "@/lib/auth";
-import { NewPostDialog } from "@/components/new-post-dialog";
+import { PostCreateDialog } from "@/components/post-create-dialog";
 import { PostItem } from "@/components/post-item";
 
 export default async function Page() {
@@ -19,7 +19,7 @@ export default async function Page() {
             Create and manage posts
           </p>
         </div>
-        <NewPostDialog />
+        <PostCreateDialog />
       </div>
       {posts.length === 0 ? (
         <p>No posts.</p>

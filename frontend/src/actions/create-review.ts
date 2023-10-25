@@ -3,21 +3,21 @@
 import { env } from "env.mjs";
 import { type z } from "zod";
 import {
-  createPostResponseSchema,
-  type createPostSchema,
-} from "@/types/post-service";
+  createReviewResponseSchema,
+  type createReviewSchema,
+} from "@/types/review-service";
 import { getServerSession } from "@/lib/auth";
 import { parseType } from "@/lib/utils";
 
-export async function createPost(
-  body: z.infer<typeof createPostSchema>
-): Promise<z.infer<typeof createPostResponseSchema>> {
+export async function createReview(
+  body: z.infer<typeof createReviewSchema>
+): Promise<z.infer<typeof createReviewResponseSchema>> {
   const session = await getServerSession(); // this will retrieve new access token if it's expired
   if (!session) {
     throw new Error("No session");
   }
 
-  const response = await fetch(`${env.API_URL}/v1/posts`, {
+  const response = await fetch(`${env.API_URL}/v1/reviews`, {
     method: "POST",
     body: JSON.stringify({
       ...body,
@@ -25,5 +25,5 @@ export async function createPost(
     }),
   });
 
-  return parseType(createPostResponseSchema, await response.json());
+  return parseType(createReviewResponseSchema, await response.json());
 }

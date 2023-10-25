@@ -89,15 +89,9 @@ const getUserElements = (remove: string[], add: string[]) => {
 };
 
 const PostEditor = ({ post }: PostEditorProps) => {
-  const editorState = post.description;
-  const [description, setDescription] = useState<string>(post.description);
-  const [topic, setTopic] = useState(post.topic);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => void setLoading(false), []);
-
   const router = useRouter();
   const { toast } = useToast();
+
   const {
     register,
     formState: { isSubmitting, errors },
@@ -114,6 +108,12 @@ const PostEditor = ({ post }: PostEditorProps) => {
     },
   });
 
+  const [description, setDescription] = useState<string>(post.description);
+  const [topic, setTopic] = useState(post.topic);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => void setLoading(false), []);
+
   const [date, setDate] = useState<DateRange | undefined>(
     parsePeriod(post.period)
   );
@@ -128,14 +128,17 @@ const PostEditor = ({ post }: PostEditorProps) => {
         period,
         howTo: data.howTo,
         openPositions: getUserElements(
-          post.openPositions,
-          data.openPositions.split(regex)
+          [...new Set(post.openPositions)],
+          [...new Set(data.openPositions.split(regex))]
         ),
         requiredSkills: getUserElements(
-          post.requiredSkills,
-          data.requiredSkills.split(regex)
+          [...new Set(post.requiredSkills)],
+          [...new Set(data.requiredSkills.split(regex))]
         ),
-        benefits: getUserElements(post.benefits, data.benefits.split(regex)),
+        benefits: getUserElements(
+          [...new Set(post.benefits)],
+          [...new Set(data.benefits.split(regex))]
+        ),
       },
     });
     if (response.status === "200") {
@@ -164,15 +167,18 @@ const PostEditor = ({ post }: PostEditorProps) => {
         </Button>
       </div>
       <div className="flex w-full max-w-3xl flex-col">
-        <LexicalComposer initialConfig={{ ...editorConfig, editorState }}>
+        <LexicalComposer
+          initialConfig={{ ...editorConfig, editorState: description }}
+        >
           <div className="relative flex flex-col items-start">
             <div className="sticky top-0 z-10 flex w-full justify-center bg-background pt-4">
               <ToolbarPlugin className="rounded-full border bg-background px-4 shadow-sm" />
             </div>
             <TextareaAutosize
-              className="flex h-[5.625rem] w-full max-w-none resize-none appearance-none items-end bg-transparent px-8 pb-0.5 pt-12 text-4xl font-extrabold text-[#111827] scrollbar-hide focus:outline-none focus-visible:outline-none dark:text-[#ffffff]"
+              className="flex h-[5.625rem] w-full max-w-none resize-none appearance-none items-end bg-transparent px-8 pb-0.5 pt-12 text-4xl font-extrabold tracking-tight text-[#111827] scrollbar-hide focus:outline-none focus-visible:outline-none dark:text-[#ffffff]"
               value={topic}
               placeholder="Untitled Post"
+              autoFocus
               spellCheck={false}
               onChange={(e) => void setTopic(e.target.value)}
               aria-label="title"
@@ -211,11 +217,10 @@ const PostEditor = ({ post }: PostEditorProps) => {
           <OnChangePlugin
             onChange={(editorState) => {
               setDescription(JSON.stringify(editorState.toJSON()));
-              console.log(JSON.stringify(editorState.toJSON()));
             }}
           />
         </LexicalComposer>
-        <Card className="mx-auto w-full max-w-3xl rounded-none border-transparent border-t-border bg-background">
+        <Card className="mx-auto w-full max-w-3xl rounded-none border-transparent border-t-border bg-background shadow-none">
           <CardHeader className="p-8">
             <CardTitle>Additional information</CardTitle>
             <CardDescription>

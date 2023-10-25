@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { deletePost } from "@/actions/delete-post";
-import { MoreVerticalIcon, TrashIcon } from "lucide-react";
+import { Loader2Icon, MoreVerticalIcon, TrashIcon } from "lucide-react";
 import { type Post } from "@/types/base/post";
-import { cn, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import { Button, buttonVariants } from "./ui/button";
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,7 +40,8 @@ export function PostItem({ post }: PostItemProps) {
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const handleDelete = async () => {
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
     setDeleting(true);
     const response = await deletePost(post.postId);
     if (response.status === "200") {
@@ -108,14 +109,16 @@ export function PostItem({ post }: PostItemProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className={cn(buttonVariants({ variant: "destructive" }))}
-              disabled={deleting}
-              onClick={() => void handleDelete()}
-            >
-              <TrashIcon className="mr-2 h-4 w-4" />
-              Delete
-            </AlertDialogAction>
+            <Button variant="destructive" disabled={deleting} asChild>
+              <AlertDialogAction onClick={(...a) => void handleDelete(...a)}>
+                {deleting ? (
+                  <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <TrashIcon className="mr-2 h-4 w-4" />
+                )}
+                Delete
+              </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

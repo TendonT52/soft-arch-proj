@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(cx(inputs));
 }
 
-export function formatDate(input: string | number): string {
+export function formatDate(input: string | number) {
   const date = new Date(input);
   return date.toLocaleDateString("en-US", {
     month: "long",
@@ -39,8 +39,7 @@ export function getSearchArray(searchParam?: string | string[]) {
 export function formatPeriod(date?: DateRange) {
   return date?.from
     ? date.to
-      ? `${format(date.from, "LLL dd, y")} - 
-                  ${format(date.to, "LLL dd, y")}`
+      ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}`
       : format(date.from, "LLL dd, y")
     : "Date range";
 }

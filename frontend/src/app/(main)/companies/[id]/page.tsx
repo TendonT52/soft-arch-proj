@@ -1,6 +1,10 @@
 import Image from "next/image";
+import { notFound } from "next/navigation";
 import { PenSquare } from "lucide-react";
+import { UserRole } from "@/types/base/user";
+import { getServerSession } from "@/lib/auth";
 import { CompanyProfileCard } from "@/components/company-profile-card";
+import { ReviewCreateDialog } from "@/components/review-create-dialog";
 
 /**Dummy Company profile */
 type CompanyProfile = {
@@ -13,9 +17,12 @@ type CompanyProfile = {
   profileImagePath: string;
 };
 
-export default function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: { id: string } }) {
+  const session = await getServerSession();
+  if (!session) notFound();
+
   const mockProfileRepo = new Map<string, CompanyProfile>();
-  mockProfileRepo.set("001", {
+  mockProfileRepo.set("2", {
     companyName: "RedBik",
     category: "Tech",
     location: "Bangkok",
@@ -42,6 +49,11 @@ export default function Page({ params }: { params: { id: string } }) {
         </div>
       </div>
       <div className="m-3 text-lg">Profile Details</div>
+      {session.user.role === UserRole.Student && (
+        <div className="my-3">
+          <ReviewCreateDialog student={session.user} companyId={params.id} />
+        </div>
+      )}
       <div className="m-3 h-[587px] w-[550px] rounded-lg bg-primary">
         <CompanyProfileCard companyJson={mockProfileRepo.get(params.id)!} />
       </div>
@@ -50,5 +62,5 @@ export default function Page({ params }: { params: { id: string } }) {
 }
 
 export function generateStaticParams() {
-  return [{ id: "001" }, { id: "002" }, { id: "003" }];
+  return [{ id: "1" }, { id: "2" }, { id: "3" }];
 }

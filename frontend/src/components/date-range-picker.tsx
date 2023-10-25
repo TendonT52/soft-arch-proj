@@ -15,7 +15,7 @@ import {
 
 type DatePickerWithRangeProps = React.HTMLAttributes<HTMLButtonElement> & {
   date?: DateRange;
-  onDateChange?: (date: DateRange) => void;
+  onDateChange?: (date?: DateRange) => void;
 };
 
 const DatePickerWithRange = ({
@@ -24,13 +24,17 @@ const DatePickerWithRange = ({
   className,
   ...props
 }: DatePickerWithRangeProps) => {
-  const [_date, _setDate] = useState<DateRange>();
+  const [_date, _setDate] = useState<DateRange | undefined>();
 
   useEffect(() => {
-    if (_date && onDateChange) {
+    _setDate(date);
+  }, [date]);
+
+  useEffect(() => {
+    if (onDateChange) {
       onDateChange(_date);
     }
-  }, [_date, onDateChange]);
+  }, [_date, date, onDateChange]);
 
   return (
     <Popover>
