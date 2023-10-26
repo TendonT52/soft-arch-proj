@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createReview } from "@/actions/create-review";
+import { updateReview } from "@/actions/update-review";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
@@ -17,54 +19,71 @@ import {
   DialogPortal,
   DialogTrigger,
 } from "@radix-ui/react-dialog";
-import { format } from "date-fns";
 import { Loader2Icon } from "lucide-react";
-import { type Student } from "@/types/base/student";
+import { type Review } from "@/types/base/review";
 import { editorConfig, initialEditorState } from "@/lib/lexical";
 import { CodeHighlightPlugin } from "./lexical/code-highlight-plugin";
 import { ListMaxIndentLevelPlugin } from "./lexical/list-max-index-level-plugin";
 import { ToolbarPlugin } from "./lexical/toolbar-plugin";
-import { Rating, type RatingScore } from "./rating";
+import { Rating } from "./rating";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
+import { ScrollArea } from "./ui/scroll-area";
 import { Switch } from "./ui/switch";
 import { useToast } from "./ui/toaster";
 
-type ReviewCreateDialogProps = {
-  student: Student;
+type ReviewDialogProps = {
+  review?: Review & {
+    id: string;
+  };
   companyId: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
-const ReviewCreateDialog = ({
-  student,
+const ReviewDialog = ({
+  review,
   companyId,
-}: ReviewCreateDialogProps) => {
+  open,
+  onOpenChange,
+}: ReviewDialogProps) => {
+  const router = useRouter();
   const { toast } = useToast();
 
-  const date: number = Date.now();
-  const [title, setTitle] = useState<string>();
-  const [description, setDescription] = useState<string>();
-  const [rating, setRating] = useState<RatingScore>();
+  const [title, setTitle] = useState<string | undefined>(review?.title);
+  const [description, setDescription] = useState<string | undefined>(
+    review?.description
+  );
+  const [rating, setRating] = useState<number | undefined>(review?.rating);
   const [anonymous, setAnonymous] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async () => {
     setSubmitting(true);
-    const response = await createReview({
-      review: {
-        cid: companyId,
-        title: title ?? "Untitled Review",
-        description: description ?? initialEditorState,
-        rating: rating!,
-        isAnonymous: anonymous,
-      },
-    });
-    if (response.status === "201") {
+    const response = review
+      ? await updateReview(review.id, {
+          review: {
+            title: title ?? "Untitled Review",
+            description: description ?? initialEditorState,
+            rating: rating!,
+            isAnonymous: anonymous,
+          },
+        })
+      : await createReview({
+          review: {
+            cid: companyId,
+            title: title ?? "Untitled Review",
+            description: description ?? initialEditorState,
+            rating: rating!,
+            isAnonymous: anonymous,
+          },
+        });
+    if (["200", "201"].includes(response.status)) {
       toast({
         title: "Success",
         description: response.message,
       });
-      // router
+      router.refresh();
     } else {
       toast({
         title: "Error",
@@ -76,8 +95,14 @@ const ReviewCreateDialog = ({
   };
 
   return (
-    <Dialog onOpenChange={() => void setRating((prev) => prev ?? 5)}>
-      <DialogTrigger>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        setRating((prev) => prev ?? 5);
+        onOpenChange?.(open);
+      }}
+    >
+      <DialogTrigger className="h-5">
         <Rating rating={rating} onRatingChange={setRating} />
       </DialogTrigger>
       <DialogPortal>
@@ -86,7 +111,7 @@ const ReviewCreateDialog = ({
           <LexicalComposer
             initialConfig={{ ...editorConfig, editorState: description }}
           >
-            <div className="relative flex flex-col items-start rounded-xl">
+            <div className="relative flex flex-col items-start rounded-t-xl pb-6">
               <ToolbarPlugin
                 className="w-full rounded-t-[inherit] border-b px-4"
                 variant="minimal"
@@ -95,9 +120,7 @@ const ReviewCreateDialog = ({
                 <div className="flex flex-1 flex-col gap-4 overflow-x-hidden">
                   <Rating rating={rating} onRatingChange={setRating} />
                   <p className="truncate text-sm text-muted-foreground">
-                    {anonymous ? "Anonymous" : student.name}
-                    ,&nbsp;
-                    {format(date, "MM/dd/yyyy")}
+                    to Pizza Company
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -110,7 +133,7 @@ const ReviewCreateDialog = ({
                 </div>
               </div>
               <input
-                className="flex w-full max-w-none resize-none appearance-none items-end bg-transparent px-8 pb-[0.6em] pt-[1.6em] text-xl font-semibold leading-[1.6] tracking-tight text-[#111827] scrollbar-hide focus:outline-none focus-visible:outline-none dark:text-[#ffffff]"
+                className="flex w-full max-w-none appearance-none items-end bg-transparent px-8 pb-[0.6em] pt-[1.6em] text-xl font-semibold leading-[1.6] tracking-tight text-[#111827] scrollbar-hide focus:outline-none focus-visible:outline-none dark:text-[#ffffff]"
                 value={title}
                 placeholder="Untitled Review"
                 autoFocus
@@ -121,10 +144,12 @@ const ReviewCreateDialog = ({
               <div className="relative w-full">
                 <RichTextPlugin
                   contentEditable={
-                    <ContentEditable
-                      className="prose prose-green relative h-[10rem] max-w-none flex-1 overflow-auto px-8 scrollbar-hide dark:prose-invert focus:outline-none prose-p:m-0"
-                      spellCheck={false}
-                    />
+                    <ScrollArea className="h-32">
+                      <ContentEditable
+                        className="prose prose-green relative max-w-none flex-1 overflow-auto px-8 dark:prose-invert focus:outline-none prose-p:m-0"
+                        spellCheck={false}
+                      />
+                    </ScrollArea>
                   }
                   placeholder={
                     <div className="prose prose-green pointer-events-none absolute left-0 right-0 top-0 max-w-none px-8 pb-8 prose-p:m-0">
@@ -148,7 +173,7 @@ const ReviewCreateDialog = ({
               }}
             />
           </LexicalComposer>
-          <div className="flex justify-center px-8 py-6 sm:space-x-2">
+          <div className="flex justify-center px-8 pb-6 sm:space-x-2">
             <Button
               disabled={submitting}
               onClick={() => void handleSubmit()}
@@ -166,4 +191,4 @@ const ReviewCreateDialog = ({
   );
 };
 
-export { ReviewCreateDialog };
+export { ReviewDialog };

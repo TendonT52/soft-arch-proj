@@ -137,10 +137,6 @@ const PostCreateDialog = () => {
                 </Label>
                 <DatePickerWithRange
                   id="period"
-                  className={cn(
-                    !date &&
-                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
-                  )}
                   date={date}
                   onDateChange={setDate}
                 />

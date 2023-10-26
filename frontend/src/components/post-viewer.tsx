@@ -5,15 +5,11 @@ import { useEffect, useState } from "react";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
-import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
-import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { CalendarIcon } from "lucide-react";
 import { type Post } from "@/types/base/post";
 import { editorConfig } from "@/lib/lexical";
 import { formatDate, formatPeriod, parsePeriod } from "@/lib/utils";
-import { CodeHighlightPlugin } from "./lexical/code-highlight-plugin";
-import { ListMaxIndentLevelPlugin } from "./lexical/list-max-index-level-plugin";
 import { Loading } from "./loading";
 import { Button } from "./ui/button";
 import {
@@ -40,16 +36,6 @@ type PostViewerProps = {
 };
 
 const PostViewer = ({ post }: PostViewerProps) => {
-  const {
-    topic,
-    description,
-    openPositions,
-    requiredSkills,
-    benefits,
-    howTo,
-    owner,
-    updatedAt,
-  } = post;
   const [loading, setLoading] = useState(true);
 
   useEffect(() => void setLoading(false), []);
@@ -60,21 +46,21 @@ const PostViewer = ({ post }: PostViewerProps) => {
         initialConfig={{
           ...editorConfig,
           editable: false,
-          editorState: description,
+          editorState: post.description,
         }}
       >
         <div className="relative flex flex-col items-start">
           <div className="flex gap-6 px-8 pt-6">
             <div className="h-14 w-14 rounded-full bg-muted"></div>
             <div className="flex flex-col justify-end gap-2">
-              <p className="text-muted-foreground">{owner.name}</p>
+              <p className="text-muted-foreground">{post.owner.name}</p>
               <p className="text-sm leading-none text-muted-foreground">
-                {formatDate(parseInt(updatedAt) * 1000)}
+                {formatDate(parseInt(post.updatedAt) * 1000)}
               </p>
             </div>
           </div>
           <div className="w-full max-w-none bg-transparent px-8 pb-0.5 pt-12 text-4xl font-extrabold text-[#111827] scrollbar-hide focus:outline-none focus-visible:outline-none dark:text-[#ffffff]">
-            {topic}
+            {post.topic}
           </div>
           {loading ? (
             <div className="relative flex min-h-[32rem] w-full items-center justify-center">
@@ -90,7 +76,7 @@ const PostViewer = ({ post }: PostViewerProps) => {
                   />
                 }
                 placeholder={
-                  <div className="prose prose-green pointer-events-none absolute left-0 right-0 top-0 max-w-none p-8">
+                  <div className="prose prose-green absolute left-0 right-0 top-0 max-w-none p-8">
                     <p className="text-muted-foreground">
                       This post currently has no description yet.
                     </p>
@@ -101,10 +87,6 @@ const PostViewer = ({ post }: PostViewerProps) => {
             </div>
           )}
         </div>
-        <CodeHighlightPlugin />
-        <ListPlugin />
-        <LinkPlugin />
-        <ListMaxIndentLevelPlugin maxDepth={1} />
       </LexicalComposer>
       <Card className="rounded-none border-transparent border-t-border bg-background shadow-none">
         <CardHeader className="p-8">
@@ -114,7 +96,7 @@ const PostViewer = ({ post }: PostViewerProps) => {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6 p-8 pt-0">
-          <fieldset className="flex w-full gap-4">
+          <div className="flex w-full gap-4">
             <div className="flex flex-1 flex-col gap-2">
               <Label
                 className="w-full text-sm font-medium leading-none"
@@ -122,7 +104,7 @@ const PostViewer = ({ post }: PostViewerProps) => {
               >
                 Topic
               </Label>
-              <Input id="topic" value={topic} readOnly />
+              <Input id="topic" value={post.topic} readOnly />
             </div>
             <div className="flex flex-1 flex-col gap-2">
               <Label
@@ -141,70 +123,70 @@ const PostViewer = ({ post }: PostViewerProps) => {
                 </span>
               </Button>
             </div>
-          </fieldset>
-          <fieldset className="flex w-full flex-col gap-2">
+          </div>
+          <div className="flex w-full flex-col gap-2">
             <Label
-              className="w-full text-sm font-medium leading-none"
-              htmlFor="positions"
+              className="flex w-full justify-between text-sm font-medium leading-none"
+              htmlFor="openPositions"
             >
               Open positions
               <span className="ml-4 font-normal text-muted-foreground">
-                *Space delimited
+                Space delimited
               </span>
             </Label>
             <Input
               id="openPositions"
-              value={openPositions.join(" ")}
+              value={post.openPositions.join(" ")}
               placeholder="Top of the world"
               readOnly
             />
-          </fieldset>
-          <fieldset className="flex w-full flex-col gap-2">
+          </div>
+          <div className="flex w-full flex-col gap-2">
             <Label
-              className="w-full text-sm font-medium leading-none"
-              htmlFor="skills"
+              className="flex w-full justify-between text-sm font-medium leading-none"
+              htmlFor="requiredkills"
             >
               Required skills
               <span className="ml-4 font-normal text-muted-foreground">
-                *Space delimited
+                Space delimited
               </span>
             </Label>
             <Input
               id="requiredSkills"
-              value={requiredSkills.join(" ")}
+              value={post.requiredSkills.join(" ")}
               placeholder="SQL slamming"
               readOnly
             />
-          </fieldset>
-          <fieldset className="flex w-full flex-col gap-2">
+          </div>
+          <div className="flex w-full flex-col gap-2">
             <Label
-              className="w-full text-sm font-medium leading-none"
+              className="flex w-full justify-between text-sm font-medium leading-none"
               htmlFor="benefits"
             >
               Benefits
               <span className="ml-4 font-normal text-muted-foreground">
-                *Space delimited
+                Space delimited
               </span>
             </Label>
             <Input
               id="benefits"
-              value={benefits.join(" ")}
+              value={post.benefits.join(" ")}
               placeholder="Coffee"
               readOnly
             />
-          </fieldset>
-          <fieldset className="flex flex-col gap-2">
+          </div>
+          <div className="flex flex-col gap-2">
             <Label className="text-sm font-medium leading-none" htmlFor="howTo">
               How to apply
             </Label>
             <Textarea
               id="howTo"
               className="resize-none"
-              value={howTo}
+              value={post.howTo}
               placeholder="Run to the office like the flash ⚡"
               readOnly
             />
-          </fieldset>
+          </div>
         </CardContent>
         <CardFooter />
       </Card>

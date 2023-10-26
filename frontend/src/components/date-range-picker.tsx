@@ -24,16 +24,14 @@ const DatePickerWithRange = ({
   className,
   ...props
 }: DatePickerWithRangeProps) => {
-  const [_date, _setDate] = useState<DateRange | undefined>();
+  const [_date, _setDate] = useState<DateRange | undefined>(date);
 
   useEffect(() => {
     _setDate(date);
   }, [date]);
 
   useEffect(() => {
-    if (onDateChange) {
-      onDateChange(_date);
-    }
+    onDateChange?.(_date);
   }, [_date, date, onDateChange]);
 
   return (

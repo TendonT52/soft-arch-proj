@@ -117,7 +117,6 @@ const PostEditor = ({ post }: PostEditorProps) => {
   const [date, setDate] = useState<DateRange | undefined>(
     parsePeriod(post.period)
   );
-  const period = formatPeriod(date);
 
   const onSubmit = async (data: FormData) => {
     const regex = /\s+/;
@@ -125,7 +124,7 @@ const PostEditor = ({ post }: PostEditorProps) => {
       post: {
         topic: topic || "Untitled Post",
         description,
-        period,
+        period: formatPeriod(date),
         howTo: data.howTo,
         openPositions: getUserElements(
           [...new Set(post.openPositions)],

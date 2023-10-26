@@ -220,7 +220,7 @@ const RegisterStudentForm = () => {
                 >
                   {year ?? "Year"}
                 </SelectTrigger>
-                <SelectContent className="w-24 min-w-0">
+                <SelectContent>
                   {years.map((year) => (
                     <SelectItem
                       className="pr-0"

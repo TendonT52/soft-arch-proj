@@ -33,11 +33,11 @@ type PostItemProps = {
   };
 };
 
-export function PostItem({ post }: PostItemProps) {
+const PostItem = ({ post }: PostItemProps) => {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -50,7 +50,7 @@ export function PostItem({ post }: PostItemProps) {
         description: response.message,
       });
       router.refresh();
-      setShowDeleteAlert(false);
+      setShowDeleteDialog(false);
     } else {
       toast({
         title: "Error",
@@ -70,11 +70,9 @@ export function PostItem({ post }: PostItemProps) {
         >
           {post.topic}
         </Link>
-        <div>
-          <p className="text-sm text-muted-foreground">
-            {formatDate(parseInt(post.updatedAt) * 1000)}
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          {formatDate(parseInt(post.updatedAt) * 1000)}
+        </p>
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -91,13 +89,13 @@ export function PostItem({ post }: PostItemProps) {
           </DropdownMenuItem>
           <DropdownMenuItem
             className="flex cursor-pointer items-center text-destructive focus:text-destructive"
-            onSelect={() => void setShowDeleteAlert(true)}
+            onSelect={() => void setShowDeleteDialog(true)}
           >
             Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
@@ -124,4 +122,6 @@ export function PostItem({ post }: PostItemProps) {
       </AlertDialog>
     </div>
   );
-}
+};
+
+export { PostItem };
