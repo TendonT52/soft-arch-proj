@@ -39,9 +39,11 @@ const UserAccountNav = ({ user }: UserAccountNavProps) => {
             <Link href="/dashboard/posts">Posts</Link>
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem asChild>
-          <Link href="/dashboard/reviews">Reviews</Link>
-        </DropdownMenuItem>
+        {user.role === UserRole.Student && (
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/reviews">Reviews</Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild>
           <Link href="/dashboard/settings">Settings</Link>
         </DropdownMenuItem>

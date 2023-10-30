@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 type RatingProps = {
   rating?: number;
-  onRatingChange?: (rating?: number) => void;
+  onRatingChange?: (rating: number) => void;
   editable?: boolean;
 };
 
@@ -14,13 +14,12 @@ const Rating = ({ rating, onRatingChange, editable = true }: RatingProps) => {
   const [_rating, _setRating] = useState<number | undefined>(rating);
   const [_displayRating, _setDisplayRating] = useState<number | undefined>();
 
+  // prevent race conditions
   useEffect(() => {
-    _setRating(rating);
-  }, [rating]);
-
-  useEffect(() => {
-    onRatingChange?.(_rating);
-  }, [_rating, rating, onRatingChange]);
+    if (rating !== _rating) {
+      _setRating(rating);
+    }
+  }, [_rating, rating]);
 
   return (
     <div className="inline-flex">
@@ -36,13 +35,20 @@ const Rating = ({ rating, onRatingChange, editable = true }: RatingProps) => {
             )}
             strokeWidth={1}
             onMouseOver={() => {
-              if (editable) _setDisplayRating(rating);
+              if (editable) {
+                _setDisplayRating(rating);
+              }
             }}
             onMouseOut={() => {
-              if (editable) _setDisplayRating(undefined);
+              if (editable) {
+                _setDisplayRating(undefined);
+              }
             }}
             onClick={() => {
-              if (editable) _setRating(rating);
+              if (editable) {
+                _setRating(rating);
+                onRatingChange?.(rating);
+              }
             }}
           />
         );

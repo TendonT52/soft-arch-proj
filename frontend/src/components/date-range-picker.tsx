@@ -15,7 +15,7 @@ import {
 
 type DatePickerWithRangeProps = React.HTMLAttributes<HTMLButtonElement> & {
   date?: DateRange;
-  onDateChange?: (date?: DateRange) => void;
+  onDateChange?: (date: DateRange) => void;
 };
 
 const DatePickerWithRange = ({
@@ -26,13 +26,12 @@ const DatePickerWithRange = ({
 }: DatePickerWithRangeProps) => {
   const [_date, _setDate] = useState<DateRange | undefined>(date);
 
+  // prevent race conditions
   useEffect(() => {
-    _setDate(date);
-  }, [date]);
-
-  useEffect(() => {
-    onDateChange?.(_date);
-  }, [_date, date, onDateChange]);
+    if (date !== _date) {
+      _setDate(date);
+    }
+  }, [_date, date]);
 
   return (
     <Popover>
@@ -63,7 +62,12 @@ const DatePickerWithRange = ({
           mode="range"
           defaultMonth={date?.from}
           selected={date ?? _date}
-          onSelect={_setDate}
+          onSelect={(date) => {
+            if (date) {
+              _setDate(date);
+              onDateChange?.(date);
+            }
+          }}
           numberOfMonths={2}
         />
       </PopoverContent>

@@ -28,7 +28,7 @@ const ReviewItem = ({ review }: ReviewItemProps) => {
           </Link>
           <div className="flex select-none items-center">
             &nbsp;
-            <StarIcon className="h-4 w-4" />
+            <StarIcon className="h-3 w-3" />
             {review.rating}
           </div>
         </div>

@@ -28,8 +28,6 @@ import { Separator } from "./ui/separator";
 import { Textarea } from "./ui/textarea";
 import { useToast } from "./ui/toaster";
 
-const years = [1, 2, 3, 4];
-
 const firstPageSchema = z.object({
   firstName: z
     .string()
@@ -39,14 +37,8 @@ const firstPageSchema = z.object({
     .string()
     .min(1, { message: "Last name is required" })
     .regex(/^[a-zA-Z]+$/, { message: "Last name must be alphabetical" }),
-  faculty: z
-    .string()
-    .min(1, { message: "Faculty is required" })
-    .regex(/^[a-zA-Z]+$/, { message: "Faculty must be alphabetical" }),
-  major: z
-    .string()
-    .min(1, { message: "Major is required" })
-    .regex(/^[a-zA-Z]+$/, { message: "Major must be alphabetical" }),
+  faculty: z.string().min(1, { message: "Faculty is required" }),
+  major: z.string().min(1, { message: "Major is required" }),
   year: z.number({ required_error: "Year is required" }),
   description: z.string().min(1, { message: "Description is required" }),
 });
@@ -221,15 +213,10 @@ const RegisterStudentForm = () => {
                   {year ?? "Year"}
                 </SelectTrigger>
                 <SelectContent>
-                  {years.map((year) => (
-                    <SelectItem
-                      className="pr-0"
-                      key={year}
-                      value={year.toString()}
-                    >
-                      {year}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
+                  <SelectItem value="3">3</SelectItem>
+                  <SelectItem value="4">4</SelectItem>
                 </SelectContent>
               </Select>
               <FormErrorTooltip

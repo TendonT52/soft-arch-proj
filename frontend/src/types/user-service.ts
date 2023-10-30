@@ -23,7 +23,7 @@ export const getCompaniesApprovedResponseSchema = getCompaniesResponseSchema;
  * `PUT /v1/company`
  */
 export const updateCompanySchema = z.object({
-  accessToken: z.string(),
+  accessToken: z.string().optional(),
   company: z.object({
     name: z.string(),
     description: z.string(),
@@ -74,7 +74,7 @@ export const getCompanyResponse = z.object({
  * `PUT /v1/student`
  */
 export const updateStudentSchema = z.object({
-  accessToken: z.string(),
+  accessToken: z.string().optional(),
   student: z.object({
     name: z.string(),
     description: z.string(),

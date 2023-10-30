@@ -25,7 +25,12 @@ const navItems: NavItem[] = [
     href: "/dashboard/posts",
     role: UserRole.Company,
   },
-  { Icon: StarIcon, title: "Reviews", href: "/dashboard/reviews" },
+  {
+    Icon: StarIcon,
+    title: "Reviews",
+    href: "/dashboard/reviews",
+    role: UserRole.Student,
+  },
   { Icon: SettingsIcon, title: "Settings", href: "/dashboard/settings" },
 ];
 
@@ -39,8 +44,8 @@ const DashboardNav = ({ user }: DashboardNavProps) => {
   return (
     <nav className="flex h-full flex-col gap-2">
       {navItems.map(
-        ({ Icon, title, href, role }) =>
-          (!role || role === user.role) && (
+        ({ Icon, title, href, role = user.role }) =>
+          role === user.role && (
             <Link
               className={cn(
                 "flex h-9 items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
