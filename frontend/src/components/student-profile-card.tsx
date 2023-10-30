@@ -1,37 +1,14 @@
-import { MailIcon, PenSquare } from "lucide-react";
+import { MailIcon } from "lucide-react";
+import { type Student } from "@/types/base/student";
 
-type StudentProfile = {
-  firstName: string;
-  lastName: string;
-  faculty: string;
-  major: string;
-  year: string;
-  email: string;
-  description: string;
-  profileImagePath: string;
-};
-
-const StudentProfileCard = ({
-  studentJson,
-}: {
-  studentJson: StudentProfile;
-}) => {
+const StudentProfileCard = ({ studentJson }: { studentJson: Student }) => {
   return (
     <div className="m-4 h-[555px] w-[520px] rounded-md bg-white">
-      <div className="flex flex-row-reverse">
-        <PenSquare className="text-black" />
-      </div>
       <div className="items-left m-3 flex  flex-col justify-evenly gap-4">
         <div className="mb-2 flex flex-col">
           <div className="flex h-full w-20  justify-start">Name</div>
           <div className="my-1 flex w-full rounded-lg border-2 border-solid border-slate-500 px-1">
-            {studentJson.firstName}
-          </div>
-        </div>
-        <div className="mb-2 flex flex-col">
-          <div className="flex h-full w-20 justify-start">Lastname</div>
-          <div className="my-1 flex w-full rounded-lg border-2 border-solid border-slate-500 px-1">
-            {studentJson.lastName}
+            {studentJson.name}
           </div>
         </div>
         <div className="flex flex-row justify-between">
