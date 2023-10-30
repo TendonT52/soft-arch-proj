@@ -99,7 +99,7 @@ export const getStudentMeResponseSchema = z.object({
 });
 
 /**
- * `GET /v1/student`
+ * `GET /v1/student/{id}`
  */
 export const getStudentResponseSchema = z.object({
   status: z.string(),

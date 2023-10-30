@@ -1,31 +1,16 @@
-import { MailIcon, PenSquare } from "lucide-react";
+import { MailIcon } from "lucide-react";
+import { type Company } from "@/types/base/company";
 
 /**Dummy Company profile */
-type CompanyProfile = {
-  companyName: string;
-  category: string;
-  location: string;
-  phone: string;
-  description: string;
-  email: string;
-  profileImagePath: string;
-};
 
-const CompanyProfileCard = ({
-  companyJson,
-}: {
-  companyJson: CompanyProfile;
-}) => {
+const CompanyProfileCard = ({ companyJson }: { companyJson: Company }) => {
   return (
     <div className="m-4 h-[555px] w-[520px] rounded-md bg-white">
-      <div className="flex flex-row-reverse">
-        <PenSquare className="text-black" />
-      </div>
       <div className="items-left m-3 flex  flex-col gap-4">
         <div className="mb-2 flex flex-col">
           <div className="flex h-full w-20  justify-start">Name</div>
           <div className="my-1 flex w-full rounded-lg border-2 border-solid border-slate-500 px-1">
-            {companyJson.companyName}
+            {companyJson.name}
           </div>
         </div>
         <div className="mb-2 flex flex-col">
@@ -54,6 +39,7 @@ const CompanyProfileCard = ({
           </div>
         </div>
         <div className="mb-2 flex flex-col">
+          <div className="flex h-full w-20 justify-start">Description</div>
           <div className="my-1 flex w-full rounded-lg border-2 border-solid border-slate-500 px-1">
             {companyJson.description}
           </div>
