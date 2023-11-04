@@ -76,7 +76,7 @@
         ]
       }
     },
-    "/v1/reviews/{cid}": {
+    "/v1/reviews/company/{cid}": {
       "get": {
         "operationId": "ReviewService_ListReviewsByCompany",
         "responses": {
