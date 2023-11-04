@@ -15,7 +15,7 @@ service ReviewService {
     }
     rpc ListReviewsByCompany(ListReviewsByCompanyRequest) returns (ListReviewsByCompanyResponse) {
         option (google.api.http) = {
-            get: "/v1/reviews/{cid}"
+            get: "/v1/reviews/company/{cid}"
         };
     }
     rpc ListReviewsByUser(ListReviewsByUserRequest) returns (ListReviewsByUserResponse) {
