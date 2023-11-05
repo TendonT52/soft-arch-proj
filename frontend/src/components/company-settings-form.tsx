@@ -21,10 +21,7 @@ import { Textarea } from "./ui/textarea";
 import { useToast } from "./ui/toaster";
 
 const formSchema = z.object({
-  name: z
-    .string()
-    .min(1, { message: "Name is required" })
-    .regex(/^[a-zA-Z]+$/, { message: "Name must be alphabetical" }),
+  name: z.string().min(1, { message: "Name is required" }),
   category: z.string().min(1, { message: "Category is required" }),
   location: z.string().min(1, { message: "Location is required" }),
   phone: z
