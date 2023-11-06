@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+export enum PostField {
+  benefits = "benefits",
+  openPositions = "openPositions",
+  requiredSkills = "requiredSkills",
+}
+
 export const postSchema = z.object({
   topic: z.string(),
   description: z.string(),

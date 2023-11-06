@@ -86,7 +86,7 @@ const StudentSettingsForm = ({ student }: StudentSettingsFormProps) => {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>First name</FormLabel>
+              <FormLabel>Name</FormLabel>
               <FormControl>
                 <Input placeholder="John Smith" {...field} />
               </FormControl>

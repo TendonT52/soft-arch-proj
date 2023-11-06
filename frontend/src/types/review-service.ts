@@ -43,8 +43,24 @@ export const createReviewResponseSchema = z.object({
 
 /**
  * TODO
- * `GET /v1/reviews/{cid}`
+ * `GET /v1/reviews/company/{cid}`
  */
+export const getReviewCompanyResponseSchema = z.object({
+  status: z.string(),
+  message: z.string(),
+  reviews: z
+    .array(
+      reviewSchema.extend({
+        id: z.string(),
+        updatedAt: z.string(),
+        owner: z.object({
+          id: z.string().optional(),
+          name: z.string(),
+        }),
+      })
+    )
+    .optional(),
+});
 
 /**
  * `GET /v1/reviews/{id}`

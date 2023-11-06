@@ -7,10 +7,11 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { CalendarIcon } from "lucide-react";
-import { type Post } from "@/types/base/post";
+import { PostField, type Post } from "@/types/base/post";
 import { editorConfig } from "@/lib/lexical";
 import { formatDate, formatPeriod, parsePeriod } from "@/lib/utils";
 import { Loading } from "./loading";
+import { PostFieldInput } from "./post-field-input";
 import { Button } from "./ui/button";
 import {
   Card,
@@ -115,7 +116,7 @@ const PostViewer = ({ post }: PostViewerProps) => {
               </Label>
               <Button
                 variant={"outline"}
-                className="justify-start text-left font-normal"
+                className="justify-start text-left font-normal hover:cursor-text hover:bg-transparent focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 <span className="block">
@@ -134,10 +135,10 @@ const PostViewer = ({ post }: PostViewerProps) => {
                 Space delimited
               </span>
             </Label>
-            <Input
+            <PostFieldInput
               id="openPositions"
-              value={post.openPositions.join(" ")}
-              placeholder="Top of the world"
+              field={PostField.openPositions}
+              tags={post.openPositions}
               readOnly
             />
           </div>
@@ -151,10 +152,10 @@ const PostViewer = ({ post }: PostViewerProps) => {
                 Space delimited
               </span>
             </Label>
-            <Input
-              id="requiredSkills"
-              value={post.requiredSkills.join(" ")}
-              placeholder="SQL slamming"
+            <PostFieldInput
+              id="openPositions"
+              field={PostField.requiredSkills}
+              tags={post.requiredSkills}
               readOnly
             />
           </div>
@@ -168,10 +169,10 @@ const PostViewer = ({ post }: PostViewerProps) => {
                 Space delimited
               </span>
             </Label>
-            <Input
+            <PostFieldInput
               id="benefits"
-              value={post.benefits.join(" ")}
-              placeholder="Coffee"
+              field={PostField.benefits}
+              tags={post.benefits}
               readOnly
             />
           </div>

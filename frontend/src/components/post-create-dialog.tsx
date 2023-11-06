@@ -1,16 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createPost } from "@/actions/create-post";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2Icon, PlusIcon } from "lucide-react";
 import { type DateRange } from "react-day-picker";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
+import { PostField } from "@/types/base/post";
 import { initialEditorState } from "@/lib/lexical";
 import { cn, formatPeriod } from "@/lib/utils";
 import { DatePickerWithRange } from "./date-range-picker";
+import { FormErrorTooltip } from "./form-error-tooltip";
+import { PostFieldInput } from "./post-field-input";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -29,16 +32,13 @@ import { useToast } from "./ui/toaster";
 const formDataSchema = z.object({
   topic: z.string().min(1, { message: "Topic is required" }),
   openPositions: z
-    .string()
-    .trim()
+    .array(z.string())
     .min(1, { message: "At least 1 open position is required" }),
   requiredSkills: z
-    .string()
-    .trim()
+    .array(z.string())
     .min(1, { message: "At least 1 required skill is required" }),
   benefits: z
-    .string()
-    .trim()
+    .array(z.string())
     .min(1, { message: "At least 1 benefit is required" }),
   howTo: z.string().trim().min(1, { message: "How to is required" }),
 });
@@ -53,25 +53,27 @@ const PostCreateDialog = () => {
     register,
     formState: { isSubmitting, errors },
     handleSubmit,
+    trigger,
+    setValue,
+    control,
   } = useForm<FormData>({
     mode: "onChange",
-    shouldUseNativeValidation: true,
     resolver: zodResolver(formDataSchema),
   });
 
+  const { openPositions, requiredSkills, benefits } = useWatch({ control });
   const [date, setDate] = useState<DateRange>();
 
   const onSubmit = async (data: FormData) => {
-    const regex = /\s+/;
     const response = await createPost({
       post: {
         topic: data.topic,
         description: initialEditorState,
         period: formatPeriod(date),
         howTo: data.howTo,
-        openPositions: [...new Set(data.openPositions.split(regex))],
-        requiredSkills: [...new Set(data.requiredSkills.split(regex))],
-        benefits: [...new Set(data.benefits.split(regex))],
+        openPositions: data.openPositions,
+        requiredSkills: data.requiredSkills,
+        benefits: data.benefits,
       },
     });
     if (response.status === "201") {
@@ -90,6 +92,10 @@ const PostCreateDialog = () => {
     }
   };
 
+  useEffect(() => {
+    console.log(openPositions);
+  }, [openPositions]);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -100,17 +106,17 @@ const PostCreateDialog = () => {
       </DialogTrigger>
       <DialogContent>
         <form
-          className="flex w-full flex-col gap-4 p-1"
+          className="flex w-full flex-col gap-4 overflow-auto p-1"
           onSubmit={(...a) => void handleSubmit(onSubmit)(...a)}
         >
           <DialogHeader className="mb-2">
-            <DialogTitle>Create new post</DialogTitle>
+            <DialogTitle>New post</DialogTitle>
             <DialogDescription>
               Enter information to create your post
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col gap-6">
-            <fieldset className="flex w-full gap-4">
+          <div className="flex flex-col items-start gap-6">
+            <div className="flex w-full items-center gap-4">
               <div className="flex flex-1 flex-col gap-2">
                 <Label
                   className="w-full text-sm font-medium leading-none"
@@ -141,74 +147,95 @@ const PostCreateDialog = () => {
                   onDateChange={setDate}
                 />
               </div>
-            </fieldset>
-            <fieldset className="flex w-full gap-4">
+              <FormErrorTooltip
+                className="relative top-3"
+                message={errors.topic?.message}
+              />
+            </div>
+            <div className="flex w-full gap-4">
               <div className="flex w-full flex-col gap-2">
                 <Label
                   className="flex w-full justify-between text-sm font-medium leading-none"
                   htmlFor="openPositions"
                 >
                   Open positions
-                  <span className="ml-4 font-normal text-muted-foreground">
-                    Space delimited
-                  </span>
                 </Label>
-                <Input
-                  {...register("openPositions")}
-                  id="openPositions"
-                  className={cn(
-                    errors.openPositions &&
-                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
-                  )}
-                  placeholder="Top of the world"
-                />
+                <div className="flex w-full items-center gap-4">
+                  <PostFieldInput
+                    id="openPositions"
+                    className={cn(
+                      "flex-1",
+                      errors.openPositions &&
+                        "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                    )}
+                    field={PostField.openPositions}
+                    tags={openPositions}
+                    onTagsChange={(tags) => {
+                      setValue("openPositions", tags);
+                      void trigger("openPositions");
+                    }}
+                  />
+                  <FormErrorTooltip message={errors.openPositions?.message} />
+                </div>
               </div>
-            </fieldset>
-            <fieldset className="flex w-full gap-4">
+            </div>
+            <div className="flex w-full gap-4">
               <div className="flex w-full flex-col gap-2">
                 <Label
                   className="flex w-full justify-between text-sm font-medium leading-none"
                   htmlFor="requiredSkills"
                 >
                   Required skills
-                  <span className="ml-4 font-normal text-muted-foreground">
-                    Space delimited
-                  </span>
                 </Label>
-                <Input
-                  {...register("requiredSkills")}
-                  id="requiredSkills"
-                  className={cn(
-                    errors.requiredSkills &&
-                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
-                  )}
-                  placeholder="SQL slamming"
-                />
+
+                <div className="flex w-full items-center gap-4">
+                  <PostFieldInput
+                    id="requiredSkills"
+                    className={cn(
+                      "flex-1",
+                      errors.requiredSkills &&
+                        "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                    )}
+                    field={PostField.requiredSkills}
+                    tags={requiredSkills}
+                    onTagsChange={(tags) => {
+                      setValue("requiredSkills", tags);
+                      void trigger("requiredSkills");
+                    }}
+                  />
+                  <FormErrorTooltip message={errors.requiredSkills?.message} />
+                </div>
               </div>
-            </fieldset>
-            <fieldset className="flex w-full gap-4">
+            </div>
+            <div className="flex w-full gap-4">
               <div className="flex w-full flex-col gap-2">
                 <Label
                   className="flex w-full justify-between text-sm font-medium leading-none"
                   htmlFor="benefits"
                 >
                   Benefits
-                  <span className="ml-4 font-normal text-muted-foreground">
-                    Space delimited
-                  </span>
                 </Label>
-                <Input
-                  {...register("benefits")}
-                  id="benefits"
-                  className={cn(
-                    errors.benefits &&
-                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
-                  )}
-                  placeholder="Coffee"
-                />
+
+                <div className="flex w-full items-center gap-4">
+                  <PostFieldInput
+                    id="benefits"
+                    className={cn(
+                      "flex-1",
+                      errors.benefits &&
+                        "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                    )}
+                    field={PostField.benefits}
+                    tags={benefits}
+                    onTagsChange={(tags) => {
+                      setValue("benefits", tags);
+                      void trigger("benefits");
+                    }}
+                  />
+                  <FormErrorTooltip message={errors.benefits?.message} />
+                </div>
               </div>
-            </fieldset>
-            <fieldset className="flex w-full gap-4">
+            </div>
+            <div className="flex w-full gap-4">
               <div className="flex w-full flex-col gap-2">
                 <Label
                   className="text-sm font-medium leading-none"
@@ -216,18 +243,21 @@ const PostCreateDialog = () => {
                 >
                   How to apply
                 </Label>
-                <Textarea
-                  {...register("howTo")}
-                  id="howTo"
-                  className={cn(
-                    "resize-none",
-                    errors.howTo &&
-                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
-                  )}
-                  placeholder="Run to the office like the flash ⚡"
-                />
+                <div className="flex items-center gap-4">
+                  <Textarea
+                    {...register("howTo")}
+                    id="howTo"
+                    className={cn(
+                      "flex-1 resize-none",
+                      errors.howTo &&
+                        "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                    )}
+                    placeholder="Run to the office like the flash ⚡"
+                  />
+                  <FormErrorTooltip message={errors.howTo?.message} />
+                </div>
               </div>
-            </fieldset>
+            </div>
           </div>
           <DialogFooter className="mt-2 flex sm:justify-center">
             <Button size="sm" disabled={isSubmitting} type="submit">

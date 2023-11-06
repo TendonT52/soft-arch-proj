@@ -1,3 +1,5 @@
+"use server";
+
 import { env } from "env.mjs";
 import { type z } from "zod";
 import { getStudentResponseSchema } from "@/types/user-service";

@@ -4,14 +4,22 @@ import { z } from "zod";
 import { postSchema } from "./base/post";
 
 /**
- * TODO
  * `GET /v1/benefits`
  */
+export const getBenefitsResponseSchema = z.object({
+  status: z.string(),
+  message: z.string(),
+  benefits: z.array(z.string()).optional(),
+});
 
 /**
- * TODO
  * `GET /v1/open_positions`
  */
+export const getOpenPositionsResponseSchema = z.object({
+  status: z.string(),
+  message: z.string(),
+  openPositions: z.array(z.string()).optional(),
+});
 
 /**
  * `GET /v1/posts`
@@ -126,6 +134,10 @@ export const updatePostResponseSchema = z.object({
 });
 
 /**
- * TODO
  * `GET /v1/required_skills`
  */
+export const getRequiredSkillsResponseSchema = z.object({
+  status: z.string(),
+  message: z.string(),
+  requiredSkills: z.array(z.string()).optional(),
+});

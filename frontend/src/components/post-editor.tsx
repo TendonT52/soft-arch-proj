@@ -18,18 +18,20 @@ import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ChevronLeftIcon, Loader2Icon } from "lucide-react";
 import { type DateRange } from "react-day-picker";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import TextareaAutosize from "react-textarea-autosize";
 import { z } from "zod";
-import { type Post } from "@/types/base/post";
+import { PostField, type Post } from "@/types/base/post";
 import { editorConfig } from "@/lib/lexical";
 import { cn, formatPeriod, parsePeriod } from "@/lib/utils";
 import { DatePickerWithRange } from "./date-range-picker";
+import { FormErrorTooltip } from "./form-error-tooltip";
 import { CodeHighlightPlugin } from "./lexical/code-highlight-plugin";
 import { ListMaxIndentLevelPlugin } from "./lexical/list-max-index-level-plugin";
 import { ToolbarPlugin } from "./lexical/toolbar-plugin";
 import { Loading } from "./loading";
 import { ModeToggle } from "./mode-toggle";
+import { PostFieldInput } from "./post-field-input";
 import { Button } from "./ui/button";
 import {
   Card,
@@ -46,16 +48,13 @@ import { useToast } from "./ui/toaster";
 
 const formDataSchema = z.object({
   openPositions: z
-    .string()
-    .trim()
+    .array(z.string())
     .min(1, { message: "At least 1 open position is required" }),
   requiredSkills: z
-    .string()
-    .trim()
+    .array(z.string())
     .min(1, { message: "At least 1 required skill is required" }),
   benefits: z
-    .string()
-    .trim()
+    .array(z.string())
     .min(1, { message: "At least 1 benefit is required" }),
   howTo: z.string().trim().min(1, { message: "How to is required" }),
 });
@@ -96,17 +95,21 @@ const PostEditor = ({ post }: PostEditorProps) => {
     register,
     formState: { isSubmitting, errors },
     handleSubmit,
+    trigger,
+    setValue,
+    control,
   } = useForm<FormData>({
     mode: "onChange",
-    shouldUseNativeValidation: true,
     resolver: zodResolver(formDataSchema),
     defaultValues: {
-      openPositions: post.openPositions.join(" "),
-      requiredSkills: post.requiredSkills.join(" "),
-      benefits: post.benefits.join(" "),
+      openPositions: post.openPositions,
+      requiredSkills: post.requiredSkills,
+      benefits: post.benefits,
       howTo: post.howTo,
     },
   });
+
+  const { openPositions, requiredSkills, benefits } = useWatch({ control });
 
   const [description, setDescription] = useState<string>(post.description);
   const [topic, setTopic] = useState(post.topic);
@@ -119,7 +122,6 @@ const PostEditor = ({ post }: PostEditorProps) => {
   );
 
   const onSubmit = async (data: FormData) => {
-    const regex = /\s+/;
     const response = await updatePost(post.postId, {
       post: {
         topic: topic || "Untitled Post",
@@ -128,15 +130,15 @@ const PostEditor = ({ post }: PostEditorProps) => {
         howTo: data.howTo,
         openPositions: getUserElements(
           [...new Set(post.openPositions)],
-          [...new Set(data.openPositions.split(regex))]
+          [...new Set(data.openPositions)]
         ),
         requiredSkills: getUserElements(
           [...new Set(post.requiredSkills)],
-          [...new Set(data.requiredSkills.split(regex))]
+          [...new Set(data.requiredSkills)]
         ),
         benefits: getUserElements(
           [...new Set(post.benefits)],
-          [...new Set(data.benefits.split(regex))]
+          [...new Set(data.benefits)]
         ),
       },
     });
@@ -261,35 +263,51 @@ const PostEditor = ({ post }: PostEditorProps) => {
                   *Space delimited
                 </span>
               </Label>
-              <Input
-                {...register("openPositions")}
-                id="openPositions"
-                className={cn(
-                  errors.openPositions &&
-                    "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
-                )}
-                placeholder="Top of the world"
-              />
+              <div className="flex w-full items-center gap-4">
+                <PostFieldInput
+                  id="openPositions"
+                  className={cn(
+                    "flex-1",
+                    errors.openPositions &&
+                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                  )}
+                  field={PostField.openPositions}
+                  tags={openPositions}
+                  onTagsChange={(tags) => {
+                    setValue("openPositions", tags);
+                    void trigger("openPositions");
+                  }}
+                />
+                <FormErrorTooltip message={errors.openPositions?.message} />
+              </div>
             </fieldset>
             <fieldset className="flex w-full flex-col gap-2">
               <Label
                 className="w-full text-sm font-medium leading-none"
-                htmlFor="skills"
+                htmlFor="requiredSkills"
               >
                 Required skills
                 <span className="ml-4 font-normal text-muted-foreground">
                   *Space delimited
                 </span>
               </Label>
-              <Input
-                {...register("requiredSkills")}
-                id="requiredSkills"
-                className={cn(
-                  errors.requiredSkills &&
-                    "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
-                )}
-                placeholder="SQL slamming"
-              />
+              <div className="flex w-full items-center gap-4">
+                <PostFieldInput
+                  id="requiredSkills"
+                  className={cn(
+                    "flex-1",
+                    errors.requiredSkills &&
+                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                  )}
+                  field={PostField.requiredSkills}
+                  tags={requiredSkills}
+                  onTagsChange={(tags) => {
+                    setValue("requiredSkills", tags);
+                    void trigger("requiredSkills");
+                  }}
+                />
+                <FormErrorTooltip message={errors.requiredSkills?.message} />
+              </div>
             </fieldset>
             <fieldset className="flex w-full flex-col gap-2">
               <Label
@@ -301,15 +319,23 @@ const PostEditor = ({ post }: PostEditorProps) => {
                   *Space delimited
                 </span>
               </Label>
-              <Input
-                {...register("benefits")}
-                id="benefits"
-                className={cn(
-                  errors.benefits &&
-                    "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
-                )}
-                placeholder="Coffee"
-              />
+              <div className="flex w-full items-center gap-4">
+                <PostFieldInput
+                  id="benefits"
+                  className={cn(
+                    "flex-1",
+                    errors.benefits &&
+                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                  )}
+                  field={PostField.benefits}
+                  tags={benefits}
+                  onTagsChange={(tags) => {
+                    setValue("benefits", tags);
+                    void trigger("benefits");
+                  }}
+                />
+                <FormErrorTooltip message={errors.benefits?.message} />
+              </div>
             </fieldset>
             <fieldset className="flex flex-col gap-2">
               <Label
@@ -318,12 +344,19 @@ const PostEditor = ({ post }: PostEditorProps) => {
               >
                 How to apply
               </Label>
-              <Textarea
-                {...register("howTo")}
-                id="howTo"
-                className="resize-none"
-                placeholder="Run to the office like the flash ⚡"
-              />
+              <div className="flex items-center gap-4">
+                <Textarea
+                  {...register("howTo")}
+                  id="howTo"
+                  className={cn(
+                    "flex-1 resize-none",
+                    errors.howTo &&
+                      "ring-2 ring-destructive ring-offset-2 focus-visible:ring-destructive"
+                  )}
+                  placeholder="Run to the office like the flash ⚡"
+                />
+                <FormErrorTooltip message={errors.howTo?.message} />
+              </div>
             </fieldset>
           </CardContent>
           <CardFooter />

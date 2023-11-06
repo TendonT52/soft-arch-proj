@@ -5,7 +5,7 @@ import { type Company } from "@/types/base/company";
 
 const CompanyProfileCard = ({ companyJson }: { companyJson: Company }) => {
   return (
-    <div className="m-4 h-[555px] w-[520px] rounded-md bg-white">
+    <div className="m-4 h-[555px] w-[520px] rounded-md bg-background">
       <div className="items-left m-3 flex  flex-col gap-4">
         <div className="mb-2 flex flex-col">
           <div className="flex h-full w-20  justify-start">Name</div>

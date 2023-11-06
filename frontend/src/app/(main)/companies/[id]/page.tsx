@@ -1,22 +1,19 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getCompany } from "@/actions/get-company";
-import { getReview } from "@/actions/get-review";
+import { getReviewCompany } from "@/actions/get-review-company";
 import { UserRole } from "@/types/base/user";
 import { getServerSession } from "@/lib/auth";
 import { CompanyProfileCard } from "@/components/company-profile-card";
 import { ReviewCard } from "@/components/review-card";
 import { ReviewDialog } from "@/components/review-dialog";
 
-/**Dummy Company profile */
-
 export default async function Page({ params }: { params: { id: string } }) {
   const session = await getServerSession();
   if (!session) notFound();
-  const { company } = await getCompany(params.id, session.accessToken);
 
-  /* DUMMY */
-  const { review: dummyReview } = await getReview("6");
+  const { company } = await getCompany(params.id, session.accessToken);
+  const { reviews } = await getReviewCompany(params.id);
 
   return (
     <div className="container flex flex-col items-center justify-center">
@@ -41,28 +38,22 @@ export default async function Page({ params }: { params: { id: string } }) {
       <div className="m-3 h-[587px] w-[550px] rounded-lg bg-primary">
         <CompanyProfileCard companyJson={company} />
       </div>
-      <div className="mt-5 grid w-full auto-cols-fr grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
-        {/* DUMMY, Expect error because we need to know if the user is the owner */}
-        <ReviewCard
-          user={session.user}
-          review={dummyReview}
-          companyId={params.id}
-        />
-        <ReviewCard
-          user={session.user}
-          review={dummyReview}
-          companyId={params.id}
-        />
-        <ReviewCard
-          user={session.user}
-          review={dummyReview}
-          companyId={params.id}
-        />
-        <ReviewCard
-          user={session.user}
-          review={dummyReview}
-          companyId={params.id}
-        />
+      <div className="flex w-full justify-center pb-4 pt-10">
+        <h2 className="text-lg">Company reviews</h2>
+      </div>
+      <div className="grid w-full auto-cols-fr grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+        {!reviews || reviews.length === 0 ? (
+          <p className="text-muted-foreground">No reviews</p>
+        ) : (
+          reviews.map((review) => (
+            <ReviewCard
+              key={review.id}
+              user={session.user}
+              review={review}
+              companyId={params.id}
+            />
+          ))
+        )}
       </div>
     </div>
   );

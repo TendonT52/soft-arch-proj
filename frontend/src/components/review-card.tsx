@@ -41,7 +41,7 @@ type ReviewCardProps = {
     id: string;
     updatedAt: string;
     owner: {
-      id: string;
+      id?: string;
       name: string;
     };
   };

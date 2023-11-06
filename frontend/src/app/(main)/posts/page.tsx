@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getPosts } from "@/actions/get-posts";
 import { SearchIcon } from "lucide-react";
+import { PostField } from "@/types/base/post";
 import { getServerSession } from "@/lib/auth";
 import { getSearchArray } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,7 +34,7 @@ export default async function Page({ searchParams }: PageProps) {
 
   return (
     <main className="container relative flex flex-1 items-start gap-12">
-      <aside className="sticky top-[5.5rem] h-[calc(100vh-5.5rem)] w-[14rem]">
+      <aside className="sticky top-[5.5rem] h-[calc(100vh-5.5rem)] w-[16rem]">
         <div className="flex h-full flex-col">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -64,21 +65,25 @@ export default async function Page({ searchParams }: PageProps) {
               field="companies"
               label="Interested companies"
               placeholder="Umbrella"
+              userRole={session.user.role}
             />
             <SearchField
-              field="openPositions"
+              field={PostField.openPositions}
               label="Open positions"
               placeholder="Social engineer"
+              userRole={session.user.role}
             />
             <SearchField
-              field="requiredSkills"
+              field={PostField.requiredSkills}
               label="Required skills"
               placeholder="Phishing"
+              userRole={session.user.role}
             />
             <SearchField
-              field="benefits"
+              field={PostField.benefits}
               label="Benefits"
               placeholder="Millions"
+              userRole={session.user.role}
             />
           </div>
         </div>

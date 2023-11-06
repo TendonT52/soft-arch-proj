@@ -98,7 +98,11 @@ const ReviewDialog = ({
     <Dialog
       open={open}
       onOpenChange={(open) => {
-        setRating((prev) => prev ?? 5);
+        if (open) {
+          setRating((prev) => prev ?? 5);
+        } else {
+          setRating(0);
+        }
         onOpenChange?.(open);
       }}
     >

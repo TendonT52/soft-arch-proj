@@ -26,7 +26,7 @@ const DatePickerWithRange = ({
 }: DatePickerWithRangeProps) => {
   const [_date, _setDate] = useState<DateRange | undefined>(date);
 
-  // prevent race conditions
+  // can prevent race conditions
   useEffect(() => {
     if (date !== _date) {
       _setDate(date);
