@@ -7,7 +7,7 @@ import { getRequiredSkills } from "@/actions/get-required-skills";
 import { Label } from "@radix-ui/react-label";
 import { PopoverContent } from "@radix-ui/react-popover";
 import { Command } from "cmdk";
-import { CheckIcon, SearchIcon } from "lucide-react";
+import { CheckIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { PostField } from "@/types/base/post";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -34,17 +34,24 @@ const PostFieldInput = ({
   ...props
 }: PostFieldInputProps) => {
   const [_tags, _setTags] = useState<Set<string>>(new Set());
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [sysSuggestions, setSysSuggestions] = useState<string[]>([]);
 
   const [search, setSearch] = useState({ value: "" });
   const debouncedSearch = useDebounce(search, 250);
 
-  const toggleTag = (suggestion: string) => {
+  const addTag = (tag: string) => {
     const updatedTags = new Set(_tags);
-    if (!updatedTags.has(suggestion)) {
-      updatedTags.add(suggestion);
+    updatedTags.add(tag);
+    _setTags(updatedTags);
+    onTagsChange?.([...updatedTags]);
+  };
+
+  const toggleTag = (tag: string) => {
+    const updatedTags = new Set(_tags);
+    if (!updatedTags.has(tag)) {
+      updatedTags.add(tag);
     } else {
-      updatedTags.delete(suggestion);
+      updatedTags.delete(tag);
     }
     _setTags(updatedTags);
     onTagsChange?.([...updatedTags]);
@@ -61,15 +68,14 @@ const PostFieldInput = ({
     }
   }, [field]);
 
-  const arrangedSuggestions = useMemo(
-    () =>
-      suggestions.toSorted((a, b) => {
-        const x = _tags.has(a) ? 1 : 0;
-        const y = _tags.has(b) ? 1 : 0;
-        return y - x;
-      }),
-    [_tags, suggestions]
-  );
+  const suggestions = useMemo(() => {
+    const suggestionSet = new Set([..._tags, ...sysSuggestions]);
+    return [...suggestionSet].toSorted((a, b) => {
+      const x = _tags.has(a) ? 1 : 0;
+      const y = _tags.has(b) ? 1 : 0;
+      return x - y;
+    });
+  }, [_tags, sysSuggestions]);
 
   useEffect(() => {
     const equals = (tags ?? []).every((tag) => _tags.has(tag));
@@ -83,15 +89,15 @@ const PostFieldInput = ({
       switch (field) {
         case PostField.benefits:
           const { benefits } = await getBenefits(search);
-          setSuggestions(benefits ?? []);
+          setSysSuggestions(benefits ?? []);
           break;
         case PostField.openPositions:
           const { openPositions } = await getOpenPositions(search);
-          setSuggestions(openPositions ?? []);
+          setSysSuggestions(openPositions ?? []);
           break;
         case PostField.requiredSkills:
           const { requiredSkills } = await getRequiredSkills(search);
-          setSuggestions(requiredSkills ?? []);
+          setSysSuggestions(requiredSkills ?? []);
           break;
       }
     };
@@ -180,32 +186,51 @@ const PostFieldInput = ({
               onValueChange={(value) => void setSearch({ value })}
             />
           </div>
-          <Command.List className="h-[10.5rem] overflow-auto p-1 scrollbar-hide">
-            {arrangedSuggestions.length === 0 ? (
-              <div className="flex h-40 w-full items-center justify-center text-xs text-muted-foreground">
+          <Command.List className="h-[11rem]">
+            {suggestions.length === 0 ? (
+              <div className="flex h-[8.5rem] w-full items-center justify-center text-xs text-muted-foreground">
                 <p>No suggestions</p>
               </div>
             ) : (
-              arrangedSuggestions.map((suggestion) => (
-                <Command.Item
-                  key={suggestion}
-                  className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                  onSelect={() => void toggleTag(suggestion)}
-                >
-                  <div
-                    className={cn(
-                      "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                      _tags.has(suggestion)
-                        ? "bg-primary text-primary-foreground"
-                        : "opacity-50 [&_svg]:invisible"
-                    )}
+              <div className="h-[8.5rem] overflow-auto p-1 scrollbar-hide">
+                {suggestions.map((suggestion) => (
+                  <Command.Item
+                    key={suggestion}
+                    className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
+                    onSelect={() => void toggleTag(suggestion)}
                   >
-                    <CheckIcon className="h-4 w-4" />
-                  </div>
-                  {suggestion}
-                </Command.Item>
-              ))
+                    <div
+                      className={cn(
+                        "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                        _tags.has(suggestion)
+                          ? "bg-primary text-primary-foreground"
+                          : "opacity-50 [&_svg]:invisible"
+                      )}
+                    >
+                      <CheckIcon className="h-4 w-4" />
+                    </div>
+                    {suggestion}
+                  </Command.Item>
+                ))}
+              </div>
             )}
+            <Separator className="h-px border-b" />
+            <div className="p-1">
+              {search.value.trim() ? (
+                <Command.Item
+                  className="relative flex cursor-default select-none items-center justify-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
+                  onSelect={() => void addTag(search.value)}
+                >
+                  <PlusIcon className="mr-2 h-4 w-4 shrink-0" />
+                  Add
+                </Command.Item>
+              ) : (
+                <div className="pointer-events-none relative flex cursor-default select-none items-center justify-center rounded-sm px-2 py-1.5 text-sm opacity-50 outline-none aria-selected:bg-accent aria-selected:text-accent-foreground">
+                  <PlusIcon className="mr-2 h-4 w-4 shrink-0" />
+                  Add
+                </div>
+              )}
+            </div>
           </Command.List>
         </Command>
       </PopoverContent>
