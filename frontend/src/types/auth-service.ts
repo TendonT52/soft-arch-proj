@@ -102,14 +102,8 @@ export const createStudentResponseSchema = z.object({
  * `POST /v1/verify`
  */
 export const verifySchema = z.object({
-  name: z.string(),
-  email: z.string(),
-  password: z.string(),
-  passwordConfirm: z.string(),
-  description: z.string(),
-  faculty: z.string(),
-  major: z.string(),
-  year: z.number(),
+  code: z.string(),
+  studentId: z.string(),
 });
 
 export const verifyResponseSchema = z.object({
