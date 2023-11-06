@@ -1,5 +1,6 @@
 import * as React from "react";
 import Link from "next/link";
+import { SearchIcon } from "lucide-react";
 import { getServerSession } from "@/lib/auth";
 import { Logo } from "./logo";
 import { SignUpOptionMenu } from "./sign-up-option-menu";
@@ -20,7 +21,20 @@ const Header = async () => {
         </div>
       </Link>
       {user ? (
-        <UserAccountNav user={user} />
+        <div className="flex items-center gap-4 text-sm">
+          <Button
+            className="text-muted-foreground"
+            variant="outline"
+            size="sm"
+            asChild
+          >
+            <Link href="/posts">
+              <SearchIcon className="mr-2 h-4 w-4 shrink-0" />
+              Search posts
+            </Link>
+          </Button>
+          <UserAccountNav user={user} />
+        </div>
       ) : (
         <div className="flex items-center gap-4 text-sm font-medium">
           <Link
