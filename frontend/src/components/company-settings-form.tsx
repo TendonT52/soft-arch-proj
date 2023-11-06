@@ -81,8 +81,8 @@ const CompanySettingsForm = ({ company }: CompanySettingsFormProps) => {
           name="name"
           control={control}
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>First name</FormLabel>
+            <FormItem className="space-y-1">
+              <FormLabel>Name</FormLabel>
               <FormControl>
                 <Input placeholder="John Smith" {...field} />
               </FormControl>
@@ -94,7 +94,7 @@ const CompanySettingsForm = ({ company }: CompanySettingsFormProps) => {
           name="category"
           control={control}
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="space-y-1">
               <FormLabel>Category</FormLabel>
               <FormControl>
                 <Input placeholder="Engineering" {...field} />
@@ -107,7 +107,7 @@ const CompanySettingsForm = ({ company }: CompanySettingsFormProps) => {
           name="location"
           control={control}
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="space-y-1">
               <FormLabel>Location</FormLabel>
               <FormControl>
                 <Input placeholder="Computer" {...field} />
@@ -120,7 +120,7 @@ const CompanySettingsForm = ({ company }: CompanySettingsFormProps) => {
           name="phone"
           control={control}
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="space-y-1">
               <FormLabel>Telephone number</FormLabel>
               <FormControl>
                 <Input placeholder="Computer" {...field} />
@@ -133,7 +133,7 @@ const CompanySettingsForm = ({ company }: CompanySettingsFormProps) => {
           name="description"
           control={control}
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="space-y-1">
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea placeholder="I own a building." {...field} />

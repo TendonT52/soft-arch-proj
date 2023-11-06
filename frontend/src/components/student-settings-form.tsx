@@ -85,8 +85,8 @@ const StudentSettingsForm = ({ student }: StudentSettingsFormProps) => {
           name="name"
           control={control}
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
+            <FormItem className="space-y-1">
+              <FormLabel className="leading-none">Name</FormLabel>
               <FormControl>
                 <Input placeholder="John Smith" {...field} />
               </FormControl>
@@ -98,7 +98,7 @@ const StudentSettingsForm = ({ student }: StudentSettingsFormProps) => {
           name="faculty"
           control={control}
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="space-y-1">
               <FormLabel>Faculty</FormLabel>
               <FormControl>
                 <Input placeholder="Engineering" {...field} />
@@ -111,7 +111,7 @@ const StudentSettingsForm = ({ student }: StudentSettingsFormProps) => {
           name="major"
           control={control}
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="space-y-1">
               <FormLabel>Major</FormLabel>
               <FormControl>
                 <Input placeholder="Computer" {...field} />
@@ -124,7 +124,7 @@ const StudentSettingsForm = ({ student }: StudentSettingsFormProps) => {
           name="year"
           control={control}
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="space-y-1">
               <FormLabel>Year</FormLabel>
               <Select
                 onValueChange={(value) => {
@@ -152,7 +152,7 @@ const StudentSettingsForm = ({ student }: StudentSettingsFormProps) => {
           name="description"
           control={control}
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="space-y-1">
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea placeholder="I own a computer." {...field} />

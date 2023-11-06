@@ -39,13 +39,13 @@ const DatePickerWithRange = ({
         <Button
           variant={"outline"}
           className={cn(
-            "justify-start text-left font-normal",
+            "justify-start overflow-auto whitespace-nowrap text-left font-normal scrollbar-hide",
             !date && "text-muted-foreground",
             className
           )}
           {...props}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+          <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
           <span className="block">
             {date?.from
               ? date.to

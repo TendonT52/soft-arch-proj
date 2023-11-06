@@ -134,10 +134,10 @@ const PostCreateDialog = () => {
                   placeholder="Untitled Post"
                 />
               </div>
-              <div className="flex flex-1 flex-col gap-2">
+              <div className="flex flex-1 flex-col gap-2 overflow-auto">
                 <Label
                   htmlFor="period"
-                  className="w-full text-sm font-medium leading-none"
+                  className="text-sm font-medium leading-none"
                 >
                   Period
                 </Label>
