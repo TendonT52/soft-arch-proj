@@ -10,6 +10,7 @@ export default withAuth(
     if (!token) return NextResponse.next();
 
     const accessToken = verifyAccessToken(token.accessToken);
+
     if (["/dashboard"].includes(req.nextUrl.pathname)) {
       switch (accessToken.role) {
         case UserRole.Company:
@@ -20,14 +21,20 @@ export default withAuth(
           return NextResponse.redirect(
             new URL("/dashboard/reviews", req.nextUrl)
           );
+        case UserRole.Admin:
+          return NextResponse.redirect(
+            new URL("/dashboard/admin", req.nextUrl)
+          );
       }
     }
 
-    if (
-      ["/login", "/register/company", "/register/student"].includes(
-        req.nextUrl.pathname
-      )
-    ) {
+    const isAuthPath = [
+      "/login",
+      "/register/company",
+      "/register/student",
+    ].includes(req.nextUrl.pathname);
+
+    if (isAuthPath) {
       return NextResponse.redirect(new URL("/", req.nextUrl));
     }
 

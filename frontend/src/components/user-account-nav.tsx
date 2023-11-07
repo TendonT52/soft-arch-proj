@@ -24,24 +24,25 @@ const UserAccountNav = ({ user }: UserAccountNavProps) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <div className="flex items-center justify-start gap-2 p-2">
-          <div className="flex flex-col space-y-1 leading-none">
-            {user.name && <p className="font-medium">{user.name}</p>}
-            {user.email && (
-              <p className="w-[200px] truncate text-sm text-muted-foreground">
-                {user.email}
-              </p>
-            )}
+          <div className="flex w-[12rem] flex-col space-y-1 leading-none">
+            <p className="font-medium">{user.name}</p>
+            <p className="w-full truncate text-sm text-muted-foreground">
+              {user.email}
+            </p>
           </div>
         </div>
         <DropdownMenuSeparator />
-        {user.role === UserRole.Company && (
+        {user.role === UserRole.Company ? (
           <DropdownMenuItem asChild>
             <Link href="/dashboard/posts">Posts</Link>
           </DropdownMenuItem>
-        )}
-        {user.role === UserRole.Student && (
+        ) : user.role === UserRole.Student ? (
           <DropdownMenuItem asChild>
             <Link href="/dashboard/reviews">Reviews</Link>
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/admin">Admin</Link>
           </DropdownMenuItem>
         )}
         <DropdownMenuItem asChild>

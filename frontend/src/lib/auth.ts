@@ -7,10 +7,13 @@ import {
   type AuthOptions,
 } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { UserRole } from "@/types/base/user";
+import { UserRole, type User } from "@/types/base/user";
 import { validateAccessToken, verifyAccessToken } from "./token";
 
-async function lookupUser(accessToken: string, role: UserRole) {
+async function lookupUser(
+  accessToken: string,
+  role: UserRole
+): Promise<User | null> {
   switch (role) {
     case UserRole.Company:
       const { status: cStatus, company } = await getCompanyMe(accessToken);
@@ -21,6 +24,9 @@ async function lookupUser(accessToken: string, role: UserRole) {
       const { status: sStatus, student } = await getStudentMe(accessToken);
       if (sStatus !== "200") return null;
       return { ...student, role };
+
+    case UserRole.Admin:
+      return { name: "Admin", email: "unknown email", role };
 
     default:
       return null;

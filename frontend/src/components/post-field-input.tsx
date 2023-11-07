@@ -193,9 +193,9 @@ const PostFieldInput = ({
               </div>
             ) : (
               <div className="h-[8.5rem] overflow-auto p-1 scrollbar-hide">
-                {suggestions.map((suggestion) => (
+                {suggestions.map((suggestion, idx) => (
                   <Command.Item
-                    key={suggestion}
+                    key={idx}
                     className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
                     onSelect={() => void toggleTag(suggestion)}
                   >

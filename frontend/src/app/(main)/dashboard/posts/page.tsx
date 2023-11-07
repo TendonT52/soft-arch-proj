@@ -22,7 +22,7 @@ export default async function Page() {
         <PostCreateDialog />
       </div>
       {posts.length === 0 ? (
-        <p>No posts.</p>
+        <p>No posts</p>
       ) : (
         <div className="divide-y rounded-md border">
           {posts.map((post, idx) => (

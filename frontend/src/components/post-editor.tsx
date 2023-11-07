@@ -229,7 +229,7 @@ const PostEditor = ({ post }: PostEditorProps) => {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-6 p-8 pt-0">
-            <fieldset className="flex w-full gap-4">
+            <div className="flex w-full gap-4">
               <div className="flex flex-1 flex-col gap-2">
                 <Label
                   className="w-full text-sm font-medium leading-none"
@@ -252,16 +252,13 @@ const PostEditor = ({ post }: PostEditorProps) => {
                   onDateChange={setDate}
                 />
               </div>
-            </fieldset>
-            <fieldset className="flex w-full flex-col gap-2">
+            </div>
+            <div className="flex w-full flex-col gap-2">
               <Label
                 className="w-full text-sm font-medium leading-none"
                 htmlFor="openPositions"
               >
                 Open positions
-                <span className="ml-4 font-normal text-muted-foreground">
-                  *Space delimited
-                </span>
               </Label>
               <div className="flex w-full items-center gap-4">
                 <PostFieldInput
@@ -280,16 +277,13 @@ const PostEditor = ({ post }: PostEditorProps) => {
                 />
                 <FormErrorTooltip message={errors.openPositions?.message} />
               </div>
-            </fieldset>
-            <fieldset className="flex w-full flex-col gap-2">
+            </div>
+            <div className="flex w-full flex-col gap-2">
               <Label
                 className="w-full text-sm font-medium leading-none"
                 htmlFor="requiredSkills"
               >
                 Required skills
-                <span className="ml-4 font-normal text-muted-foreground">
-                  *Space delimited
-                </span>
               </Label>
               <div className="flex w-full items-center gap-4">
                 <PostFieldInput
@@ -308,16 +302,13 @@ const PostEditor = ({ post }: PostEditorProps) => {
                 />
                 <FormErrorTooltip message={errors.requiredSkills?.message} />
               </div>
-            </fieldset>
-            <fieldset className="flex w-full flex-col gap-2">
+            </div>
+            <div className="flex w-full flex-col gap-2">
               <Label
                 className="w-full text-sm font-medium leading-none"
                 htmlFor="benefits"
               >
                 Benefits
-                <span className="ml-4 font-normal text-muted-foreground">
-                  *Space delimited
-                </span>
               </Label>
               <div className="flex w-full items-center gap-4">
                 <PostFieldInput
@@ -336,8 +327,8 @@ const PostEditor = ({ post }: PostEditorProps) => {
                 />
                 <FormErrorTooltip message={errors.benefits?.message} />
               </div>
-            </fieldset>
-            <fieldset className="flex flex-col gap-2">
+            </div>
+            <div className="flex flex-col gap-2">
               <Label
                 className="text-sm font-medium leading-none"
                 htmlFor="howTo"
@@ -357,7 +348,7 @@ const PostEditor = ({ post }: PostEditorProps) => {
                 />
                 <FormErrorTooltip message={errors.howTo?.message} />
               </div>
-            </fieldset>
+            </div>
           </CardContent>
           <CardFooter />
         </Card>
