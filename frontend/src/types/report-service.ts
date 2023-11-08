@@ -5,13 +5,13 @@ import { reportSchema } from "./base/report";
  * POST /v1/reports/
  */
 export const createReportSchema = z.object({
-  reports: reportSchema,
-  accessToken: z.string(),
+  report: reportSchema,
+  accessToken: z.string().optional(),
 });
 export const createReportResponseSchema = z.object({
   status: z.string(),
   message: z.string(),
-  id: z.string(),
+  id: z.string().optional(),
 });
 /**
  * GET /v1/reports

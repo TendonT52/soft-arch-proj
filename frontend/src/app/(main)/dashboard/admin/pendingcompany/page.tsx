@@ -1,14 +1,13 @@
 import { notFound } from "next/navigation";
-import getReports from "@/actions/get-reports";
+import getCompanies from "@/actions/get-companies";
 import { UserRole } from "@/types/base/user";
 import { getServerSession } from "@/lib/auth";
-import { ReportItem } from "@/components/report-items";
+import { PendingCompany } from "@/components/pending-company";
 
-export default async function Page() {
+export default async function PendingPage() {
   const session = await getServerSession();
   if (!session || session.user.role !== UserRole.Admin) notFound();
-  const { reports = [] } = await getReports();
-
+  const { companies = [] } = await getCompanies();
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between gap-8">
@@ -16,16 +15,20 @@ export default async function Page() {
           <h1 className="text-3xl font-bold tracking-tight">
             Hello {session.user.name}!
           </h1>
-          <p className="text-lg text-muted-foreground">List of reports</p>
+          <p className="text-lg text-muted-foreground">
+            List of pending company
+          </p>
         </div>
       </div>
-      {reports.length === 0 ? (
-        <p>No reports.</p>
+      {companies.length === 0 ? (
+        <p>บ่มีcompany แล้วอ้ายแอดมิน.</p>
       ) : (
         <div className="divide-y rounded-md border">
-          {reports.map((report, idx) => (
-            <ReportItem key={idx} report={report} />
-          ))}
+          {companies.map((company, idx) =>
+            company.status === "Pending" ? (
+              <PendingCompany key={idx} company={company} />
+            ) : null
+          )}
         </div>
       )}
     </div>

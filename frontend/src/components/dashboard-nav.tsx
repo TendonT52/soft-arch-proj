@@ -1,4 +1,11 @@
-import { FileTextIcon, LockIcon, SettingsIcon, StarIcon } from "lucide-react";
+import {
+  FileTextIcon,
+  Loader2,
+  LockIcon,
+  SettingsIcon,
+  StarIcon,
+  TicketIcon,
+} from "lucide-react";
 import { UserRole, type User } from "@/types/base/user";
 import { DashboardNavItem } from "./dashboard-nav-item";
 
@@ -29,6 +36,17 @@ const DashboardNav = ({ user }: DashboardNavProps) => {
         <SettingsIcon className="mr-2 h-4 w-4 shrink-0" />
         Settings
       </DashboardNavItem>
+      {user.role === UserRole.Admin ? (
+        <DashboardNavItem href="/dashboard/admin/pendingcompany">
+          <Loader2 className="mr-2 h-4 w-4 shrink-0" />
+          Pending Company
+        </DashboardNavItem>
+      ) : (
+        <DashboardNavItem href="/reports">
+          <TicketIcon className="mr-2 h-4 w-4 shrink-0" />
+          Report
+        </DashboardNavItem>
+      )}
     </nav>
   );
 };

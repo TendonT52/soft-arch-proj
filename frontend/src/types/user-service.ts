@@ -51,7 +51,7 @@ export const getCompanyMeResponseSchema = z.object({
  * `PUT /v1/company/status`
  */
 export const updateCompanyStatusSchema = z.object({
-  accessToken: z.string(),
+  accessToken: z.string().optional(),
   id: z.string(),
   status: z.string(),
 });
