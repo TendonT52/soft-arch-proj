@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getBenefits } from "@/actions/get-benefits";
 import { getOpenPositions } from "@/actions/get-open-positions";
 import { getRequiredSkills } from "@/actions/get-required-skills";
@@ -33,6 +33,8 @@ const PostFieldInput = ({
   readOnly = false,
   ...props
 }: PostFieldInputProps) => {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
   const [_tags, _setTags] = useState<Set<string>>(new Set());
   const [sysSuggestions, setSysSuggestions] = useState<string[]>([]);
 
@@ -184,6 +186,7 @@ const PostFieldInput = ({
               placeholder="Search..."
               value={search.value}
               onValueChange={(value) => void setSearch({ value })}
+              ref={inputRef}
             />
           </div>
           <Command.List className="h-[11rem]">
@@ -193,11 +196,14 @@ const PostFieldInput = ({
               </div>
             ) : (
               <div className="h-[8.5rem] overflow-auto p-1 scrollbar-hide">
-                {suggestions.map((suggestion, idx) => (
+                {suggestions.map((suggestion) => (
                   <Command.Item
-                    key={idx}
+                    key={suggestion}
                     className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
-                    onSelect={() => void toggleTag(suggestion)}
+                    onSelect={() => {
+                      toggleTag(suggestion);
+                      inputRef.current?.focus();
+                    }}
                   >
                     <div
                       className={cn(
@@ -219,7 +225,10 @@ const PostFieldInput = ({
               {search.value.trim() ? (
                 <Command.Item
                   className="relative flex cursor-default select-none items-center justify-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
-                  onSelect={() => void addTag(search.value)}
+                  onSelect={() => {
+                    addTag(search.value);
+                    inputRef.current?.focus();
+                  }}
                 >
                   <PlusIcon className="mr-2 h-4 w-4 shrink-0" />
                   Add
