@@ -16,7 +16,7 @@ export default async function Page({ params }: { params: { id: string } }) {
   const { company } = await getCompany(params.id, session.accessToken);
 
   /* DUMMY */
-  const { review: dummyReview } = await getReview("6");
+  const { review: dummyReview } = await getReview("7");
 
   return (
     <div className="container flex flex-col items-center justify-center">
