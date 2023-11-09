@@ -46,7 +46,7 @@ const PostCard = ({ post }: PostCardProps) => {
             <MapPinnedIcon className="mr-1.5 h-3 w-3 opacity-50" />
             <Link
               className="text-sm leading-none text-muted-foreground hover:underline hover:underline-offset-2"
-              href="/companies/1"
+              href={`/companies/${owner.id}`}
             >
               {owner.name}
             </Link>

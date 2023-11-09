@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getPost } from "@/actions/get-post";
+import { UserRole } from "@/types/base/user";
 import { getServerSession } from "@/lib/auth";
 import { PostEditor } from "@/components/post-editor";
 
@@ -11,7 +12,7 @@ type PageProps = {
 
 export default async function Page({ params }: PageProps) {
   const session = await getServerSession();
-  if (!session) return notFound();
+  if (!session || session.user.role === UserRole.Admin) return notFound();
 
   const postId = params.id;
   const { status, post } = await getPost(postId);

@@ -172,8 +172,14 @@ const PostEditor = ({ post }: PostEditorProps) => {
           initialConfig={{ ...editorConfig, editorState: description }}
         >
           <div className="relative flex flex-col items-start">
-            <div className="sticky top-0 z-10 flex w-full justify-center bg-background pt-4">
-              <ToolbarPlugin className="rounded-full border bg-background px-4 shadow-sm" />
+            <div className="sticky top-0 z-10 flex w-full flex-col items-center">
+              <div className="flex w-full justify-center bg-background pt-4">
+                <ToolbarPlugin className="rounded-2xl border bg-background px-4 shadow-sm" />
+              </div>
+              <div
+                className="pointer-events-none absolute top-[calc(3.5rem+1px)] h-6 w-full border-t border-transparent bg-gradient-to-b 
+              from-background to-transparent"
+              ></div>
             </div>
             <TextareaAutosize
               className="flex h-[5.625rem] w-full max-w-none resize-none appearance-none items-end bg-transparent px-8 pb-0.5 pt-12 text-4xl font-extrabold tracking-tight text-[#111827] scrollbar-hide focus:outline-none focus-visible:outline-none dark:text-[#ffffff]"

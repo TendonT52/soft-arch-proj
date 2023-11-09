@@ -10,7 +10,7 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { format } from "date-fns";
 import { Loader2Icon, MoreVerticalIcon, TrashIcon } from "lucide-react";
 import { type Review } from "@/types/base/review";
-import { type User } from "@/types/base/user";
+import { UserRole, type User } from "@/types/base/user";
 import { editorConfig } from "@/lib/lexical";
 import { EditorStateNotifierPlugin } from "./lexical/editor-state-notifier-plugin";
 import { Rating } from "./rating";
@@ -52,7 +52,7 @@ const ReviewCard = ({ user, review, companyId }: ReviewCardProps) => {
   const router = useRouter();
   const { toast } = useToast();
 
-  const owner = user.id === review.owner.id;
+  const owner = user.role === UserRole.Admin ? false : user.id === review.owner.id;
   const [showReviewDialog, setShowReviewDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);

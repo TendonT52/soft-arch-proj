@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import putCompanyStatus from "@/actions/put-company-status";
 import { CheckCircle, X } from "lucide-react";
 import { type Company } from "@/types/base/company";
@@ -11,6 +12,8 @@ type PendingItemProps = {
 };
 
 const PendingCompany = ({ company }: PendingItemProps) => {
+  const router = useRouter();
+
   const approved = async () => {
     const response = await putCompanyStatus({
       id: company.id,
@@ -28,6 +31,7 @@ const PendingCompany = ({ company }: PendingItemProps) => {
         variant: "destructive",
       });
     }
+    router.refresh();
   };
   const reject = async () => {
     const response = await putCompanyStatus({
@@ -46,6 +50,7 @@ const PendingCompany = ({ company }: PendingItemProps) => {
         variant: "destructive",
       });
     }
+    router.refresh();
   };
   return (
     <div className="flex items-center justify-between p-4">

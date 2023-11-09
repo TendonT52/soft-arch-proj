@@ -35,7 +35,7 @@ export const createCompanySchema = z.object({
 export const createCompanyResponseSchema = z.object({
   status: z.string(),
   message: z.string(),
-  id: z.string(),
+  id: z.string().optional(),
 });
 
 /**
