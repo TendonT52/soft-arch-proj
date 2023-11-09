@@ -6,7 +6,7 @@ export default async function Page({
   params: { code: Array<string>; id: string };
 }) {
   const response = await verify({
-    code: params.code.join("/"),
+    code: decodeURIComponent(params.code.join("/")),
     studentId: params.id,
   });
   if (response.status === "200") {
