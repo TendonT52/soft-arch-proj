@@ -13,8 +13,9 @@ export default async function Page({ params }: { params: { id: string } }) {
   if (!session) notFound();
 
   const { company } = await getCompany(params.id, session.accessToken);
-  const { reviews } = await getReviewCompany(params.id);
+  if (!company) notFound();
 
+  const { reviews } = await getReviewCompany(params.id);
   return (
     <div className="container flex flex-col items-center justify-center">
       <div className="h-[150px] w-[157px] rounded-lg bg-primary text-center text-lg">

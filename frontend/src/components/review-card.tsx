@@ -110,12 +110,16 @@ const ReviewCard = ({
                 <Rating rating={review.rating} editable={false} />
               )}
               <p className="truncate text-sm text-muted-foreground">
-                <Link
-                  className="hover:underline hover:underline-offset-2 focus-visible:underline focus-visible:underline-offset-2 focus-visible:outline-none"
-                  href={`/students/${review.owner.id}`}
-                >
-                  {review.owner.name}
-                </Link>
+                {review.owner.id ? (
+                  <Link
+                    className="hover:underline hover:underline-offset-2 focus-visible:underline focus-visible:underline-offset-2 focus-visible:outline-none"
+                    href={`/students/${review.owner.id}`}
+                  >
+                    {review.owner.name}
+                  </Link>
+                ) : (
+                  review.owner.name
+                )}
                 ,&nbsp;
                 {format(parseInt(review.updatedAt) * 1000, "MM/dd/yyyy")}
               </p>
