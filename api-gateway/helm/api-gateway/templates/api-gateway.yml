@@ -29,7 +29,7 @@ spec:
       containers:
         - name: api-gateway
           image: {{ .Values.image }}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           volumeMounts:

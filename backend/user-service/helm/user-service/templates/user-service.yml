@@ -28,7 +28,7 @@ spec:
       containers:
         - name: user-service
           image: {{ .Values.image }}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           volumeMounts:
