@@ -10,8 +10,8 @@ import { studentSchema } from "./base/student";
 export const getCompaniesResponseSchema = z.object({
   status: z.string(),
   message: z.string(),
-  companies: z.array(companySchema),
-  total: z.string(),
+  companies: z.array(companySchema).optional(),
+  total: z.string().optional(),
 });
 
 /**
@@ -67,7 +67,7 @@ export const updateCompanyStatusResponseSchema = z.object({
 export const getCompanyResponse = z.object({
   status: z.string(),
   message: z.string(),
-  company: companySchema,
+  company: companySchema.optional(),
 });
 
 /**

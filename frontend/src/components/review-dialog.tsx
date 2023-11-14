@@ -19,7 +19,7 @@ import {
   DialogPortal,
   DialogTrigger,
 } from "@radix-ui/react-dialog";
-import { Loader2Icon } from "lucide-react";
+import { AlertCircleIcon, Loader2Icon, XIcon } from "lucide-react";
 import { type Review } from "@/types/base/review";
 import { editorConfig, initialEditorState } from "@/lib/lexical";
 import { CodeHighlightPlugin } from "./lexical/code-highlight-plugin";
@@ -31,12 +31,19 @@ import { Label } from "./ui/label";
 import { ScrollArea } from "./ui/scroll-area";
 import { Switch } from "./ui/switch";
 import { useToast } from "./ui/toaster";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 type ReviewDialogProps = {
   review?: Review & {
     id: string;
   };
   companyId: string;
+  companyName: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 };
@@ -44,6 +51,7 @@ type ReviewDialogProps = {
 const ReviewDialog = ({
   review,
   companyId,
+  companyName,
   open,
   onOpenChange,
 }: ReviewDialogProps) => {
@@ -56,7 +64,9 @@ const ReviewDialog = ({
   );
   const [rating, setRating] = useState<number | undefined>(review?.rating);
   const [anonymous, setAnonymous] = useState(false);
+  const [showAnonymousDialog, setShowAnonymousDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [updated, setUpdated] = useState(false);
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -78,7 +88,14 @@ const ReviewDialog = ({
             isAnonymous: anonymous,
           },
         });
-    if (["200", "201"].includes(response.status)) {
+    if (response.status === "200") {
+      toast({
+        title: "Success",
+        description: response.message,
+      });
+      router.refresh();
+      setUpdated(true);
+    } else if (response.status === "201") {
       toast({
         title: "Success",
         description: response.message,
@@ -100,8 +117,12 @@ const ReviewDialog = ({
       onOpenChange={(open) => {
         if (open) {
           setRating((prev) => prev ?? 5);
-        } else {
-          setRating(0);
+          setUpdated(false);
+        } else if (!updated) {
+          setTitle(review?.title);
+          setRating(review?.rating ?? 0);
+          setDescription(review?.description);
+          setAnonymous(false);
         }
         onOpenChange?.(open);
       }}
@@ -124,16 +145,49 @@ const ReviewDialog = ({
                 <div className="flex flex-1 flex-col gap-4 overflow-x-hidden">
                   <Rating rating={rating} onRatingChange={setRating} />
                   <p className="truncate text-sm text-muted-foreground">
-                    to Pizza Company
+                    to {companyName}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="anonymous"
-                    checked={anonymous}
-                    onCheckedChange={setAnonymous}
-                  />
-                  <Label htmlFor="anonymous">Anonymous</Label>
+                <div className="flex items-center">
+                  <TooltipProvider>
+                    <Tooltip open={showAnonymousDialog && anonymous}>
+                      <TooltipTrigger asChild>
+                        <div className="relative flex items-center gap-2 pr-3">
+                          <Switch
+                            id="anonymous"
+                            checked={anonymous}
+                            onCheckedChange={(checked) => {
+                              setAnonymous(checked);
+                              if (checked) {
+                                setShowAnonymousDialog(true);
+                              }
+                            }}
+                          />
+                          <Label htmlFor="anonymous">Anonymous</Label>
+                          <AlertCircleIcon className="absolute right-0 top-0 h-3 w-3 shrink-0 fill-destructive text-destructive-foreground" />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        className="relative flex w-64 items-center bg-destructive pr-4 text-destructive-foreground"
+                        sideOffset={12}
+                        side="bottom"
+                        align="start"
+                      >
+                        <p>
+                          If you turn this on, you cannot edit or delete the
+                          review!
+                        </p>
+                        <Button
+                          className="absolute right-2 h-4 w-4 p-0"
+                          variant="destructive"
+                          onClick={() => void setShowAnonymousDialog(false)}
+                        >
+                          <XIcon className="h-3 w-3 shrink-0"></XIcon>
+                          <span className="sr-only">close</span>
+                        </Button>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
               <input

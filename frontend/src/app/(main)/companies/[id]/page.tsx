@@ -13,8 +13,9 @@ export default async function Page({ params }: { params: { id: string } }) {
   if (!session) notFound();
 
   const { company } = await getCompany(params.id, session.accessToken);
-  const { reviews } = await getReviewCompany(params.id);
+  if (!company) notFound();
 
+  const { reviews } = await getReviewCompany(params.id);
   return (
     <div className="container flex flex-col items-center justify-center">
       <div className="h-[150px] w-[157px] rounded-lg bg-primary text-center text-lg">
@@ -32,7 +33,7 @@ export default async function Page({ params }: { params: { id: string } }) {
       <div className="m-3 text-lg">Profile Details</div>
       {session.user.role === UserRole.Student && (
         <div className="my-3">
-          <ReviewDialog companyId={params.id} />
+          <ReviewDialog companyId={params.id} companyName={company.name} />
         </div>
       )}
       <div className="m-3 h-[587px] w-[550px] rounded-lg bg-primary">
@@ -51,6 +52,7 @@ export default async function Page({ params }: { params: { id: string } }) {
               user={session.user}
               review={review}
               companyId={params.id}
+              companyName={company.name}
             />
           ))
         )}

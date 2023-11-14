@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { deleteReview } from "@/actions/delete-review";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
@@ -46,13 +47,20 @@ type ReviewCardProps = {
     };
   };
   companyId: string;
+  companyName: string;
 };
 
-const ReviewCard = ({ user, review, companyId }: ReviewCardProps) => {
+const ReviewCard = ({
+  user,
+  review,
+  companyId,
+  companyName,
+}: ReviewCardProps) => {
   const router = useRouter();
   const { toast } = useToast();
 
-  const owner = user.role === UserRole.Admin ? false : user.id === review.owner.id;
+  const owner =
+    user.role === UserRole.Admin ? false : user.id === review.owner.id;
   const [showReviewDialog, setShowReviewDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -94,6 +102,7 @@ const ReviewCard = ({ user, review, companyId }: ReviewCardProps) => {
                 <ReviewDialog
                   review={review}
                   companyId={companyId}
+                  companyName={companyName}
                   open={showReviewDialog}
                   onOpenChange={setShowReviewDialog}
                 />
@@ -101,7 +110,17 @@ const ReviewCard = ({ user, review, companyId }: ReviewCardProps) => {
                 <Rating rating={review.rating} editable={false} />
               )}
               <p className="truncate text-sm text-muted-foreground">
-                {review.owner.name},&nbsp;
+                {review.owner.id ? (
+                  <Link
+                    className="hover:underline hover:underline-offset-2 focus-visible:underline focus-visible:underline-offset-2 focus-visible:outline-none"
+                    href={`/students/${review.owner.id}`}
+                  >
+                    {review.owner.name}
+                  </Link>
+                ) : (
+                  review.owner.name
+                )}
+                ,&nbsp;
                 {format(parseInt(review.updatedAt) * 1000, "MM/dd/yyyy")}
               </p>
             </div>
