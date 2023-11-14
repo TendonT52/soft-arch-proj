@@ -5,7 +5,7 @@ gen-swagger:
 deploy:
 	@if [ "${MODE}" = "remote" ]; then \
 		kubectl create secret generic api-gateway --from-file=app.env; \
-		IMAGE=ghcr.io/tendont52/soft-arch-proj-backend-api-gateway:latest make -C ./helm api-gateway; \
+		IMAGE=ghcr.io/tendont52/soft-arch-proj-api-gateway:latest make -C ./helm api-gateway; \
 	elif [ "${MODE}" = "local" ]; then \
 		docker build -t api-gateway .; \
 		kubectl create secret generic api-gateway --from-file=app.env; \
@@ -46,14 +46,15 @@ k8s-run-prod:
 		"DATA_PATH=${DATA_PATH}/user-service make -C ../backend/user-service dependency" \
 		"DATA_PATH=${DATA_PATH}/post-service make -C ../backend/post-service dependency" \
 		"DATA_PATH=${DATA_PATH}/report-service make -C ../backend/report-service dependency" \
+		"DATA_PATH=${DATA_PATH}/review-service make -C ../backend/review-service dependency" \
 		"MODE=remote make -C ../backend/user-service deploy" \
 		"MODE=remote make -C ../backend/post-service deploy" \
 		"MODE=remote make -C ../backend/report-service deploy" \
 		"MODE=remote make -C ../backend/mail-service deploy" \
-		"MODE=local make deploy"
+		"MODE=remote make -C ../backend/review-service deploy" \
+		"MODE=remote make deploy"
 	telepresence connect
-	kubectl wait --for=condition=Ready pods --all --all-namespaces
-
+	kubectl wait --for=condition=Ready pods --all --all-nam
 k8s-run-local:
 	make gen-swagger
 	$(eval DATA_PATH := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/data)
