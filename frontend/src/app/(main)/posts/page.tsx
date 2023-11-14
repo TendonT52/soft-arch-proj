@@ -53,7 +53,7 @@ export default async function Page({ searchParams }: PageProps) {
             </CardContent>
           </Card>
           <div
-            className="flex flex-1 flex-col gap-4 overflow-auto pb-6 pt-6 scrollbar-hide"
+            className="flex flex-1 flex-col gap-4 overflow-auto py-8 scrollbar-hide"
             style={{
               maskImage:
                 "linear-gradient(to top, transparent 0%, rgb(0, 0, 0) 3rem, rgb(0, 0, 0) calc(100% - 3rem), transparent 100%)",
@@ -89,9 +89,11 @@ export default async function Page({ searchParams }: PageProps) {
         </div>
       </aside>
       <div className="flex flex-1 flex-col gap-6">
-        {posts.map((post, idx) => (
-          <PostCard key={idx} post={post} />
-        ))}
+        {posts.length === 0 ? (
+          <p className="text-muted-foreground">No posts found :(</p>
+        ) : (
+          posts.map((post, idx) => <PostCard key={idx} post={post} />)
+        )}
       </div>
     </main>
   );
